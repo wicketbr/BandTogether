@@ -1,5 +1,9 @@
 # BandTogether
 
+NOTE: This is still a work-in-progress and not all features are yet complete.
+In the next few days I will check in the remaining changes to the Tablet interface
+for transposing songs.
+
 A C# Blazor web application designed for musicians to keep all their music in one
 place and to be able to play from tablets, which has grown into much more.
 It is now a full-blown application for running an entire show. This can be used by
