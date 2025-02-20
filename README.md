@@ -1,13 +1,19 @@
 # BandTogether
 
-A C# Blazor web application designed for musicians to keep all their music in one place and to be able to play from tablets, which has grown into much more.
+A C# Blazor web application designed for musicians to keep all their music in one
+place and to be able to play from tablets, which has grown into much more.
+It is now a full-blown application for running an entire show. This can be used by
+bands, churches, organizations that want to run media for a meeting, schools, etc.
 
-- Keep all your charts in the chordpro format with an easy-to-use song editor (a sample Public Domain song is included).
+- Keep all your charts in the chordpro format with an easy-to-use song editor
+  (a sample Public Domain song is included).
 - Put together set lists.
-- Use a tablet on stage to view your charts in real time with options to personalize your view, including adding capos for guitar players and removing chords for vocalists.
+- Use a tablet on stage to view your charts in real time with options to personalize your view,
+  including adding capos for guitar players and removing chords for vocalists.
 - Charts can be stored in chord notation or using the Nashville Numbering System.
 - Songs can be transposed as needed.
-- Set lists can contains Songs, Audio Files, Images, Countdown Timers, Slideshows, Videos, and YouTube Videos.
+- Set lists can contains Songs, Audio Files, Images, Countdown Timers,
+  Slideshows, Videos, and YouTube Videos.
 - A projection view can be used to show your set information on the screen,
   including fully customizing the background, text, etc. for how songs are viewed.
 - The screen view app can be loaded into any browser window, so it can either be on the same computer
@@ -15,7 +21,8 @@ A C# Blazor web application designed for musicians to keep all their music in on
   use other systems connected to TVs pointing to the correct page.
 - The entire app is a self-contained .NET 9 Blazor app that uses SignalR to keep all connected
   tablets and screens in sync with your set list.
-- The app supports multiple languages and can easily be customized by editing/copy the en-US.json language file.
+- Send meetings from the personal controlling the set list to the screens or tablets.
+- The app supports multiple languages and can easily be customized by editing/copying the en-US.json language file.
 
 ## Getting Started with BandTogether
 
@@ -29,9 +36,16 @@ In most cases the app will be able to detect the IP address and will display
 that information in the console with a link that can be opened by pressing
 CTRL+click.
 
+You can point to an alertnate location for your data by modifying the shortcut used to
+start the application executable and adding -f PATH to the end of the command line.
+For example, if you have all your data in C:\MyBandData you would add -f C:\MyBandData.
+
 ## Contact
 
 Contact Brad Wickett at [brad@wickett.net](mailto:brad@wickett.net) for assistance.
+
+If you think of something that has been missed that should be added to the software
+please let me know.
 
 You can also download the source code for this project from GitHub at 
 [https://github.com/wicketbr/BandTogether](https://github.com/wicketbr/BandTogether).
