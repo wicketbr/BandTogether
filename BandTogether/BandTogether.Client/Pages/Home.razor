@@ -184,7 +184,11 @@
                                 <Icon Name="Settings" />
                             </button>
 
-                            <button type="button" class="ms-1 btn btn-sm @chordButtonClass" disabled="@(Model.User.preferences.editMode || Model.ActiveItemType != setListItemType.song)" @onclick="@ToggleChords" title="@Text.ShowOrHideChords">
+                            <button type="button"
+                                    class="ms-1 btn btn-sm @chordButtonClass"
+                                    disabled="@(Model.User.preferences.editMode || Model.ActiveItemType != setListItemType.song)"
+                                    @onclick="@ToggleChords"
+                                    title="@Text.ShowOrHideChords">
                                 <Icon Name="Chords" />
                             </button>
 
@@ -240,7 +244,6 @@
                                 aria-expanded="false">
                             <span title="@Text.Theme: @CurrentThemeLabel">@((MarkupString)CurrentThemeIcon)</span>
                         </button>
-
                         <ul class="dropdown-menu" aria-labelledby="dropdownMenuButtonThemeHome">
                             <li>
                                 <a class="dropdown-item @(Model.User.preferences.theme == "" ? "active" : "")" href="javascript:void('0');" @onclick="@(() => Helpers.SetUserTheme(Model.User, ""))">
@@ -307,7 +310,7 @@
 
                     <FirstPane>
                         <div class="prevent-select pane-content @(_activePageSection == "setlist" ? "active" : "")" @onclick="@(() => SetActivePageSection("setlist"))">
-                            <div class="pane-title">
+                            <div class="pane-title" id="focuser" tabindex="0">
                             @if (!String.IsNullOrWhiteSpace(Model.SetList.name)) {
                                 <span class="title">
                                     @Model.SetList.name
@@ -391,7 +394,9 @@
 
                                 </div>
 
-                                <button type="button" class="btn btn-sm btn-success" title="@Text.AddItem" @onclick="@((MouseEventArgs e) => ContextMenuShow("AddSetListItem", e))">
+                                <button type="button"
+                                        class="btn btn-sm btn-success"
+                                        title="@Text.AddItem" @onclick="@((MouseEventArgs e) => ContextMenuShow("AddSetListItem", e))">
                                     <Icon Name="AddItem" />
                                 </button>
                                 
@@ -697,96 +702,99 @@
             </FirstPane>
 
             <SecondPane>
-                <div class="panel-wrapper @(_activePageSection == "setlist-element" ? "active" : "") @(Model.User.preferences.editMode ? "" : "item-detail-view")" @onclick="@(() => SetActivePageSection("setlist-element"))">
+                <div class="panel-wrapper @(_activePageSection == "setlist-element" ? "active" : "") @(Model.User.preferences.editMode ? "" : "item-detail-view")">
                     <div class="prevent-select pane-content pane-item-details">
-                        @{
-                            // The audio player renders here, but is only visible when playing.
-                            var fileNameWithoutExtension = System.IO.Path.GetFileNameWithoutExtension(Model.AudioPlayingFile);
-                            var playTime = Model.AudioPlayingTime.currentTime + " / " + Model.AudioPlayingTime.totalTime;
+                        <div class="top-wrapper @(Model.AudioPlaying || Model.User.preferences.showMessaging ? "" : "hidden")"
+                                @onclick="@(() => SetActivePageSection("top-wrapper"))">
+                            @{
+                                // The audio player renders here, but is only visible when playing.
+                                var fileNameWithoutExtension = System.IO.Path.GetFileNameWithoutExtension(Model.AudioPlayingFile);
+                                var playTime = Model.AudioPlayingTime.currentTime + " / " + Model.AudioPlayingTime.totalTime;
 
-                            <div class="audio-player-wrapper @(Model.AudioPlaying && !String.IsNullOrWhiteSpace(Model.AudioPlayingFile) ? "" : "hidden")">
-                                <div class="audio-player-file">@fileNameWithoutExtension</div>
-                                <div class="close-button" @onclick="Helpers.PlayAudioFileStop" title="@Text.StopAndClosePlayer">
-                                    <Icon Name="Close" />
+                                <div class="audio-player-wrapper @(Model.AudioPlaying && !String.IsNullOrWhiteSpace(Model.AudioPlayingFile) ? "" : "hidden")">
+                                    <div class="audio-player-file">@fileNameWithoutExtension</div>
+                                    <div class="close-button" @onclick="Helpers.PlayAudioFileStop" title="@Text.StopAndClosePlayer">
+                                        <Icon Name="Close" />
+                                    </div>
+                                    <audio class="audio-player" id="audio-player" controls />
                                 </div>
-                                <audio class="audio-player" id="audio-player" controls />
-                            </div>
+                            }
 
-                            // Messaging interface renders here.
-                            if (Model.User.preferences.showMessaging) {
-                                <div class="messaging-wrapper">
-                                    <div class="row">
-                                        @if (Model.Settings.enableProjectionMode) {
-                                            <div class="col col-6">
-                                                <div class="mb-1">
-                                                    <label for="messaging-screen">@Text.ScreenMessage</label>
-
-                                                    <FreeBlazor.AutoGrowText 
-                                                            Id="messaging-screen"
-                                                            Class="mb-1 form-control form-control-sm"
-                                                            @bind-Value="Model.MessageItems.screenMessage.text" />
-
-                                                    <div class="input-group">
-                                                        <select class="form-select form-select-sm"
-                                                                id="messaging-screen-theme"
-                                                                @bind="Model.MessageItems.screenMessage.style"
-                                                                title="@Text.Theme">
-                                                            <option value="black" selected="@(Model.MessageItems.screenMessage.style == "black")">@Text.MessagingThemeBlack</option>
-                                                            <option value="blue" selected="@(Model.MessageItems.screenMessage.style == "blue")">@Text.MessagingThemeBlue</option>
-                                                            <option value="green" selected="@(Model.MessageItems.screenMessage.style == "green")">@Text.MessagingThemeGreen</option>
-                                                            <option value="red" selected="@(Model.MessageItems.screenMessage.style == "red")">@Text.MessagingThemeRed</option>
-                                                        </select>
-
-                                                        <button type="button" class="btn btn-sm btn-dark" @onclick="@(() => MessagingClear("screen"))">
-                                                            <Icon Name="Clear" /> @Text.Clear
-                                                        </button>
-
-                                                        <button type="button"
-                                                                class="btn btn-sm btn-success"
-                                                                @onclick="@(() => MessagingSend("screen"))">
-                                                            <Icon Name="Send" /> @Text.Send
-                                                        </button>
-                                                    </div>
-                                                </div>
-                                            </div>
-                                        }
-
-                                        <div class="col @(Model.Settings.enableProjectionMode ? "col-6" : "col-12")">
+                            @if (Model.User.preferences.showMessaging) {
+                                <div class="row">
+                                    @if (Model.Settings.enableProjectionMode) {
+                                        <div class="col col-6">
                                             <div class="mb-1">
-                                                <label for="messaging-tablet">@Text.TabletMessage</label>
+                                                <label for="messaging-screen">@Text.ScreenMessage</label>
 
                                                 <FreeBlazor.AutoGrowText
-                                                        Id="messaging-tablet"
+                                                        Id="messaging-screen"
                                                         Class="mb-1 form-control form-control-sm"
-                                                        @bind-Value="Model.MessageItems.tabletMessage.text" />
+                                                        @bind-Value="Model.MessageItems.screenMessage.text" />
 
                                                 <div class="input-group">
                                                     <select class="form-select form-select-sm"
-                                                            id="messaging-tablet-theme"
-                                                            @bind="Model.MessageItems.tabletMessage.style"
+                                                            id="messaging-screen-theme"
+                                                            @bind="Model.MessageItems.screenMessage.style"
                                                             title="@Text.Theme">
-                                                        <option value="black" selected="@(Model.MessageItems.tabletMessage.style == "black")">@Text.MessagingThemeBlack</option>
-                                                        <option value="blue" selected="@(Model.MessageItems.tabletMessage.style == "blue")">@Text.MessagingThemeBlue</option>
-                                                        <option value="green" selected="@(Model.MessageItems.tabletMessage.style == "green")">@Text.MessagingThemeGreen</option>
-                                                        <option value="red" selected="@(Model.MessageItems.tabletMessage.style == "red")">@Text.MessagingThemeRed</option>
+                                                        <option value="black" selected="@(Model.MessageItems.screenMessage.style == "black")">@Text.MessagingThemeBlack</option>
+                                                        <option value="blue" selected="@(Model.MessageItems.screenMessage.style == "blue")">@Text.MessagingThemeBlue</option>
+                                                        <option value="green" selected="@(Model.MessageItems.screenMessage.style == "green")">@Text.MessagingThemeGreen</option>
+                                                        <option value="red" selected="@(Model.MessageItems.screenMessage.style == "red")">@Text.MessagingThemeRed</option>
                                                     </select>
 
-                                                    <button type="button" class="btn btn-sm btn-dark" @onclick="@(() => MessagingClear("tablet"))">
+                                                    <button type="button" class="btn btn-sm btn-dark" @onclick="@(() => MessagingClear("screen"))">
                                                         <Icon Name="Clear" /> @Text.Clear
                                                     </button>
 
                                                     <button type="button"
                                                             class="btn btn-sm btn-success"
-                                                            @onclick="@(() => MessagingSend("tablet"))">
+                                                            @onclick="@(() => MessagingSend("screen"))">
                                                         <Icon Name="Send" /> @Text.Send
                                                     </button>
                                                 </div>
                                             </div>
                                         </div>
+                                    }
+
+                                    <div class="col @(Model.Settings.enableProjectionMode ? "col-6" : "col-12")">
+                                        <div class="mb-1">
+                                            <label for="messaging-tablet">@Text.TabletMessage</label>
+
+                                            <FreeBlazor.AutoGrowText
+                                                    Id="messaging-tablet"
+                                                    Class="mb-1 form-control form-control-sm"
+                                                    @bind-Value="Model.MessageItems.tabletMessage.text" />
+
+                                            <div class="input-group">
+                                                <select class="form-select form-select-sm"
+                                                        id="messaging-tablet-theme"
+                                                        @bind="Model.MessageItems.tabletMessage.style"
+                                                        title="@Text.Theme">
+                                                    <option value="black" selected="@(Model.MessageItems.tabletMessage.style == "black")">@Text.MessagingThemeBlack</option>
+                                                    <option value="blue" selected="@(Model.MessageItems.tabletMessage.style == "blue")">@Text.MessagingThemeBlue</option>
+                                                    <option value="green" selected="@(Model.MessageItems.tabletMessage.style == "green")">@Text.MessagingThemeGreen</option>
+                                                    <option value="red" selected="@(Model.MessageItems.tabletMessage.style == "red")">@Text.MessagingThemeRed</option>
+                                                </select>
+
+                                                <button type="button" class="btn btn-sm btn-dark" @onclick="@(() => MessagingClear("tablet"))">
+                                                    <Icon Name="Clear" /> @Text.Clear
+                                                </button>
+
+                                                <button type="button"
+                                                        class="btn btn-sm btn-success"
+                                                        @onclick="@(() => MessagingSend("tablet"))">
+                                                    <Icon Name="Send" /> @Text.Send
+                                                </button>
+                                            </div>
+                                        </div>
                                     </div>
                                 </div>
                             }
+                        </div>
 
+                        <div @onclick="@(() => SetActivePageSection("setlist-element"))">
+                            @{
                             // Get the current active item
                             var activeItem = Model.SetList.items.FirstOrDefault(x => x.id == Model.SetList.activeItem);
 
@@ -1066,6 +1074,7 @@
                                     };})"
                             />
                         </div>
+                        </div>
 
                         @if (Model.Settings.enableProjectionMode && !String.IsNullOrWhiteSpace(Model.User.preferences.showPreview) && !PreviewDisabledBasedOnSelectedItem) {
                             <div class="preview-area docked @Model.User.preferences.showPreview @Model.AspectRatio">
@@ -1138,10 +1147,10 @@
     protected bool _initialLoad = false;
     protected ProjectorView _preview = null!;
 
-    protected override void OnAfterRender(bool firstRender)
+    protected override async Task OnAfterRenderAsync(bool firstRender)
     {
         if (firstRender) {
-            SetActivePageSection("setlist");
+            await SetActivePageSection("setlist");
         }
     }
 
@@ -1238,6 +1247,10 @@
                             await SelectSetListItem(selectedSetListItem, true);
                         }
                         break;
+
+                    case "tab":
+                        await SetActivePageSection("setlist-element", true);
+                        break;
                 }
                 break;
 
@@ -1263,6 +1276,10 @@
                             } else {
                                 await MovePrevious();
                             }
+                            break;
+                        
+                        case "tab":
+                            await SetActivePageSection("setlist", true);
                             break;
                     }
                 } else if (keyboardEvent.ctrlKey || keyboardEvent.metaKey || keyboardEvent.altKey) {
@@ -1895,7 +1912,7 @@
 
     protected async Task Logout() 
     {
-        SetActivePageSection("");
+        await SetActivePageSection("");
 
         await Helpers.ClearLocalStorageItem("UserId");
 
@@ -2513,13 +2530,13 @@
         StateHasChanged();
 
         if (setFocusToSetlistElement == true) {
-            Helpers.SetTimeout(() => SetActivePageSection("setlist-element"), 200);
+            Helpers.SetTimeout(async() => await SetActivePageSection("setlist-element"), 200);
         }
     }
 
     protected async Task SelectedUser(user user)
     {
-        SetActivePageSection("");
+        await SetActivePageSection("");
 
         await Helpers.SetLocalStorageItem("UserId", user.id);
 
@@ -2554,16 +2571,36 @@
         // Model.TriggerUpdate();
     }
 
-    protected void SetActivePageSection(string section)
+    protected async Task SetActivePageSection(string section, bool setFocus = false)
     {
+        Console.WriteLine("SetActivePageSection: '" + section + "'");
         _activePageSection = section;
         StateHasChanged();
+
+        // switch(section) {
+        //     case "setlist":
+        //         break;
+
+        //     case "setlist-element":
+        //         break;
+
+        //     default:
+        //         break;
+        // }
+
+        if (setFocus) {
+            await Helpers.Focuser();
+        }
+        
+        // Helpers.SetTimeout(async () => {
+        //     await Helpers.Focuser();
+        // }, 500);
     }
 
     protected void SetLanguage(Language language)
     {
         Helpers.LoadAndUpdateLanguage(language);
-        Model.User.preferences.cultureCode = language.cultureCode;
+        Model.User.preferences.cultureCode = Helpers.StringValue(language.cultureCode);
         StateHasChanged();
     }
 

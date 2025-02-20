@@ -1182,16 +1182,11 @@ label.small {
     font-size:0.8em;
 }
 
-.messaging-wrapper {
-
-}
-
 #audio-player {
     width:100%;
 }
 
-.audio-player-wrapper,
-.messaging-wrapper {
+.top-wrapper {
     border:solid 1px var(--bs-border-color);
     border-radius:.4em;
     padding: .2em .4em 0 .4em;
@@ -1200,6 +1195,7 @@ label.small {
     color:#fff;
 }
 
+.top-wrapper.hidden,
 .audio-player-wrapper.hidden {
     display:none;
 }
@@ -1458,4 +1454,12 @@ label.small {
 .screen-message.green,
 .tablet-message.green {
     background-color:forestgreen;
+}
+
+body.dark .blazor-context-menu {
+    background-color:#222;
+}
+
+#focuser:focus-visible {
+    outline-width:0;
 }

@@ -258,6 +258,13 @@
             }
         }
 
+        function Focuser() {
+            var el = document.getElementById("focuser");
+            if (el != undefined && el != null) {
+                el.focus();
+            }
+        }
+
         function HideMenu() {
             let bsOffcanvasUserMenu = bootstrap.Offcanvas.getInstance("#offcanvasUserMenu");
             if (bsOffcanvasUserMenu != undefined && bsOffcanvasUserMenu != null && bsOffcanvasUserMenu._isShown) {

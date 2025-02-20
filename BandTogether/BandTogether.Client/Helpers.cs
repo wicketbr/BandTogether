@@ -637,6 +637,11 @@ public static class Helpers
         await jsRuntime.InvokeVoidAsync("FadeElementOut", elementId, duration);
     }
 
+    public static async Task Focuser()
+    {
+        await jsRuntime.InvokeVoidAsync("Focuser");
+    }
+
     public static string FontStyleToCSS(viewStyle style, string wrapperClass, double Scale = 1.0)
     {
         var output = new StringBuilder();
