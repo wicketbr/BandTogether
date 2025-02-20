@@ -1,0 +1,284 @@
+﻿@inject BlazorDataModel Model
+@inject Radzen.DialogService DialogService
+@implements IDisposable
+
+<ul class="nav nav-tabs">
+    <li class="nav-item">
+        <a class="nav-link @(Model.User.preferences.settingsTab == "" ? "active" : "")" 
+                href="javascript:void('0');"
+                @onclick="@(() => SetTab(""))">
+            @Text.SettingsGeneral
+        </a>
+    </li>
+
+    @if (_settings.enableProjectionMode) {
+        <li class="nav-item">
+            <a class="nav-link @(Model.User.preferences.settingsTab == "projectionstyle" ? "active" : "")"
+                    href="javascript:void('0');"
+                    @onclick="@(() => SetTab("projectionstyle"))">
+                @Text.SettingsProjection
+            </a>
+        </li>
+    }
+
+    <li class="nav-item">
+        <a class="nav-link @(Model.User.preferences.settingsTab == "messaging" ? "active" : "")"
+           href="javascript:void('0');"
+           @onclick="@(() => SetTab("messaging"))">
+            @Text.Messaging
+        </a>
+    </li>
+
+    <li class="nav-item">
+        <a class="nav-link @(Model.User.preferences.settingsTab == "fonts" ? "active" : "")"
+           href="javascript:void('0');"
+           @onclick="@(() => SetTab("fonts"))">
+            @Text.Fonts
+        </a>
+    </li>
+
+    @if (_settings.churchMode) {
+        <li class="nav-item">
+            <a class="nav-link @(Model.User.preferences.settingsTab == "church" ? "active" : "")"
+               href="javascript:void('0');"
+               @onclick="@(() => SetTab("church"))">
+                @Text.ChurchMode
+            </a>
+        </li>
+    }
+</ul>
+
+<div class="tab-content mb-2">
+    <div class="tab-pane @(Model.User.preferences.settingsTab == "" ? "active" : "")">
+        <div class="mb-2 form-check form-switch">
+            <input type="checkbox" id="setting-ShowNonStandardKeys" role="switch" class="form-check-input" @bind="_settings.showNonStandardKeys" @bind:after="ValuesChanged" />
+            <label for="setting-ShowNonStandardKeys" class="form-check-label">
+                @Text.ShowNonStandardKeys
+            </label>
+            <div class="note">
+                @Text.ShowNonStandardKeysInfo
+            </div>
+        </div>
+
+        <div class="mb-2 form-check form-switch">
+            <input type="checkbox" id="setting-EnableProjectionMode" role="switch" class="form-check-input" @bind="_settings.enableProjectionMode" @bind:after="ValuesChanged" />
+            <label for="setting-EnableProjectionMode" class="form-check-label">
+                @Text.EnableProjectionMode
+            </label>
+        </div>
+
+        @if (_settings.enableProjectionMode) {
+            <div class="mb-2">
+                <label for="setting-ProjectionModeAspectRatio">@Text.ProjectionModeAspectRatio</label>
+                <select class="form-select" id="setting-ProjectionModeAspectRatio" @bind="_settings.projectionModeAspectRatio" @bind:after="ValuesChanged">
+                    <option value="">@Text.Auto</option>
+                    <option value="4:3">4:3</option>
+                    <option value="4:3.2">4:3.2</option>
+                    <option value="16:9">16:9</option>
+                    <option value="16:10">16:10</option>
+                    <option value="16:8">16:8</option>
+                </select>
+            </div>
+
+            <div class="mb-2 form-check form-switch">
+                <input type="checkbox" id="setting-ChurchMode" role="switch" class="form-check-input" @bind="_settings.churchMode" @bind:after="ValuesChanged" />
+                <label for="setting-ChurchMode" class="form-check-label">
+                    @Text.ChurchMode
+                </label>
+                <div class="note">
+                    @Text.ChurchModeInfo
+                </div>
+            </div>
+        }
+    </div>
+
+    <div class="tab-pane @(Model.User.preferences.settingsTab == "projectionstyle" ? "active" : "")">
+        <ElementStyleEditor 
+            ObjectToRender="PreviewSong"
+            ShowSongOptions="true"
+            @bind-TransitionSpeed="_settings.transitionSpeed"
+            @bind-Value="_settings.projectionStyle"
+            />
+    </div>
+
+    <div class="tab-pane @(Model.User.preferences.settingsTab == "messaging" ? "active" : "")">
+        <div class="mb-2">
+            <button type="button" class="btn btn-outline-secondary btn-xs" @onclick="ResetMessagingDefaults">
+                @Text.Defaults
+            </button>
+        </div>
+
+        <div class="mb-2">
+            <h2>@Text.ScreenMessages</h2>
+            <MessageStyleEditor @bind-Value="_settings.messageStyleScreen" />
+            <div class="alert alert-success">
+                <div style="@SampleMessageStyleScreen">@Text.SampleMessage</div>
+            </div>
+        </div>
+
+        <div class="mb-2">
+            <h2>@Text.TabletMessages</h2>
+            <MessageStyleEditor @bind-Value="_settings.messageStyleTablet" />
+            <div class="alert alert-success">
+                <div style="@SampleMessageStyleTablet">@Text.SampleMessage</div>
+            </div>
+        </div>
+    </div>
+
+    <div class="tab-pane @(Model.User.preferences.settingsTab == "fonts" ? "active" : "")">
+        <div class="mb-2">
+            @Text.FontsInstructions
+        </div>
+
+        <div class="mb-2 form-check form-switch">
+            <input type="checkbox" id="setting-ShowFontPreviews" role="switch" class="form-check-input" @bind="_showFontPreviews" />
+            <label for="setting-ShowFontPreviews" class="form-check-label">
+                @Text.ShowFontPreviews
+            </label>
+        </div>
+
+        @foreach(var font in Model.DataLoader.installedFonts.OrderBy(x => x).Index()) {
+            var fontId = "font-" + font.Index;
+            bool isChecked = _settings.availableFonts.Contains(font.Item);
+            string fontStyle = String.Empty;
+            if (_showFontPreviews) {
+                fontStyle = "font-family:\"" + font.Item + "\"; font-size:1.5em"; 
+            }
+
+            <div class="mb-1">
+                <input type="checkbox" id="@fontId" checked="@(isChecked)" @onchange="@((e) => FontChanged(e, font.Item))" />
+                <label for="@fontId" style="@fontStyle">@font.Item</label>
+            </div>
+        }
+    </div>
+
+    <div class="tab-pane @(Model.User.preferences.settingsTab == "church" ? "active" : "")">
+        <div class="mb-2">
+            <label for="setting-ccliNumber">@Text.ccliNumber</label>
+            <input type="text" id="setting-ccliNumber" class="form-control" @bind="_settings.ccliNumber" @bind:after="ValuesChanged" />
+        </div>
+    </div>
+</div>
+
+<button type="button" class="btn btn-dark" @onclick="Close">
+    <Icon Name="Cancel" /> @Text.Cancel
+</button>
+
+<button type="button" class="btn btn-success" @onclick="Save">
+    <Icon Name="Save" /> @Text.Save
+</button>
+
+@code {
+    protected appSettings _settings = new appSettings();
+    protected appSettings _defaultSettings = new appSettings();
+    protected viewStyle _defaultStyle = new viewStyle();
+    protected bool _showFontPreviews = false;
+
+    public void Dispose() { }
+
+    protected override void OnInitialized()
+    {
+        var dup = Helpers.DuplicateObject<appSettings>(Model.Settings);
+        if (dup != null) {
+            _settings = dup;
+        }
+    }
+
+    protected void Close()
+    {
+        DialogService.Close();
+    }
+
+    protected void FontChanged(ChangeEventArgs e, string font)
+    {
+        string value = String.Empty;
+
+        if (e.Value != null) {
+            value += e.Value.ToString();
+        }
+
+        if (value.ToLower() == "true") {
+            _settings.availableFonts.Add(font);
+        } else {
+            _settings.availableFonts = _settings.availableFonts.Where(x => x.ToLower() != font.ToLower()).ToList();
+        }
+    }
+
+    protected string OptionalFormatFields
+    {
+        get
+        {
+            var output = "{title}, {artist}, {copyright}";
+            if (_settings.churchMode) {
+                output += ", {church_ccli}, {song_ccli}";
+            }
+            return output;
+        }
+    }
+
+    protected song PreviewSong {
+        get {
+            var output = new song();
+
+            var defaultSong = Model.DataLoader.defaultSongs.FirstOrDefault();
+            if (defaultSong != null) {
+                output = defaultSong;
+            }
+
+            return output;
+        }
+    }
+
+    // public viewStyle ProjectionStyle {
+    //     get {
+    //         return _settings.projectionStyle;
+    //     }
+    // }
+
+    protected void ResetMessagingDefaults()
+    {
+        _settings.messageStyleScreen = _defaultSettings.messageStyleScreen;
+        _settings.messageStyleTablet = _defaultSettings.messageStyleTablet;
+        StateHasChanged();
+    }
+
+    protected string SampleMessageStyleScreen {
+        get {
+            string output = "font-family:\"" + _settings.messageStyleScreen?.fontFamily + "\"; font-size:" + (_settings.messageStyleScreen?.fontSize).ToString() + "px";
+            return output;
+        }
+    }
+
+    protected string SampleMessageStyleTablet {
+        get {
+            string output = "font-family:\"" + _settings.messageStyleTablet?.fontFamily + "\"; font-size:" + (_settings.messageStyleTablet?.fontSize).ToString() + "px";
+            return output;
+        }
+    }
+
+    protected async Task Save()
+    {
+        var dup = Helpers.DuplicateObject<appSettings>(_settings);
+        if (dup != null) {
+            Model.Settings = _settings;
+            await Helpers.SaveSettings();
+            Close();
+        }
+    }
+
+    protected void SetTab(string tab) 
+    {
+        Model.User.preferences.settingsTab = tab;
+        StateHasChanged();
+    }
+
+    protected void ValuesChanged()
+    {
+        if (!_settings.enableProjectionMode) {
+            _settings.churchMode = false;
+        }
+
+        Model.TriggerUpdate();
+        StateHasChanged();
+    }
+}

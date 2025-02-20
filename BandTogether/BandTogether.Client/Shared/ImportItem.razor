@@ -1,0 +1,178 @@
+﻿@inject BlazorDataModel Model
+@inject Radzen.DialogService DialogService
+@implements IDisposable
+@typeparam UploadType
+
+@if (!String.IsNullOrWhiteSpace(UploadInstructions)) {
+    <div class="mb-2">@((MarkupString)UploadInstructions)</div>
+}
+
+<div class="@(_uploading ? "hidden" : "mt-3")">
+    <MudBlazor.MudStack Style="width: 100%;">
+        <MudBlazor.MudFileUpload T="UploadType" OnFilesChanged="UploaderOnInputFileChanged" Hidden="false"
+            Accept="@SupportedFileTypesList" AppendMultipleFiles="true" MaximumFileCount="10"
+            Class="flex-1" InputClass="absolute mud-width-full mud-height-full overflow-hidden z-20" InputStyle="opacity:0"
+            @ondragenter="@UploaderSetDragClass" @ondragleave="@UploaderClearDragClass" @ondragend="@UploaderClearDragClass">
+            <ActivatorContent>
+                <MudBlazor.MudPaper Height="200px" Outlined="true" Class="@UploaderDragClass">
+                    @if (!String.IsNullOrWhiteSpace(SupportedFileTypesList)) {
+                        <div class="drag-and-drop-instructions-file-types">
+                            <span>@Text.SupportedFileTypes</span><span>:</span>&nbsp;<span>@((MarkupString)SupportedFileTypesList.ToUpper())</span>
+                        </div>
+                    }
+                </MudBlazor.MudPaper>
+            </ActivatorContent>
+        </MudBlazor.MudFileUpload>
+    </MudBlazor.MudStack>
+</div>
+@if (_uploading) {
+    <div class="mt-3 mb-2">
+        @Text.Uploading
+    </div>
+}
+@code {
+    [Parameter]
+    public bool? AllowMultipleUploads { get; set; } = false;
+
+    [Parameter]
+    public Delegate? OnUploadComplete { get; set; }
+
+    [Parameter]
+    public List<string>? SupportedFileTypes { get; set; }
+
+    [Parameter]
+    public string Type { get; set; } = "";
+
+    [Parameter]
+    public string? UploadInstructions { get; set; }
+
+    private static string UploaderDefaultDragClass = "drag-and-drop-upload";
+    private string UploaderDragClass = UploaderDefaultDragClass;
+
+    protected bool _uploading = false;
+
+    public void Dispose() { }
+
+    protected override void OnInitialized()
+    {
+        // If no instructions were provided then set them based on the type
+        if (String.IsNullOrWhiteSpace(UploadInstructions)) {
+            switch(Type) {
+                case setListItemType.slideshow:
+                    break;
+
+                case setListItemType.song:
+                    break;
+            }
+        }
+    }
+
+    protected override void OnParametersSet()
+    {
+
+    }
+
+    protected void ProcessUploads(List<fileItem> files)
+    {
+        object? output = null;
+
+        switch (Type) {
+            case setListItemType.song:
+                // Convert songs from the ChordPro format to the BandTogether format and add them to the current SongBook.
+                if (files.Any()) {
+                    var songs = new List<song>();
+                    foreach (var file in files) {
+                        if (file.value != null) {
+                            var fileText = System.Text.Encoding.UTF8.GetString(file.value);
+                            if (!String.IsNullOrWhiteSpace(fileText)) {
+                                var song = Tools.ConvertChordProToSong(fileText);
+                                songs.Add(song);
+                            }
+                        }
+                    }
+
+                    output = songs;
+                }
+                break;
+
+            case setListItemType.slideshow:
+                output = files.FirstOrDefault();
+                break;
+        }
+
+        if (output != null && OnUploadComplete != null) {
+            OnUploadComplete.DynamicInvoke(output);
+        }
+
+        DialogService.Close();
+    }
+
+    protected string SupportedFileTypesList
+    {
+        get {
+            string output = String.Empty;
+
+            if(SupportedFileTypes != null && SupportedFileTypes.Any()) {
+                for(int x = 0; x < SupportedFileTypes.Count(); x++) {
+                    if(x > 0) {
+                        output += ", ";
+                    }
+
+                    string extension = SupportedFileTypes[x];
+                    if (!extension.StartsWith(".")) {
+                        extension = "." + extension;
+                    }
+
+                    output += extension.ToUpper();
+                }
+            }
+
+            return output;
+        }
+    }
+
+    private void UploaderClearDragClass()
+    {
+        UploaderDragClass = UploaderDefaultDragClass;
+    }
+
+    private async Task UploaderOnInputFileChanged(InputFileChangeEventArgs e)
+    {
+        UploaderClearDragClass();
+        Model.ClearMessages();
+
+        _uploading = true;
+
+        var output = new List<fileItem>();
+
+        try {
+            foreach (var file in e.GetMultipleFiles()) {
+                string extension = System.IO.Path.GetExtension(file.Name);
+
+                var byteData = new byte[file.Size];
+                await file.OpenReadStream(52428800).ReadAsync(byteData);
+
+                var fileStorage = new fileItem {
+                    fileName = file.Name,
+                    value = byteData,
+                };
+
+                output.Add(fileStorage);
+            }
+        }catch {}
+
+        if (output.Any()) {
+            ProcessUploads(output);
+        } else {
+            DialogService.Close();
+        }
+
+        _uploading = false;
+        StateHasChanged();
+    }
+
+    private void UploaderSetDragClass()
+    {
+        UploaderDragClass = $"{UploaderDefaultDragClass} drag-highlight";
+    }
+}

@@ -1,0 +1,44 @@
+﻿@inject IJSRuntime jsRuntime
+@inject Radzen.DialogService DialogService
+@implements IDisposable
+
+@if (!String.IsNullOrWhiteSpace(Instructions)) {
+    <div class="mb-2">@((MarkupString)Instructions)</div>
+}
+
+<div class="mb-2">
+    <button type="button" class="@ButtonClassCancel" @onclick="@(() => ReturnValue(false))">
+        <Icon Name="Cancel" />
+        @ButtonTextCancel
+    </button>
+
+    <button type="button" class="@ButtonClassOk" @onclick="@(() => ReturnValue(true))">
+        <Icon Name="Ok" />
+        @ButtonTextOk
+    </button>
+</div>
+
+@code {
+    [Parameter] public string ButtonClassCancel { get; set; } = "btn btn-dark";
+    [Parameter] public string ButtonClassOk { get; set; } = "btn btn-success";
+    [Parameter] public string ButtonTextCancel { get; set; } = Text.Cancel;
+    [Parameter] public string ButtonTextOk { get; set; } = Text.Ok;
+    [Parameter] public string? Instructions { get; set; }
+    [Parameter] public Delegate? OnConfirmed { get; set; }
+
+    public void Dispose() { }
+
+    protected void Close()
+    {
+        DialogService.Close();
+    }
+
+    protected void ReturnValue(bool value)
+    {
+        if (OnConfirmed != null) {
+            OnConfirmed.DynamicInvoke(value);
+        }
+
+        Close();
+    }
+}

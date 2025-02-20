@@ -1,0 +1,666 @@
+﻿@using Blazored.LocalStorage
+@using System.Globalization
+@using Microsoft.AspNetCore.SignalR.Client
+@implements IAsyncDisposable
+@inherits LayoutComponentBase
+@inject IJSRuntime jsRuntime
+@inject ILocalStorageService LocalStorage
+@inject HttpClient Http
+@inject NavigationManager NavManager
+@inject BlazorDataModel Model
+@inject Radzen.DialogService DialogService
+
+<style>
+    @AppCSS
+</style>
+
+<div id="page-area">@Body</div>
+
+@if (Model.Messages.Any()) {
+    <div aria-live="polite" aria-atomic="true" class="position-relative">
+        <div class="toast-container end-0" id="toast-message-area">
+            @foreach (var message in Model.Messages.OrderByDescending(x => x.Shown)) {
+                string text = message.Text;
+
+                string toastClass = "toast show ";
+                string toastCloseButtonClass = "btn-close me-2 mt-2 m-auto";
+
+                switch (message.MessageType) {
+                    case MessageType.Primary:
+                        toastClass += "text-bg-primary";
+                        toastCloseButtonClass += " btn-close-white";
+                        break;
+
+                    case MessageType.Secondary:
+                        toastClass += "text-bg-secondary";
+                        toastCloseButtonClass += " btn-close-white";
+                        break;
+
+                    case MessageType.Success:
+                        toastClass += "text-bg-success";
+                        toastCloseButtonClass += " btn-close-white";
+                        break;
+
+                    case MessageType.Danger:
+                        toastClass += "text-bg-danger";
+                        toastCloseButtonClass += " btn-close-white";
+                        break;
+
+                    case MessageType.Warning:
+                        toastClass += "text-bg-warning";
+                        toastCloseButtonClass += " btn-close-black";
+                        break;
+
+                    case MessageType.Info:
+                        toastClass += "text-bg-info";
+                        toastCloseButtonClass += " btn-close-black";
+                        break;
+
+                    case MessageType.Light:
+                        toastClass += "text-bg-light";
+                        toastCloseButtonClass += " btn-close-black";
+                        break;
+
+                    case MessageType.Dark:
+                        toastClass += "text-bg-dark";
+                        toastCloseButtonClass += " btn-close-white";
+                        break;
+                }
+
+                if (message.ReplaceLineBreaks) {
+                    text = text.Replace(Environment.NewLine, "<br />");
+                }
+
+                <div class="@toastClass" role="alert" aria-live="assertive" aria-atomic="true" id="@message.Id" data-bs-animation="false">
+                    <div class="d-flex">
+                        <div class="toast-body">
+                            @if (!message.AutoHide) {
+                                <div id="toast-time-@message.Id" class="toast-time">@message.TimeLabel</div>
+                            }
+                            <div>@((MarkupString)text)</div>
+                        </div>
+                        <button type="button" class="@toastCloseButtonClass" @onclick="@(() => CloseMessage(message.Id))"
+                                aria-label="@Text.Close"></button>
+                    </div>
+                </div>
+            }
+        </div>
+    </div>
+}
+
+<Radzen.Blazor.RadzenDialog />
+@*<Radzen.Blazor.RadzenComponents @rendermode="InteractiveAuto" />*@
+
+<div id="blazor-error-ui" data-nosnippet>
+    An unhandled error has occurred.
+    <a href="." class="reload">Reload</a>
+    <span class="dismiss">🗙</span>
+</div>
+
+@code {
+    private bool ignoreTheme = false;
+    private bool hubConfigured = false;
+    //private HubConnection? hubConnection;
+
+    protected string LastUserPreferencesJson = String.Empty;
+    protected bool Loading = true;
+    protected System.Threading.Timer? timer;
+    protected bool Validating = false;
+
+    protected DotNetObjectReference<MainLayout>? dotNetHelper;
+
+    public void Dispose()
+    {
+        dotNetHelper?.Dispose();
+    }
+
+    protected override async Task OnInitializedAsync()
+    {
+        if (!Model.Subscribers_OnChange.Contains("MainLayout")){
+            Model.Subscribers_OnChange.Add("MainLayout");
+            Model.OnChange += OnDataModelUpdated;
+        }
+
+        if (!Helpers.Initialized) {
+            Helpers.Init(jsRuntime, Model, Http, LocalStorage, DialogService, NavManager);
+        }
+
+        DialogService.OnClose += DialogClosed;
+        DialogService.OnOpen += DialogOpened;
+
+        await Helpers.LoadCachedSetList();
+        await Helpers.ReloadModel();
+
+        NavManager.LocationChanged += LocationChanged;
+
+        if (!Model.LoggedIn) {
+            await ValidateLogin();
+        }
+
+        timer = new System.Threading.Timer(async (object? stateInfo) => {
+            if (!ignoreTheme) {
+                await ThemeWatcher();
+            }
+            
+            MessageWatcher();
+            await SavePendingUserPreferences();
+        }, new System.Threading.AutoResetEvent(false), 0, 500);
+    }
+
+    protected async override Task OnAfterRenderAsync(bool firstRender)
+    {
+        if (firstRender) {
+            dotNetHelper = DotNetObjectReference.Create(this);
+            await jsRuntime.InvokeVoidAsync("SetDotNetHelper", dotNetHelper);
+
+            // Certain pages will always use the dark theme.
+            switch (Helpers.StringLower(Model.View)) {
+                case "screen":
+                    ignoreTheme = true;
+                    break;
+            }
+
+            if (!ignoreTheme) {
+                var theme = await LocalStorage.GetItemAsync<string>("Theme");
+                if (!String.IsNullOrWhiteSpace(theme)) {
+                    // Not in auto-mode, so call the Javascript method to set the theme quicly.
+                    SetTheme(theme);
+                }
+            }
+
+            await jsRuntime.InvokeVoidAsync("Loaded");
+
+            StateHasChanged();
+        } else {
+            if (!Validating && !Model.LoggedIn && Model.Loaded) {
+                await ValidateLogin();
+            }
+        }
+
+        Loading = false;
+
+        if (Model.Loaded) {
+            if(!hubConfigured){
+                hubConfigured = true;
+
+                Model.signalrRHub = new HubConnectionBuilder()
+                    .WithUrl(Model.ApplicationUrl + "hub")
+                    .WithStatefulReconnect()
+                    .WithAutomaticReconnect()
+                    .Build();
+
+                Model.signalrRHub.On<message>("message", async (message) => {
+                    await ProcessSignalRMessage(message);
+                });
+
+                Model.signalrRHub.On<setList>("setlist", async(setlist) => {
+                    await ProcessSignalRSetList(setlist);
+                });
+
+                Model.signalrRHub.On<signalRUpdate>("update", async(update) => {
+                    await ProcessSignalRUpdate(update);
+                });
+
+                Model.signalrRHub.On<user>("user", async(user) => {
+                    await ProcessSignalRUser(user);
+                });
+
+                await Model.signalrRHub.StartAsync();
+            }
+        }
+    }
+
+    protected void OnDataModelUpdated()
+    {
+        InvokeAsync(() => { StateHasChanged(); });
+    }
+
+    [JSInvokable]
+    public void OnAudioPlaybackEnded()
+    {
+        Model.AudioPlaying = false;
+        Model.AudioPlayingFile = String.Empty;
+        Model.AudioPaused = false;
+        Model.OnAudioPlaybackHasEnded();
+    }
+
+    [JSInvokable]
+    public void OnAudioPlaybackPaused(bool paused)
+    {
+        Model.AudioPaused = paused;
+    }
+
+    [JSInvokable]
+    public void OnKeyUp(string key, string code, bool ctrlKey, bool shiftKey, bool altKey, bool metaKey)
+    {
+        Model.OnKeyUpProcessor(new keyboardEvent { 
+            key = key,
+            code = code,
+            ctrlKey = ctrlKey,
+            shiftKey = shiftKey,
+            altKey = altKey,
+            metaKey = metaKey,
+        });
+    }
+
+    [JSInvokable]
+    public async Task OnVideoPlaybackStateChange(string state) {
+        //Console.WriteLine("Video Player State Change: " + state);
+
+        await Model.SendSignalRUpdate(new signalRUpdate {
+            message = state,
+            updateType = signalRUpdateType.videoPlayerState,
+        });
+    }
+
+    [JSInvokable]
+    public async Task OnVideoPlaybackTimeUpdate(double playbackTime)
+    {
+        //Console.WriteLine("Video Player Time Update: " + playbackTime);
+
+        await Model.SendSignalRUpdate(new signalRUpdate {
+            message = playbackTime.ToString(),
+            updateType = signalRUpdateType.videoPlayerPlabackTime,
+        });
+    }
+
+    [JSInvokable]
+    public async Task OnYouTubePlayerStateChange(int state)
+    {
+        // -1(unstarted)
+        // 0(ended)
+        // 1(playing)
+        // 2(paused)
+        // 3(buffering)
+        // 5(video cued)
+
+        var playStates = new List<string> { 
+            "unstarted", 
+            "ended", 
+            "playing", 
+            "paused", 
+            "buffering", 
+            "cued" };
+
+        
+        Console.WriteLine("YouTube Player State Change: " + playStates[state + 1] + " (" + state + ")");
+        //Model.OnYouTubePlayerStateChange(state);
+        Model.YouTubePlayingStatus = state;
+
+        string message = String.Empty;
+
+        if (Model.YouTubePlayingStatus == 1 || Model.YouTubePlayingStatus == 3) {
+            // Currently Playing, tell all players to play.
+            message = "play";
+        } else {
+            // Currently Paused or not started, tell all players to pause.
+            message = "pause";
+        }
+
+        Console.WriteLine("Sending State: " + message);
+
+        // Send the message to all players.
+        // This will be process in the ProjectorView component.
+        await Model.SendSignalRUpdate(new signalRUpdate {
+            message = message,
+            updateType = signalRUpdateType.youTubePlayState
+        });
+
+        if (state == 0) {
+            await Helpers.ClearVideoPlayers();
+        }
+    }
+
+    [JSInvokable]
+    public async Task OnYouTubePlayerUpdatePlayTime(double playbackTime) {
+        await Model.SendSignalRUpdate(new signalRUpdate {
+            message = playbackTime.ToString(),
+            updateType = signalRUpdateType.youTubePlaybackTime
+        });
+    }
+
+    protected string AppCSS
+    {
+        get {
+            var output = new System.Text.StringBuilder();
+
+            // Build the CSS for any installed WOFF2 fonts.
+            foreach(var font in Model.DataLoader.fontWoffFiles) {
+                output.AppendLine("@font-face {");
+                output.AppendLine("  font-family: '" + (Tools.GetFileNameWithoutExtension(font)) + "';");
+                output.AppendLine("  font-style: normal;");
+                output.AppendLine("  font-weight: 400;");
+                output.AppendLine("  font-display: swap;");
+                output.AppendLine("  src: url('./fonts/" +  font + ".woff2') format('woff2');");
+                output.AppendLine("  unicode-range: U+0000-00FF, U+0131, U+0152-0153, U+02BB-02BC, U+02C6, U+02DA, U+02DC, U+2000-206F, U+2074, U+20AC, U+2122, U+2191, U+2193, U+2212, U+2215, U+FEFF, U+FFFD;");
+                output.AppendLine("}");
+            }
+
+            // Build the CSS class styles for available fonts.
+            foreach (var font in Model.AvailableFonts) {
+                output.AppendLine(".ff-" + (font.Replace(" ", "-").ToLower()) + "{font-family:'" + font + "';}");
+            }
+
+
+            return output.ToString();
+        }
+    }
+
+    protected void CloseMessage(string messageId)
+    {
+        Model.Messages = Model.Messages.Where(x => x.Id != messageId).ToList();
+    }
+
+    protected void DialogClosed(dynamic d)
+    {
+        Model.DialogOpen = true;
+    }
+
+    protected void DialogOpened(string s, Type type, Dictionary<string, object> d, Radzen.DialogOptions o)
+    {
+        Model.DialogOpen = true;
+    }
+
+    public async ValueTask DisposeAsync()
+    {
+        if (Model.signalrRHub is not null) {
+            await Model.signalrRHub.DisposeAsync();
+        }
+    }
+
+    public bool IsSignalRConnected =>
+        Model.signalrRHub?.State == HubConnectionState.Connected;
+
+    void LocationChanged(object? sender, LocationChangedEventArgs e)
+    {
+        // Remove any messages
+        Model.Messages = new List<Message>();
+        Model.NavigationId = "";
+
+        base.InvokeAsync(async () => {
+            await Helpers.HideMenus();
+        });
+    }
+
+    protected void MessageWatcher()
+    {
+        if (Model.Messages.Any()) {
+            int maxMessages = 10;
+            int totalPersistentMessages = 0;
+
+            List<string> remove = new List<string>();
+
+            // Iterate over all messages.
+            // If any messages are auto-hide then hide them after 5 seconds.
+            // Otherwise, after the 5 seconds show the time the message has been displayed.
+            DateTime now = DateTime.UtcNow;
+            foreach (var message in Model.Messages.OrderByDescending(x => x.Shown)) {
+                var secondsAgo = (now - message.Shown).TotalSeconds;
+
+                if (secondsAgo >= 5) {
+                    if (message.AutoHide) {
+                        remove.Add(message.Id);
+                    } else {
+                        message.TimeLabel = Helpers.SecondsToTime(secondsAgo);
+                    }
+                }
+
+                if (maxMessages > 0 && !message.AutoHide) {
+                    totalPersistentMessages++;
+                    if (totalPersistentMessages > maxMessages) {
+                        remove.Add(message.Id);
+                    }
+                }
+            }
+
+            Model.Messages = Model.Messages.Where(x => !remove.Contains(x.Id)).ToList();
+        }
+    }
+
+    protected async Task ProcessSignalRMessage(message msg)
+    {
+        switch(Helpers.StringLower(msg.target)) {
+            case "screen":
+                Model.MessageItems.screenMessage = msg;
+                break;
+
+            case "tablet":
+                Model.MessageItems.tabletMessage = msg;
+                break;
+        }
+
+        Model.TriggerUpdate();
+        Model.SignalRMessage(msg);
+    }
+
+    protected async Task ProcessSignalRSetList(setList setlist)
+    {
+        //await System.Threading.Tasks.Task.Delay(0);
+        if (setlist != null) {
+            Model.SetList = Helpers.ReloadSetListItemsFromJson(setlist);
+
+            // If there are any songs in the set list this push may include updates to them.
+            foreach(var item in Model.SetList.items) {
+                if (item.id == setlist.activeItem) {
+                    // Keep the model updated with the current component type so background processing
+                    // in components can be disabled when that component type is not being rendered.
+                    Model.CurrentComponentType = item.type;
+                }
+
+                if (item.type == setListItemType.song && item.item != null) {
+                    var song = (song)item.item;
+
+                    if (song != null) {
+                        var songbook = Model.SongBooks.FirstOrDefault(x => x.id == song.songBookId);
+                        if (songbook != null) {
+                            var songInSongBook = songbook.songs.FirstOrDefault(x => x.id == song.id);
+                            if (songInSongBook != null) {
+                                if (Helpers.SerializeObject(song) != Helpers.SerializeObject(songInSongBook)) {
+                                    songInSongBook = song;
+
+                                    // If this is the current song in the view pane then it needs to be update there as well.
+                                    if (Model.Song.id == song.id) {
+                                        Model.Song = song;
+
+                                        if (Model.User.preferences.editMode) {
+                                            // If the user is in edit mode need to reload the Monoco editor.
+
+                                        }
+                                    }
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+
+            // Also trigger the update in the model.
+            var sendSetList = Helpers.ReloadSetListItemsFromJson(setlist);
+            Model.SignalRSetList(sendSetList);
+        }
+    }
+
+    protected async Task ProcessSignalRUpdate(signalRUpdate update)
+    {
+        if(update != null) {
+            var itemId = update.itemId;
+            string message = update.message.ToLower();
+
+            switch (update.updateType) {
+                case signalRUpdateType.admin:
+                    switch(message) {
+                        case "reload-settings":
+                            await Helpers.ReloadSettings();
+                            break;
+
+                        case "reload-songbooks":
+                            var existingSongBookIds = Model.SongBooks.Select(x => x.id).ToList();
+
+                            await Helpers.ReloadSongBooks();
+                            Helpers.ValidateCurrentSongAndSetListItems();
+
+                            // If a new songbook was just added expand it for the user.
+                            foreach(var songbook in Model.SongBooks) {
+                                if (!existingSongBookIds.Contains(songbook.id)) {
+                                    Model.User.preferences.openSongBooks.Add(songbook.id);
+                                }
+                            }
+
+                            StateHasChanged();
+                            break;
+
+                        case "reload-users":
+                            await Helpers.ReloadUsers();
+                            break;
+                    }
+                    break;
+
+                case signalRUpdateType.blankScreen:
+                    Model.BlankScreen = true;
+                    break;
+
+                case signalRUpdateType.hideText:
+                    Model.HideText = true;
+                    break;
+
+                case signalRUpdateType.setList:
+                case signalRUpdateType.videoPlayerPlabackTime:
+                case signalRUpdateType.videoPlayerState:
+                case signalRUpdateType.youTubePlaybackTime:
+                case signalRUpdateType.youTubePlayState:
+                    // These are just ignored in the main layout as they are handled in other components.
+                    break;
+
+                case signalRUpdateType.song:
+                    var song = Helpers.DeserializeObject<song>(update.objectAsString);
+
+                    switch(message) {
+                        case "deleted":
+                            if (song != null) {
+                                var songbook = Helpers.GetSongBook(song.songBookId);
+                                if (songbook != null) {
+                                    songbook.songs = songbook.songs.Where(x => x.id != song.id).ToList();
+
+                                    Helpers.ValidateCurrentSongAndSetListItems();
+                                }
+                            }
+                            break;
+
+                        case "saved":
+                            
+                            if (song != null) {
+                                var songbook = Model.SongBooks.FirstOrDefault(x => x.id == song.songBookId);
+                                if (songbook != null) {
+                                    songbook.songs = songbook.songs.Where(x => x.id != song.id).ToList();
+                                    songbook.songs.Add(song);
+
+                                    if (Model.Song.id == song.id) {
+                                        var songObject = songbook.songs.FirstOrDefault(x => x.id == song.id);
+                                        if (songObject != null) {
+                                            Model.Song = songObject;
+                                        }
+                                    }
+                                }
+                            }
+                            break;
+                    }
+                    break;
+
+                case signalRUpdateType.songBook:
+                    var songBook = Helpers.DeserializeObject<songBook>(update.objectAsString);
+
+                    switch(message) {
+                        case "saved":
+                            if (songBook != null) {
+                                Model.SongBooks = Model.SongBooks.Where(x => x.id != songBook.id).ToList();
+                                Model.SongBooks.Add(songBook);
+                                Model.TriggerUpdate();
+                            }
+                            break;
+                    }
+                    break;
+
+                case signalRUpdateType.unblankScreen:
+                    Model.BlankScreen = false;
+                    break;
+
+                case signalRUpdateType.unhideText:
+                    Model.HideText = false;
+                    break;
+
+                default:
+                    await Helpers.ConsoleLog("Unknown SignalR Update Type Received");
+                    break;
+            }
+
+            // Also trigger the update in the model.
+            Model.SignalRUpdate(update);
+        }
+    }
+
+    protected async Task ProcessSignalRUser(user user)
+    {
+        await System.Threading.Tasks.Task.Delay(0);
+        //await Helpers.ConsoleLog("Processing SignalR User", user);
+        var users = Model.Users.Where(x => x.id != user.id).ToList();
+        users.Add(user);
+        Model.Users = users;
+
+        if (Model.User.id == user.id){
+            Model.User = user;
+        }
+
+        // Also trigger the update in the model.
+        Model.SignalRUser(user);
+    }
+
+    protected async Task SavePendingUserPreferences()
+    {
+        if (Model.LoggedIn) {
+            string json = Helpers.SerializeObject(Model.User.preferences);
+
+            if(LastUserPreferencesJson != json) {
+                // Initially, the LastUserPreferencesJson will be empty. Don't save on that initial load of the object.
+                if (!String.IsNullOrEmpty(LastUserPreferencesJson)) {
+                    await Helpers.SaveUserPreferences();
+                }
+
+                LastUserPreferencesJson = json;
+            }
+        }
+    }
+
+    protected async void SetTheme(string theme)
+    {
+        Model.User.preferences.theme = theme;
+        await jsRuntime.InvokeVoidAsync("SetPreferredColorScheme", theme);
+        await LocalStorage.SetItemAsync("Theme", theme);
+    }
+
+    protected async Task ThemeWatcher()
+    {
+        try {
+            await jsRuntime.InvokeVoidAsync("SetPreferredColorScheme", Model.User.preferences.theme);
+        } catch { }
+    }
+
+    protected async Task ValidateLogin()
+    {
+        if (!Validating) {
+            Validating = true;
+
+            if(Model.User.id != Guid.Empty){
+                Validating = false;
+                return;
+            }
+
+            var lastUserId = await Helpers.GetLocalStorageItem<Guid>("UserId");
+            var user = Model.Users.FirstOrDefault(x => x.id == lastUserId);
+            if (user != null) {
+                Model.User = user;
+            }
+
+            Validating = false;
+        }
+    }
+}

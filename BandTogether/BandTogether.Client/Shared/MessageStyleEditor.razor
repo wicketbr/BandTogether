@@ -1,0 +1,64 @@
+﻿@inject BlazorDataModel Model
+@implements IDisposable
+
+<div class="mb-2">
+    <label class="small">
+        <Radzen.Blazor.RadzenLabel Text="@Text.FontFamily" Component="DropDownFontFamily" />
+    </label>
+    <Radzen.Blazor.RadzenDropDown @bind-Value="@FontFamily"
+            Data="@Fonts"
+            TextProperty="Name"
+            ValueProperty="Name"
+            Style="@FontListingStyle"
+            Name="DropDownFontFamily" >
+        <Template>
+            <span class="ff-@((context as FontListing)?.Name.Replace(" ", "-").ToLower())">@((context as FontListing)?.Name)</span>
+        </Template>
+        <ValueTemplate>
+            @((context as FontListing)?.Name)
+        </ValueTemplate>
+    </Radzen.Blazor.RadzenDropDown>
+</div>
+
+<div class="mb-2">
+    <label for="style-FontSize" class="small">@Text.FontSize (@Value.fontSize)</label>
+    <input type="range" class="form-range" id="style-FontSize" min="10" max="100" @bind="Value.fontSize" @bind:after="ValueHasChanged" />
+</div>
+
+@code {
+    [Parameter] public messageStyle Value { get; set; } = null!;
+    [Parameter] public EventCallback<messageStyle> ValueChanged { get; set; }
+
+    public void Dispose() { }
+
+    protected void ValueHasChanged()
+    {
+        ValueChanged.InvokeAsync(Value);
+        StateHasChanged();
+    }
+
+    protected string FontFamily {
+        get { return Helpers.StringValue(Value.fontFamily); }
+        set {
+            Value.fontFamily = value;
+            ValueHasChanged();
+        }
+    }
+
+    protected string FontListingStyle {
+        get {
+            string output = "width:100%; font-family:'" + Value.fontFamily + "';";
+            return output;
+        }
+    }
+
+    protected List<FontListing> Fonts {
+        get {
+            return Model.AvailableFonts.Select(f => new FontListing { Name = f }).ToList();
+        }
+    }
+
+    protected class FontListing {
+        public string Name { get; set; } = "";
+    }
+}

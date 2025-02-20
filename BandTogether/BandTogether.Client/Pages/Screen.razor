@@ -1,0 +1,43 @@
+﻿@page "/Screen"
+@inject BlazorDataModel Model
+
+<PageTitle>@Text.ScreenView - @Text.AppName</PageTitle>
+
+<div class="screen-wrapper">
+    @if (Model.Loaded && _loaded) {
+        <ProjectorView
+                AspectRatio="@Model.Settings.projectionModeAspectRatio" />
+    }
+</div>
+
+@code {
+    protected bool _loaded = false;
+    protected string _pageName = "screen";
+
+    protected override void OnInitialized()
+    {
+        if (!Model.Subscribers_OnChange.Contains(_pageName)) {
+            Model.Subscribers_OnChange.Add(_pageName);
+            Model.OnChange += OnDataModelUpdated;
+        }
+
+        Model.View = _pageName;
+    }
+
+    protected override async Task OnAfterRenderAsync(bool firstRender)
+    {
+        if (Model.Loaded && !_loaded) {
+            _loaded = true;
+            await Helpers.LoadCachedMessages();
+            await Helpers.LoadCachedSetList();
+            StateHasChanged();
+        }
+    }
+
+    protected void OnDataModelUpdated()
+    {
+        if (Model.View == _pageName) {
+            StateHasChanged();
+        }
+    }
+}

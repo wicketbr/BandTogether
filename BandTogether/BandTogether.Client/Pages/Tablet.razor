@@ -1,0 +1,449 @@
+﻿@page "/Tablet"
+@inject BlazorDataModel Model
+
+<PageTitle>@Text.TabletView - @Text.AppName</PageTitle>
+
+<style>
+    @((MarkupString)_css)
+</style>
+
+<div class="tablet-wrapper">
+    @if (Model.Loaded) {
+        if (Model.LoggedIn) {
+            <div class="jumbotron tablet-toolbar">
+                <button type="button" class="btn btn-sm btn-primary" @onclick="Logout">
+                    @Model.User.name
+                </button>
+
+                <div class="btn-group" role="group">
+                    <button type="button" class="btn btn-sm btn-secondary" @onclick="ZoomOut">
+                        <Icon Name="ZoomOut" />
+                    </button>
+
+                    <button type="button" class="btn btn-sm btn-secondary" @onclick="ZoomIn">
+                        <Icon Name="ZoomIn" />
+                    </button>
+
+                    <button type="button" class="btn btn-sm btn-secondary" @onclick="ZoomReset">
+                        <Icon Name="ZoomReset" />
+                    </button>
+                </div>
+
+                <button type="button" class="btn btn-sm @(Model.User.preferences.hideChords ? "btn-danger" : "btn-success")"
+                        @onclick="ToggleChords">
+                    @Text.Chords
+                </button>
+
+                <button type="button"
+                        class="btn btn-sm btn-secondary dropdown-toggle"
+                        data-toggle="dropdown"
+                        role="button"
+                        id="dropdownMenuButtonCapo"
+                        data-bs-toggle="dropdown"
+                        aria-expanded="false">
+                    <span>No Capo</span>
+                </button>
+
+                <ul class="dropdown-menu dopdown-menu-capo" aria-labelledby="dropdownMenuButtonCapo">
+                    @for (int x = 0; x <= 12; x++) {
+                        int capoValue = x;
+                        <li>
+                            <a href="javascript:void('0');"
+                                    class="dropdown-item @(capoValue == Capo ? "active" : "")"
+                                    @onclick="@(() => CapoChanged(capoValue))">
+                                @((MarkupString)CapoLabel(capoValue))
+                            </a>
+                        </li>
+                    }
+                </ul>
+
+                <button type="button" class="btn btn-sm @(Model.User.preferences.autoFollow? "btn-success" : "btn-danger")"
+                        @onclick="ToggleAutoFollow">
+                    @if (Model.User.preferences.autoFollow) {
+                        <span>@Text.AutoFollowOn</span>
+                    } else {
+                        <span>@Text.AutoFollowOff</span>
+                    }
+                </button>
+
+                <button type="button"
+                        class="btn btn-sm btn-secondary dropdown-toggle"
+                        data-toggle="dropdown"
+                        role="button"
+                        id="dropdownMenuButtonTheme"
+                        data-bs-toggle="dropdown"
+                        aria-expanded="false">
+                    <span title="@Text.Theme: @CurrentThemeLabel">@((MarkupString)CurrentThemeIcon)</span>
+                </button>
+
+                <ul class="dropdown-menu" aria-labelledby="dropdownMenuButtonTheme">
+                    <li>
+                        <a class="dropdown-item @(Model.User.preferences.theme == "" ? "active" : "")" href="javascript:void('0');" @onclick="@(() => Helpers.SetUserTheme(Model.User, ""))">
+                            <Icon Name="ThemeAuto" /> @Text.ThemeAuto
+                        </a>
+                    </li>
+                    <li>
+                        <a class="dropdown-item @(Model.User.preferences.theme == "light" ? "active" : "")" href="javascript:void('0');" @onclick="@(() => Helpers.SetUserTheme(Model.User, "light"))">
+                            <Icon Name="ThemeLight" /> @Text.ThemeLight
+                        </a>
+                    </li>
+                    <li>
+                        <a class="dropdown-item @(Model.User.preferences.theme == "dark" ? "active" : "")" href="javascript:void('0');" @onclick="@(() => Helpers.SetUserTheme(Model.User, "dark"))">
+                            <Icon Name="ThemeDark" /> @Text.ThemeDark
+                        </a>
+                    </li>
+                </ul>
+            </div>
+
+            if (_setList.items.Any()) {
+                if (_song != null) {
+                    string matrixKey = String.Empty;
+
+                    if (Capo == 12) {
+                        matrixKey = Helpers.StringValue(_song.key);
+                        Helpers.ShowChordsAsNashvilleNumbers = true;
+                    } else {
+                        matrixKey = Helpers.TransposeKey(_song.key, 12 - Capo);
+                        Helpers.ShowChordsAsNashvilleNumbers = false;
+                    }
+
+                    bool minor = matrixKey.Contains("m") || matrixKey.Contains("minor");
+                    string keyLabel = matrixKey + (minor ? "m" : "");
+
+                    <div class="song-title">@_song.title</div>
+
+                    if (!String.IsNullOrWhiteSpace(_song.artist)) {
+                        <div class="song-author">@_song.artist</div>
+                    }
+
+                    <div id="zoomable-area">
+                        @if (!String.IsNullOrWhiteSpace(_song.key)) {
+                            <div class="song-key">@Text.SongKey @keyLabel</div>
+                        }
+
+                        @if (_song.parts != null && _song.parts.Any()) {
+                            Helpers.UsingDoReMi = Helpers.SongUsesDoReMiSystem(_song);
+                            Helpers.UsingNashvilleNumbering = Helpers.SongUsesNashvilleNumberingSystem(_song);
+                            Helpers.ShowChordsAsNashvilleNumbers = Capo == 12;
+
+                            NashvilleNumbering.Init(matrixKey, minor ? "minor" : "major");
+
+                            foreach (var part in _song.parts.Index()) {
+                                var elementId = "tablet-song-part-" + part.Index.ToString();
+
+                                <div id="tablet-scroll-target-@part.Index" class="tablet-scroll-target"></div>
+
+                                <div id="@elementId" class="tablet-song-part @(part.Index == _setList.activeItemPart ? "active" : "")">
+                                    @if (!part.Item.partOfPrevious) {
+                                        <div class="song-element">@part.Item.label</div>
+                                    }
+                                    <div>
+                                        @((MarkupString)Helpers.RenderSongElement(_song, part.Item, matrixKey))
+                                    </div>
+                                </div>
+                            }
+                        }
+                    </div>
+                    <div id="after-song-padding"></div>
+                } else {
+                    <div>@Text.WaitingForSetlist</div>
+                }
+            } else {
+                <div>@Text.WaitingForSetlist</div>
+            }
+        } else {
+            <div class="ms-2 me-2 mt-5 row">
+                <div class="col col-12 col-sm-1 col-md-2 col-lg-3 col-xl-4 col-xxl-4"></div>
+
+                <div class="col col-12 col-sm-10 col-md-8 col-lg-6 col-xl-4 col-xxl-4">
+                    <h1>
+                        @Text.SelectUser
+                    </h1>
+
+                    @foreach (var item in Model.Users.Where(x => x.id != Guid.Empty && x.enabled == true).OrderBy(x => x.name)) {
+                        <div class="mb-1">
+                            <button type="button" class="btn btn-sm btn-success user-button" @onclick="@(() => SelectedUser(item))">
+                                @if (item.enabled) {
+                                    <span>@item.name</span>
+                                } else {
+                                    <em>@item.name</em>
+                                }
+                            </button>
+                        </div>
+                    }
+                </div>
+
+                <div class="col col-12 col-sm-1 col-md-2 col-lg-3 col-xl-4 col-xxl-4"></div>
+            </div>
+        }
+
+        if (Model.MessageItems.tabletMessage.active && !String.IsNullOrWhiteSpace(Model.MessageItems.tabletMessage.text)) {
+            var msg = Model.MessageItems.tabletMessage.text.Replace(Environment.NewLine, "<br />");
+            var style = !String.IsNullOrWhiteSpace(Model.MessageItems.tabletMessage.style) ? Model.MessageItems.tabletMessage.style : "red";
+
+            <div class="tablet-message @style">
+                <span class="tablet-message-text">@((MarkupString)msg)</span>
+            </div>
+        }
+
+    }
+</div>
+
+@code {
+    protected string _css = String.Empty;
+    protected bool _loaded = false;
+    protected string _matrixKey = String.Empty;
+    protected song? _nextSong = null;
+    protected string _pageName = "tablet";
+    protected song? _previousSong = null;
+    protected setList _setList = new setList();
+    protected song? _song = null;
+
+    protected Guid? _activeItem = null;
+    protected int? _activeItemPart = null;
+    protected Guid? _selectedItem = null;
+
+    protected override async Task OnInitializedAsync()
+    {
+        if (!Model.Subscribers_OnChange.Contains(_pageName)) {
+            Model.Subscribers_OnChange.Add(_pageName);
+            Model.OnChange += OnDataModelUpdated;
+        }
+
+        if (!Model.Subscribers_OnSignalRSetList.Contains(_pageName)) {
+            Model.Subscribers_OnSignalRSetList.Add(_pageName);
+            Model.OnSignalRSetList += ProcessSignalRSetList;
+        }
+
+        Model.View = _pageName;
+
+        // We are going to use our own local copy of the set list.
+        // That way, if we are not auto-following the model updates won't affect our view.
+        if (Model.SetList.items.Count == 0) {
+            await Helpers.LoadCachedMessages();
+            await Helpers.LoadCachedSetList();
+        }
+        _setList = Model.SetList;
+
+        if (_setList.items.Any()) {
+            var selectedItem = _setList.items.FirstOrDefault(x => x.id == _setList.activeItem);
+            if (selectedItem != null) {
+                var song = Tools.SetListItemAsSong(selectedItem);
+                if (song != null) {
+                    _song = song;
+                    
+                }
+            }
+        }
+    }
+
+    protected override async Task OnAfterRenderAsync(bool firstRender)
+    {
+        if (_song != null) {
+            await Helpers.ResetPadding();
+        }
+
+        if (Model.Loaded && _loaded) {
+            _loaded = true;
+            RenderCSS();
+        }
+    }
+
+    protected void OnDataModelUpdated()
+    {
+        if (Model.View == _pageName) {
+            StateHasChanged();
+            RenderCSS();
+        }
+    }
+
+    protected int Capo
+    {
+        get {
+            int output = 0;
+
+            if (_song != null) {
+                var pref = Model.User.preferences.songPreferences.FirstOrDefault(x => x.songId == _song.id);
+                if (pref != null && pref.capo > 0) {
+                    output = pref.capo;
+                }
+            }
+
+            return output;
+        }
+    }
+
+    protected string CapoLabel(int capo)
+    {
+        if (capo == 0){
+            return Text.NoCapo;
+        } else if (capo == 12) {
+            return "<div class=\"nns-label\">" + Text.NashvilleNumbers + "</div>";
+        } else {
+            string output = "<div class=\"capo-label\">" + Text.Capo + " <strong>" + Helpers.NumberToRomanNumerals(capo) + "</strong></div>"; ;
+
+            if (!String.IsNullOrWhiteSpace(_song?.key)) {
+                var newKey = Helpers.TransposeKey(_song?.key, 12 - capo);
+
+                if (!String.IsNullOrWhiteSpace(newKey)) {
+                    output += " to play in <strong>" + newKey + "</strong>";
+                }
+            }
+
+            return output;
+        }
+    }
+
+    protected void CapoChanged(int capo)
+    {
+        if (_song != null && _song.id != Guid.Empty) {
+            var pref = Model.User.preferences.songPreferences.FirstOrDefault(x => x.songId == _song.id);
+            if (pref != null) {
+                pref.capo = capo;
+                pref.title = Helpers.StringValue(_song.title);
+            } else {
+                Model.User.preferences.songPreferences.Add(new songPreferences {
+                    songBookId = _song.songBookId,
+                    songId = _song.id,
+                    capo = capo,
+                    title = Helpers.StringValue(_song.title),
+                    userId = Model.User.id,
+                });
+            }
+
+            StateHasChanged();
+        }
+    }
+
+    protected string CurrentThemeIcon {
+        get {
+            string output = Helpers.CurrentThemeIconForUser(Model.User);
+            return output;
+        }
+    }
+
+    protected string CurrentThemeLabel {
+        get {
+            string output = Helpers.CurrentThemeLabelForUser(Model.User);
+            return output;
+        }
+    }
+
+    protected async Task Logout()
+    {
+        await Helpers.ClearLocalStorageItem("UserId");
+        Model.User = new user();
+        StateHasChanged();
+    }
+
+    protected async void ProcessSignalRSetList(setList setList)
+    {
+        // We will update our local copy of the set list, but not the active items unless we are auto-following.
+        RenderCSS();
+
+        _setList.items = setList.items;
+        _activeItem = setList.activeItem;
+        _activeItemPart = setList.activeItemPart;
+        _selectedItem = setList.selectedItem;
+
+        if (Model.User.preferences.autoFollow) {
+            await UpdateSetList();
+        }
+    }
+
+    protected void RenderCSS()
+    {
+        var output = new System.Text.StringBuilder();
+
+        output.AppendLine("#zoomable-area {");
+        output.AppendLine("  transform-origin: top left;");
+        output.AppendLine("  display: inline-block;");
+        output.AppendLine("  transform: scale(" + (Model.User.preferences.zoom / 100.0) + ");");
+        output.AppendLine("}");
+
+        var style = Model.Settings.messageStyleTablet;
+        if (style != null) {
+            output.AppendLine(".tablet-message-text {");
+            output.AppendLine("  font-family:\"" + style.fontFamily + "\";");
+            output.AppendLine("  font-size:" + (style.fontSize * Model.FontBaseMultiplier) + "vw;");
+            output.AppendLine("}");
+        }
+
+        _css = output.ToString();
+        StateHasChanged();
+    }
+
+    protected async Task SelectedUser(user user)
+    {
+        await Helpers.SetLocalStorageItem("UserId", user.id);
+        user.preferences.cultureCode = Model.User.preferences.cultureCode;
+        Model.User = user;
+    }
+
+    protected async Task ToggleAutoFollow(){
+        Model.User.preferences.autoFollow = !Model.User.preferences.autoFollow;
+        StateHasChanged();
+
+        if (Model.User.preferences.autoFollow) {
+            await UpdateSetList();
+        }
+    }
+
+    protected void ToggleChords(){
+        Model.User.preferences.hideChords = !Model.User.preferences.hideChords;
+        StateHasChanged();
+    }
+
+    protected async Task UpdateSetList()
+    {
+        _setList.activeItem = _activeItem;
+        _setList.activeItemPart = _activeItemPart;
+        _setList.selectedItem = _selectedItem;
+
+        // We also will only update what song we are viewing if the active item is a song.
+        var selectedItem = _setList.items.FirstOrDefault(x => x.id == _activeItem);
+        if (selectedItem != null) {
+            switch (selectedItem.type) {
+                case setListItemType.song:
+                    var song = Tools.SetListItemAsSong(selectedItem);
+                    if (song != null) {
+                        _song = song;
+                        StateHasChanged();
+
+                        await Helpers.ResetPadding();
+                    }
+                    break;
+            }
+        }
+
+        if (_setList.activeItemPart.HasValue) {
+            if (_setList.activeItemPart.Value == 0) {
+                await Helpers.ScrollToTop();
+            } else {
+                await Helpers.ScrollToElement("tablet-scroll-target-" + _setList.activeItemPart.ToString());
+            }
+        }
+    }
+
+    protected void ZoomIn()
+    {
+        if (Model.User.preferences.zoom < Model.ZoomMax) {
+            Model.User.preferences.zoom += 5;
+            RenderCSS();
+        }
+    }
+
+    protected void ZoomOut()
+    {
+        if (Model.User.preferences.zoom > Model.ZoomMin) {
+            Model.User.preferences.zoom -= 5;
+            RenderCSS();
+        }
+    }
+
+    protected void ZoomReset()
+    {
+        Model.User.preferences.zoom = 100;
+        RenderCSS();
+    }
+}

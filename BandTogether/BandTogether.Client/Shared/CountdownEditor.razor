@@ -1,0 +1,86 @@
+﻿@inject BlazorDataModel Model
+@inject Radzen.DialogService DialogService
+@implements IDisposable
+
+<div class="row">
+    <div class="col col-6 mb-2">
+        <label for="countdown-type" class="small">@Text.CountdownType</label>
+        <select id="countdown-type" class="form-control" @bind="Value.countdownType" @bind:after="ValueHasChanged">
+            <option value="seconds">@Text.Seconds</option>
+            <option value="time">@Text.CountdownToTime</option>
+        </select>
+    </div>
+
+    <div class="col col-6 mb-2">
+        @if (Value.countdownType == "time")
+        {
+            <label for="countdown-time" class="small">@Text.Time</label>
+            <div>
+                <FreeBlazor.DateTimePicker
+                        Class="form-control"
+                        Id="countdown-time"
+                        TValue="TimeOnly"
+                        Value="@Value.toTime"
+                        OnUpdate="@((TimeOnly value) => Value.toTime = value)"
+                        OnValueChanged="@ValueHasChanged"
+                        WrapInTable="false" />
+            </div>
+        }
+        else
+        {
+            <label for="countdown-seconds" class="small">@Text.Seconds</label>
+            <input type="number" id="countdown-seconds" class="form-control" @bind="Value.seconds" @bind:after="ValueHasChanged" />
+        }
+    </div>
+</div>
+
+<div class="mb-2">
+    <StyleEditor @bind-Value="Value.style.lyricsStyle" />
+</div>
+
+<BackgroundEditor @bind-Value="Value.style" />
+
+<div class="ms-2 mb-2">
+    <label for="setting-TransitionSpeed" class="small">@Text.TransitionSpeed (@Value.transitionSpeed)</label>
+    <input type="range" class="form-range" id="setting-TransitionSpeed"
+           @bind="Value.transitionSpeed" @bind:after="ValueHasChanged"
+           min="0" max="@Model.MaxTransitionDuration" step="1" />
+</div>
+
+<div class="mb-2 center-preview">
+    <div>
+        <label for="settings-PreviewSize" class="small">@Text.PreviewSize</label>
+        <select class="fixed-200 form-select form-select-sm" id="settings-PreviewSize" @bind="Model.User.preferences.settingsPreviewSize">
+            <option value="xs">@Text.PreviewXSmall</option>
+            <option value="s">@Text.PreviewSmall</option>
+            <option value="m">@Text.PreviewMedium</option>
+            <option value="l">@Text.PreviewLarge</option>
+            <option value="xl">@Text.PreviewXLarge</option>
+        </select>
+    </div>
+
+    <div class="preview-area @Model.User.preferences.settingsPreviewSize @Helpers.AspectRatioToCssClass(Model.Settings.projectionModeAspectRatio)">
+        <PreviewView ActiveItemPart="0"
+                     ObjectToRender="_countdownPreview"
+                     ObjectType="@setListItemType.song"
+                     PreviewId="settings-preview"
+                     PreviewSize="@Helpers.PreviewSizeFromString(Model.User.preferences.settingsPreviewSize)"
+                     Style="Value.style"
+                     TransitionSpeed="Value.transitionSpeed"/>
+    </div>
+</div>
+
+@code {
+    [Parameter] public countdownItem Value { get; set; } = null!;
+    [Parameter] public EventCallback<countdownItem> ValueChanged { get; set; }
+
+    protected song _countdownPreview = new song { content = "Countdown" + Environment.NewLine + "5:00" };
+
+    public void Dispose() { }
+
+    protected void ValueHasChanged()
+    {
+        ValueChanged.InvokeAsync(Value);
+        StateHasChanged();
+    }
+}

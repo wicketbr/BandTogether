@@ -1,0 +1,24 @@
+﻿@inject BlazorDataModel Model
+@implements IDisposable
+
+<div class="youtube-player-wrapper @Model.AspectRatio embed-responsive embed-responsive-@Model.AspectRatioBootstrapResponsive"
+        style="@BackgroundStyle">
+    <div id="@ElementId" class="youtube-player @Model.AspectRatio"></div>
+</div>
+
+@code {
+    [Parameter] public string ElementId { get; set; } = "";
+    [Parameter] public string VideoId { get; set; } = "";
+
+    public void Dispose(){
+    }
+
+    protected override void OnParametersSet() {
+    }
+
+    protected string BackgroundStyle {
+        get {
+            return "background-image: url('https://img.youtube.com/vi/" + VideoId + "/0.jpg');";
+        }
+    }
+}

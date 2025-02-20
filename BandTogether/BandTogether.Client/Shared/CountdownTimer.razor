@@ -1,0 +1,121 @@
+﻿@inject BlazorDataModel Model
+@implements IDisposable
+
+@if (Value != null) {
+    <div class="@(Preview ? "countdown-preview" : "")">@_display</div>
+}
+
+@code {
+    [Parameter] public bool Preview { get; set; }
+    [Parameter] public string UniqueId { get; set; } = "";
+    [Parameter] public countdownItem? Value { get; set; }
+
+    //protected System.Threading.Timer? timer;
+    protected System.Timers.Timer? _timer = null;
+
+    protected double _totalSeconds = 0;
+    protected DateTime _toTime = DateTime.Now.AddMinutes(5);
+    protected string _display = "";
+    protected string _lastDisplay = "";
+    protected string _lastTimer = "";
+    protected DateTime _started = DateTime.Now;
+    protected string _type = "";
+
+    public void Dispose() { 
+        _timer?.Dispose();
+        _timer = null;
+    }
+
+    protected override void OnInitialized(){
+        
+    }
+
+    protected override void OnParametersSet() {
+        if (Value != null && (Helpers.SerializeObject(Value) != _lastTimer || _timer == null)) {
+        //if (Value != null) {
+            if (Value.countdownType == "time") {
+                _type = "time";
+                if (Value.toTime.HasValue) {
+                    _toTime = Convert.ToDateTime(DateTime.Now.ToShortDateString() + " " + Value.toTime.Value.ToString());
+
+                    // If the time is in the past, add a day.
+                    if (_toTime < DateTime.Now) {
+                        _toTime = _toTime.AddDays(1);
+                    }
+                }
+            } else {
+                _type = "seconds";
+                if (Value.seconds.HasValue) {
+                    _totalSeconds = Value.seconds.Value;
+                    _toTime = DateTime.Now.AddSeconds(Value.seconds.Value);
+                }
+            }
+
+            _display = "";
+            _lastDisplay = "";
+            _lastTimer = Helpers.SerializeObject(Value);
+
+            if (_timer != null && _timer.Enabled) {
+                _timer.Dispose();
+                _timer = null;
+            }
+        }
+
+        _started = DateTime.Now;
+
+        _timer = new System.Timers.Timer();
+        _timer.Interval = 200;
+        _timer.Elapsed += TimerElapsed;
+        _timer.AutoReset = false;
+
+        UpdateTimer();
+    }
+
+    protected void ClearTimer() {
+        _display = "";
+        StateHasChanged();
+    }
+
+    protected void TimerElapsed(Object? source, System.Timers.ElapsedEventArgs e)
+    {
+        UpdateTimer();
+    }
+
+    protected void UpdateTimer() 
+    {
+        // Start the timer if it's not running.
+        if (_timer != null && !_timer.Enabled) {
+            _timer.Start();
+        }
+
+        var now = DateTime.Now.AddSeconds(-1);
+        if (now <= _toTime) {
+            var secondsRemaining = (_toTime - now).TotalSeconds;
+
+            if (_type == "seconds" && secondsRemaining > _totalSeconds) {
+                secondsRemaining = _totalSeconds;
+            }
+
+            // If this is more than an hour include hours in the formatting.
+            if (secondsRemaining >= 3600) {
+                _display = TimeSpan.FromSeconds(secondsRemaining).ToString(@"h\:mm\:ss");
+            } else {
+                _display = TimeSpan.FromSeconds(secondsRemaining).ToString(@"m\:ss");
+            }
+        } else {
+            // Clear the display after 3 seconds.
+            // Helpers.SetTimeout(ClearTimer, 3000);
+
+            if (_timer != null) {
+                _timer.Stop();
+                _timer.Dispose();
+                _timer = null;
+            }
+        }
+
+        if (_display != _lastDisplay) {
+            _lastDisplay = _display;
+            StateHasChanged();
+        }
+    }
+}

@@ -1,0 +1,226 @@
+﻿@inject BlazorDataModel Model
+@inject Radzen.DialogService DialogService
+@implements IDisposable
+
+@if (ObjectToRender != null) {
+    switch (ObjectType) {
+        case setListItemType.clock:
+            var clock = (clockItem)ObjectToRender;
+            if (clock != null ){
+                <div class="projection-lyrics">
+                    <div class="view-lyrics-line">
+                        <ClockEngine Value="clock" Preview="false" />
+                    </div>
+                </div>
+            }
+            break;
+
+        case setListItemType.countdown:
+            var countdown = (countdownItem)ObjectToRender;
+            if (countdown != null) {
+                <div class="projection-lyrics">
+                    <div class="view-lyrics-line">
+                        <CountdownTimer Value="countdown" Preview="false" UniqueId="@UniqueId" />
+                    </div>
+                </div>
+            }
+            break;
+
+        case setListItemType.image:
+            @* var img = (imageItem)ObjectToRender;
+            if (img != null && !String.IsNullOrWhiteSpace(img.filename)) {
+                <img class="slideshow-image" src="@Helpers.MediaUrl("Images", img.filename)" />
+            } *@
+            break;
+
+        case setListItemType.slideshow:
+            // Now being rendered as a background image.
+            @*var slideshow = (slideshowItem)ObjectToRender;
+            if (slideshow != null && slideshow.images != null &&
+                Model.SetList.activeItemPart != null &&
+                slideshow.images.Count > Model.SetList.activeItemPart) {
+                var image = slideshow.images[(int)Model.SetList.activeItemPart];
+
+                if (!String.IsNullOrEmpty(image)) {
+                    <img class="slideshow-image" src="@Helpers.SlideShowUrl(slideshow.folder, image)" />
+                }
+            }*@
+            break;
+
+        case setListItemType.song:
+            song? song = null;
+
+            try {
+                song = (song)ObjectToRender;
+            } catch(Exception ex) {
+                if (ex != null) { }
+            }
+
+            if (song != null && ActiveItemPart != null) {
+                int activeItemPart = ActiveItemPart.Value;
+
+                var parts = Tools.SongParts(song);
+                if (parts != null && parts.Count() > ActiveItemPart) {
+                    if (!String.IsNullOrWhiteSpace(ItemStyle.headerDisplay) && !String.IsNullOrWhiteSpace(ItemStyle.headerFormat)) {
+                        bool showHeader = false;
+
+                        switch (Helpers.StringLower(ItemStyle.headerDisplay)) {
+                            case "all":
+                                showHeader = true;
+                                break;
+
+                            case "first":
+                                showHeader = activeItemPart == 0;
+                                break;
+
+                            case "last":
+                                showHeader = activeItemPart == parts.Count() - 1;
+                                break;
+
+                            case "firstandlast":
+                                showHeader = activeItemPart == 0 || activeItemPart == parts.Count() - 1;
+                                break;
+                        }
+
+                        if (showHeader) {
+                            <div class="header">@((MarkupString)(Helpers.ReplaceSongTags(ItemStyle.headerFormat, song)))</div>
+                        }
+                    }
+
+                    if (!String.IsNullOrWhiteSpace(ItemStyle.footerDisplay) && !String.IsNullOrWhiteSpace(ItemStyle.footerFormat)) {
+                        bool showFooter = false;
+
+                        switch (Helpers.StringLower(ItemStyle.footerDisplay)) {
+                            case "all":
+                                showFooter = true;
+                                break;
+
+                            case "first":
+                                showFooter = activeItemPart == 0;
+                                break;
+
+                            case "last":
+                                showFooter = activeItemPart == parts.Count() - 1;
+                                break;
+
+                            case "firstandlast":
+                                showFooter = activeItemPart == 0 || activeItemPart == parts.Count() - 1;
+                                break;
+                        }
+
+                        if (showFooter) {
+                            <div class="footer">@((MarkupString)(Helpers.ReplaceSongTags(ItemStyle.footerFormat, song)))</div>
+                        }
+                    }
+
+                    var part = parts[activeItemPart];
+                    if (part != null) {
+                        var previousLyrics = new List<string> { "", "", "" };
+                        var upcomingLyrics = new List<string> { "", "", "" };
+
+                        bool showOtherLyrics = Helpers.BooleanValue(ItemStyle.showPreviousLyrics) || Helpers.BooleanValue(ItemStyle.showUpcomingLyrics);
+                        if (showOtherLyrics) {
+                            // We will be showing either some previous or upcoming lyrics, so
+                            // fill the arrays with non-breaking spaces so they balance out.
+                            previousLyrics = new List<string> { "&nbsp;", "&nbsp;", "&nbsp;" };
+                            upcomingLyrics = new List<string> { "&nbsp;", "&nbsp;", "&nbsp;" };
+                        }
+
+                        if (Helpers.BooleanValue(ItemStyle.showPreviousLyrics)) {
+                            // Get the previous element for this song and update the previous lyrics array.
+                            if (activeItemPart > 0) {
+                                var previousPart = parts[activeItemPart - 1];
+                                if (previousPart != null && !String.IsNullOrWhiteSpace(previousPart.content)) {
+                                    var partLines = Tools.SplitTextIntoLines(Helpers.LyricsOnly(previousPart.content));
+                                    var lastThree = partLines.Take(3).ToList();
+                                    while (lastThree.Count() < 3) {
+                                        lastThree.Insert(0, "");
+                                    }
+
+                                    previousLyrics[0] = lastThree[0];
+                                    previousLyrics[1] = lastThree[1];
+                                    previousLyrics[2] = lastThree[2];
+                                }
+                            }
+                        }
+
+                        if (Helpers.BooleanValue(ItemStyle.showUpcomingLyrics)) {
+                            // Get the upcoming element for this song and update the next lyrics array.
+                            if (parts.Count() > activeItemPart + 1) {
+                                var upcomingPart = parts[activeItemPart + 1];
+                                if (upcomingPart != null && !String.IsNullOrWhiteSpace(upcomingPart.content)) {
+                                    var partLines = Tools.SplitTextIntoLines(Helpers.LyricsOnly(upcomingPart.content));
+                                    var firstThree = partLines.Take(3).ToList();
+                                    while (firstThree.Count() < 3) {
+                                        firstThree.Add("");
+                                    }
+                                    upcomingLyrics[0] = firstThree[0];
+                                    upcomingLyrics[1] = firstThree[1];
+                                    upcomingLyrics[2] = firstThree[2];
+                                }
+                            }
+                        }
+
+                        <div class="projection-lyrics">
+                            @foreach(var item in previousLyrics.Index()) {
+                                <div class="view-lyrics-line previous-lyrics item-@item.Index.ToString()">@((MarkupString)item.Item)</div>
+                            }
+
+                            @((MarkupString)Helpers.LyricsLinesToDivs(Helpers.LyricsOnly(part.content)))
+
+                            @foreach(var item in upcomingLyrics.Index()) {
+                                <div class="view-lyrics-line upcoming-lyrics item-@item.Index.ToString()">@((MarkupString)item.Item)</div>
+                            }
+                        </div>
+                    }
+                }
+            }
+            break;
+
+        case setListItemType.video:
+            var video = (videoItem)ObjectToRender;
+            if (video != null) {
+                bool mute = video.muteOnScreens || IsPreview;
+                var videoUrl = Helpers.MediaUrl("Videos", video.filename);
+
+                <VideoPlayer ElementId="@("video-player-" + UniqueId)" 
+                        Loop="@video.loop"
+                        Mute="@mute" 
+                        VideoUrl="@videoUrl"/>
+            }
+            break;
+
+        case setListItemType.youTube:
+            var youTube = (youTubeItem)ObjectToRender;
+            if (youTube != null && !String.IsNullOrWhiteSpace(youTube.videoId)) {
+                var playerId = "youtube-player-" + UniqueId;
+
+                <YouTubePlayer VideoId="@youTube.videoId" ElementId="@playerId" />
+            }
+            break;
+    }
+}
+
+@code {
+    [Parameter] public int? ActiveItemPart { get; set; }
+    [Parameter] public bool IsPreview { get; set; }
+    [Parameter] public viewStyle ItemStyle { get; set; } = new viewStyle();
+    [Parameter] public object? ObjectToRender { get; set; }
+    [Parameter] public String ObjectType { get; set; } = "";
+    [Parameter] public string UniqueId { get; set; } = "";
+
+    public void Dispose() { }
+
+    // protected override async Task OnAfterRenderAsync(bool firstRender)
+    // {
+    // }
+
+    // protected override void OnInitialized()
+    // {
+    // }
+
+    protected override void OnParametersSet() {
+        StateHasChanged();
+    }
+
+}

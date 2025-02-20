@@ -1,0 +1,99 @@
+﻿@inject BlazorDataModel Model
+@inject Radzen.DialogService DialogService
+@implements IDisposable
+
+<div class="mb-2 form-check form-switch">
+    <input type="checkbox" id="clock-ShowSeconds" role="switch" class="form-check-input" @bind="Value.showSeconds" @bind:after="ValueHasChanged" />
+    <label for="clock-ShowSeconds" class="form-check-label">
+        @Text.ShowSeconds
+    </label>
+</div>
+
+<div class="mb-2">
+    <StyleEditor @bind-Value="Value.style.lyricsStyle" />
+</div>
+
+<BackgroundEditor @bind-Value="Value.style" />
+
+<div class="ms-2 mb-2">
+    <label for="setting-TransitionSpeed" class="small">@Text.TransitionSpeed (@Value.transitionSpeed)</label>
+    <input type="range" class="form-range" id="setting-TransitionSpeed"
+           @bind="Value.transitionSpeed" @bind:after="ValueHasChanged"
+           min="0" max="@Model.MaxTransitionDuration" step="1" />
+</div>
+
+<div class="mb-2 center-preview">
+    <div>
+        <label for="settings-PreviewSize" class="small">@Text.PreviewSize</label>
+        <select class="fixed-200 form-select form-select-sm" id="settings-PreviewSize" @bind="Model.User.preferences.settingsPreviewSize">
+            <option value="xs">@Text.PreviewSize</option>
+            <option value="s">@Text.PreviewSmall</option>
+            <option value="m">@Text.PreviewMedium</option>
+            <option value="l">@Text.PreviewLarge</option>
+            <option value="xl">@Text.PreviewXLarge</option>
+        </select>
+    </div>
+
+    <div class="preview-area @Model.User.preferences.settingsPreviewSize @Helpers.AspectRatioToCssClass(Model.Settings.projectionModeAspectRatio)">
+        <PreviewView ActiveItemPart="0"
+                     ObjectToRender="_clockPreview"
+                     ObjectType="@setListItemType.song"
+                     PreviewId="settings-preview"
+                     PreviewSize="@Helpers.PreviewSizeFromString(Model.User.preferences.settingsPreviewSize)"
+                     Style="Value.style" 
+                     TransitionSpeed="Value.transitionSpeed"/>
+    </div>
+</div>
+
+@code {
+    [Parameter] public clockItem Value { get; set; } = null!;
+    [Parameter] public EventCallback<clockItem> ValueChanged { get; set; }
+
+    protected song _clockPreview = new song { content = "Clock" + Environment.NewLine + DateTime.Now.ToShortDateString() };
+
+    protected System.Timers.Timer? _timer = null;
+
+    public void Dispose(){
+        _timer?.Dispose();
+        _timer = null;
+    }
+
+    protected override void OnParametersSet()
+    {
+        _timer = new System.Timers.Timer();
+        _timer.Interval = 200;
+        _timer.Elapsed += TimerElapsed;
+        _timer.AutoReset = false;
+
+        UpdateTimer();
+    }
+
+    protected void TimerElapsed(Object? source, System.Timers.ElapsedEventArgs e)
+    {
+        UpdateTimer();
+    }
+
+    protected void UpdateTimer() 
+    {
+        // Start the timer if it's not running.
+        if (_timer != null && !_timer.Enabled) {
+            _timer.Start();
+        }
+
+        string time = Value != null && Value.showSeconds 
+            ? DateTime.Now.ToLongTimeString()
+            : DateTime.Now.ToShortTimeString();
+
+        _clockPreview = new song {
+            content = "Clock" + Environment.NewLine + time
+        };
+
+        StateHasChanged();
+    }
+   
+    protected void ValueHasChanged()
+    {
+        ValueChanged.InvokeAsync(Value);
+        StateHasChanged();
+    }
+}

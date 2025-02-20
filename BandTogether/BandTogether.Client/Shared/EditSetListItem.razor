@@ -1,0 +1,428 @@
+﻿@inject BlazorDataModel Model
+@inject Radzen.DialogService DialogService
+@implements IDisposable
+
+<div class="mb-2">
+    @switch (_value.type) {
+        case setListItemType.audio:
+            <h2>@Text.AudioFile</h2>
+
+            @if (Model.AudioFiles.Any()) {
+                <div class="mb-2">
+                    @foreach (var file in Model.AudioFiles)
+                    {
+                        <div class="item-selection @(ItemAsAudio.filename == file ? "selected" : "")" @onclick="@(() => SetAudioFile(file))">
+                            <Icon Name="Audio" /> @file
+                        </div>
+                    }
+                </div>
+
+                <div class="mb-2">
+                    <label for="audio-volume">@Text.Volume (@ItemAsAudio.volume)</label>
+                    <input type="range" id="audio-volume" class="form-range" min="0" max="100" step="1" @bind="ItemAsAudio.volume" />
+                </div>
+
+
+            } else {
+                <div class="mb-2">@Text.NoAudioFiles</div>
+            }
+            break;
+
+        case setListItemType.clock:
+            <h2>@Text.Clock</h2>
+
+            <div class="mb-2">
+                <ClockEditor @bind-Value="ItemAsClock" />
+            </div>
+            break;
+
+        case setListItemType.countdown:
+            <h2>@Text.Countdown</h2>
+
+            <div class="mb-2">@Text.AddCountdownInfo</div>
+
+            <div class="mb-2">
+                <CountdownEditor @bind-Value="ItemAsCountdown" />
+            </div>
+            break;
+
+        case setListItemType.image:
+            <h2>@Text.Image</h2>
+
+            <div class="mb-2">
+                <label for="image-name">@Text.Name</label>
+                <input type="text" class="form-control" id="image-name" @bind="ItemAsImage.name" />
+            </div>
+
+            <div class="mb-2">
+                @foreach (var image in Model.Images) {
+                    <div class="item-selection @(ItemAsImage.filename == image ? "selected" : "")" @onclick="@(() => SetImage(image))">
+                        <Icon Name="Image" /> @image
+                    </div>
+                }
+            </div>
+            break;
+
+        case setListItemType.slideshow:
+            <h2>@Text.Slideshow</h2>
+
+            <div class="mb-2">@Text.AddSlideshowInfo</div>
+
+            <div class="mb-2">
+                @foreach (var folder in Model.Slideshows) {
+                    <div class="item-selection @(ItemAsSlideshow.folder == folder ? "selected" : "")" @onclick="@(() => SetSlideshow(folder))">
+                        <Icon Name="Slideshow" /> @folder
+                    </div>
+                }
+            </div>
+
+            <div class="mb-2">
+                <label for="setting-TransitionSpeed" class="small">@Text.TransitionSpeed (@ItemAsSlideshow.transitionSpeed)</label>
+                <input type="range" class="form-range" id="setting-TransitionSpeed"
+                       @bind="ItemAsSlideshow.transitionSpeed"
+                       min="0" max="@Model.MaxTransitionDuration" step="1" />
+            </div>
+
+            @if (Value.id == Guid.Empty) {
+                <div class="mb-2">
+                    <button type="button" class="btn btn-warning" @onclick="Helpers.ImportPowerPoint">
+                        <Icon Name="Import" /> @Text.ImportPowerPoint
+                    </button>
+                </div>
+            }
+            break;
+
+        case setListItemType.video:
+            <h2>@Text.Video</h2>
+
+            <div class="mb-2">
+                @foreach (var video in Model.Videos) {
+                    <div class="item-selection @(ItemAsVideo.filename == video ? "selected" : "")" @onclick="@(() => SetVideo(video))">
+                        <Icon Name="Video" /> @video
+                    </div>
+                }
+            </div>
+
+            <div class="mb-2 form-check form-switch">
+                <input type="checkbox" id="edit-setlist-video-loop" role="switch" class="form-check-input" @bind="ItemAsVideo.loop" />
+                <label for="edit-setlist-video-loop" class="form-check-label">
+                    @Text.LoopItem
+                </label>
+            </div>
+
+            <div class="mb-2">
+                <label for="video-volume">@Text.Volume (@ItemAsVideo.volume)</label>
+                <input type="range" id="video-volume" class="form-range" min="0" max="100" step="1" @bind="ItemAsVideo.volume" />
+            </div>
+
+            <div class="mb-2 form-check form-switch">
+                <input type="checkbox" id="video-MuteOnScreens" role="switch" class="form-check-input" @bind="ItemAsVideo.muteOnScreens" />
+                <label for="video-MuteOnScreens" class="form-check-label">
+                    @Text.MuteOnScreens
+                </label>
+            </div>
+
+            <div class="mb-2 form-check form-switch">
+                <input type="checkbox" id="video-MuteInMainWindow" role="switch" class="form-check-input" @bind="ItemAsVideo.muteInMainWindow" />
+                <label for="video-MuteInMainWindow" class="form-check-label">
+                    @Text.MuteInMainWindow
+                </label>
+            </div>
+            break;
+
+        case setListItemType.youTube:
+            <h2>@Text.YouTubeVideo</h2>
+
+            <div class="mb-2">
+                <label for="youtube-name">@Text.Name</label>
+                <input type="text" class="form-control" id="youtube-name" @bind="ItemAsYouTube.name" />
+            </div>
+
+            <div class="mb-2">
+                <label for="youtube-videoId">@Text.YouTubeVideoId</label>
+                <span class="note">- @Text.YouTubeVideoIdInfo</span>
+                <input type="text" class="form-control" id="youtube-videoId" @bind="ItemAsYouTube.videoId" />
+            </div>
+
+            <div class="mb-2">
+                <label for="youtube-volume">@Text.Volume (@ItemAsYouTube.volume)</label>
+                <input type="range" id="youtube-volume" class="form-range" min="0" max="100" step="1" @bind="ItemAsYouTube.volume" />
+            </div>
+
+            <div class="mb-2 form-check form-switch">
+                <input type="checkbox" id="youtube-MuteOnScreens" role="switch" class="form-check-input" @bind="ItemAsYouTube.muteOnScreens" />
+                <label for="youtube-MuteOnScreens" class="form-check-label">
+                    @Text.MuteOnScreens
+                </label>
+            </div>
+
+            <div class="mb-2 form-check form-switch">
+                <input type="checkbox" id="youtube-MuteInMainWindow" role="switch" class="form-check-input" @bind="ItemAsYouTube.muteInMainWindow" />
+                <label for="youtube-MuteInMainWindow" class="form-check-label">
+                    @Text.MuteInMainWindow
+                </label>
+            </div>
+            break;
+    }
+</div>
+
+<div class="mb-2">
+    <button type="button" class="btn btn-dark" @onclick="Close">
+        <Icon Name="Close" /> @Text.Close
+    </button>
+
+    @if (_showSave) {
+        <button type="button" class="ms-2 btn btn-success" @onclick="Save">
+            <Icon Name="Save" /> @Text.Save
+        </button>
+    }
+</div>
+
+
+@code {
+    [Parameter] public setListItem Value { get; set; } = null!;
+
+    protected bool _showSave = true;
+    protected setListItem _value = new setListItem();
+
+    public void Dispose() { }
+
+    protected override async Task OnInitializedAsync() {
+        _value = new setListItem{
+            id = Value.id,
+            type = Value.type,
+            item = Value.item,
+            afterItemOption = Value.afterItemOption,
+            //itemJson = Value.itemJson,
+        };
+
+        switch (Value.type)
+        {
+            case setListItemType.audio:
+                _showSave = false;
+                await Helpers.ReloadAudioFiles();
+                break;
+
+            case setListItemType.countdown:
+                await Helpers.ReloadBackgrounds();
+                await Helpers.DelayedFocus("countdown-type");
+                break;
+
+            case setListItemType.image:
+                _showSave = false;
+                await Helpers.ReloadImages();
+                await Helpers.DelayedFocus("image-name");
+                break;
+
+            case setListItemType.slideshow:
+                _showSave = Value.id != Guid.Empty;
+                await Helpers.ReloadSlideshows();
+                break;
+
+            case setListItemType.video:
+                _showSave = false;
+                await Helpers.ReloadVideos();
+                break;
+
+            case setListItemType.youTube:
+                await Helpers.DelayedFocus("youtube-name");
+                break;
+        }
+    }
+
+    protected void Close()
+    {
+        DialogService.Close();
+    }
+
+    protected audioItem ItemAsAudio {
+        get {
+            var audio = Tools.SetListItemAsAudio(_value);
+            return audio != null ? audio : new audioItem();
+        }
+
+        set {
+            _value.item = value;
+        }
+    }
+
+    protected clockItem ItemAsClock {
+        get {
+            var clock = Tools.SetListItemAsClock(_value);
+            return clock != null ? clock : new clockItem();
+        }
+        set {
+            _value.item = value;
+        }
+    }
+
+    protected countdownItem ItemAsCountdown {
+        get {
+            var countdown = Tools.SetListItemAsCountdown(_value);
+            return countdown != null ? countdown : new countdownItem();
+        }
+
+        set {
+            _value.item = value;
+        }
+    }
+
+    protected imageItem ItemAsImage {
+        get {
+            var image = Tools.SetListItemAsImage(_value);
+            return image != null ? image : new imageItem();
+        }
+
+        set {
+            _value.item = value;
+        }
+    }
+
+    protected slideshowItem ItemAsSlideshow {
+        get
+        {
+            var slideshow = Tools.SetListItemAsSlideshow(_value);
+            return slideshow != null ? slideshow : new slideshowItem();
+        }
+
+        set {
+            _value.item = value;
+        }
+    }
+
+    protected videoItem ItemAsVideo {
+        get {
+            var video = Tools.SetListItemAsVideo(_value);
+            return video != null ? video : new videoItem();
+        }
+
+        set {
+            _value.item = value;
+        }
+    }
+
+    protected youTubeItem ItemAsYouTube {
+        get {
+            var youtube = Tools.SetListItemAsYouTube(_value);
+            return youtube != null ? youtube : new youTubeItem();
+        }
+
+        set {
+            _value.item = value;
+        }
+    }
+
+    protected async Task Save()
+    {
+        // Only certain items need validation
+        switch(_value.type) {
+            case setListItemType.countdown:
+                var countdown = ItemAsCountdown;
+
+                if (String.IsNullOrWhiteSpace(countdown.countdownType)) {
+                    await Helpers.DelayedFocus("countdown-type");
+                    return;
+                }
+
+                if (countdown.countdownType == "time" && countdown.toTime == null) {
+                    await Helpers.DelayedFocus("countdown-time");
+                    return;
+                }
+
+                if (countdown.countdownType == "seconds" && countdown.seconds == 0) {
+                    await Helpers.DelayedFocus("countdown-seconds");
+                    return;
+                }
+                break;
+
+            case setListItemType.youTube:
+                var youTube = ItemAsYouTube;
+
+                if (String.IsNullOrWhiteSpace(youTube.name)) {
+                    await Helpers.DelayedFocus("edit-setlist-item-youtube-name");
+                    return;
+                }
+
+                if (String.IsNullOrWhiteSpace(youTube.videoId)) {
+                    await Helpers.DelayedFocus("edit-setlist-item-youtube-videoId");
+                    return;
+                }
+                break;
+        }
+
+        // If this is an existing item, just update the item in the set list.
+        if (_value.id != Guid.Empty) {
+            var existingItem = Model.SetList.items.FirstOrDefault(x => x.id == _value.id);
+            if (existingItem != null) {
+                existingItem.item = _value.item;
+                //existingItem.itemJson = Helpers.SerializeObject(_value.item);
+            }
+        } else {
+            // Insert the item after the currently selected item, or at the end of the list if no item is selected.
+            Helpers.InsertSetListItem(_value);
+
+            // bool added = false;
+            // _value.id = Guid.NewGuid();
+
+            // if (Model.SetList.selectedItem.HasValue) {
+            //     var items = new List<setListItem>();
+            //     foreach (var item in Model.SetList.items) {
+            //         items.Add(item);
+
+            //         if (item.id == Model.SetList.selectedItem) {
+            //             items.Add(_value);
+            //             added = true;
+            //         }
+            //     }
+
+            //     Model.SetList.items = items;
+            // }
+
+            // if (!added) {
+            //     // Just add to the end.
+            //     Model.SetList.items.Add(_value);
+            // }
+        }
+
+        Model.SetList.saveRequired = true;
+        Model.TriggerUpdate();
+        Close();
+    }
+
+    protected async Task SetAudioFile(string file)
+    {
+        _value.item = new audioItem {
+            filename = file,
+            volume = ItemAsAudio.volume,
+        };
+        await Save();
+    }
+
+    protected async Task SetImage(string image)
+    {
+        _value.item = new imageItem { 
+            filename = image,
+            name = ItemAsImage.name,
+        };
+        await Save();
+    }
+
+    protected async Task SetSlideshow(string folder)
+    {
+        var slideshow = ItemAsSlideshow;
+        slideshow.folder = folder;
+
+        _value.item = slideshow;
+        await Save();
+    }
+
+    protected void SetVideo(string video)
+    {
+        _value.item = new videoItem { 
+            filename = video,
+            loop = ItemAsVideo.loop,
+            muteOnScreens = ItemAsVideo.muteOnScreens,
+            muteInMainWindow = ItemAsVideo.muteInMainWindow,
+        };
+    }
+}

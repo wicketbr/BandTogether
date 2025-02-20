@@ -1,0 +1,28 @@
+﻿@page "/Test"
+@inject BlazorDataModel Model
+@inject IBlazorContextMenuService contextMenuService
+
+<div class="mb-2">
+    <button type="button" class="btn btn-primary" @onclick="MenuTest">
+        Test
+    </button>
+</div>
+
+@code {
+    protected string _pageName = "test";
+
+    protected override async Task OnInitializedAsync()
+    {
+        Model.View = _pageName;
+
+    }
+
+    protected override async Task OnAfterRenderAsync(bool firstRender)
+    {
+    }
+
+    protected async Task MenuTest()
+    {
+        
+    }
+}

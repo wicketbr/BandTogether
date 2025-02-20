@@ -1,0 +1,86 @@
+﻿@inject BlazorDataModel Model
+@inject Radzen.DialogService DialogService
+@implements IDisposable
+
+<div class="mb-2">
+    <label for="setting-BackgroundType" class="small">@Text.BackgroundType</label>
+    <select class="form-select" id="setting-BackgroundType" @bind="Value.backgroundType" @bind:after="ValueHasChanged">
+        <option value="@backgroundType.unknown" selected="@(Value.backgroundType == backgroundType.unknown)"></option>
+        <option value="@backgroundType.color" selected="@(Value.backgroundType == backgroundType.color)">@Text.BackgroundTypeColor</option>
+        <option value="@backgroundType.image" selected="@(Value.backgroundType == backgroundType.image)">@Text.BackgroundTypeImage</option>
+        <option value="@backgroundType.video" selected="@(Value.backgroundType == backgroundType.video)">@Text.BackgroundTypeVideo</option>
+    </select>
+</div>
+
+<div class="background-details">
+    @switch (Value.backgroundType) {
+        case backgroundType.color:
+            <div class="mb-2">
+                <label for="settings-Background-Color" class="small">@Text.BackgroundTypeColor</label>
+                <div>
+                    <Radzen.Blazor.RadzenColorPicker 
+                            id="settings-Background-Color"
+                            @bind-Value="Value.background"
+                            ShowHSV="true"
+                            ShowRGBA="true"
+                            ShowColors="true"
+                            ShowButton="true"
+                            Change="@((args) => {Value.background = args; ValueHasChanged(); })" />
+                </div>
+            </div>
+            break;
+
+        case backgroundType.image:
+            if (Model.BackgroundImages.Any()) {
+                foreach (var image in Model.BackgroundImages) {
+                    var filename = System.IO.Path.GetFileNameWithoutExtension(image);
+
+                    <div class="image-thumbnail @Helpers.AspectRatioToCssClass(AspectRatio) @(image == Value.background ? "selected" : "")" @onclick="@(() => SelectBackgroundImage(image))">
+                        <img src="/Background/@image" />
+                        <div class="filename" title="@filename">@filename</div>
+                    </div>
+                }
+            } else {
+                <div>@Text.NoBackgroundImages</div>
+            }
+            break;
+
+        case backgroundType.video:
+            if (Model.BackgroundVideos.Any()) {
+                foreach (var video in Model.BackgroundVideos) {
+                    var mimeType = Helpers.MimeType(video);
+                    var filename = System.IO.Path.GetFileNameWithoutExtension(video);
+
+                    <div class="video-thumbnail @Helpers.AspectRatioToCssClass(AspectRatio) @(video == Value.background ? "selected" : "")" @onclick="@(() => SelectBackgroundImage(video))">
+                        <video class="video-background" preload="" autoplay="" muted="" playsinline="" loop="">
+                            <source src="/Background/@video" type="@mimeType" />
+                        </video>
+                        <div class="filename" title="@filename">@filename</div>
+                    </div>
+                }
+            }else {
+                <div>@Text.NoBackgroundVideos</div>
+            }
+            break;
+    }
+</div>
+
+@code {
+    [Parameter] public string? AspectRatio { get; set; }
+    [Parameter] public viewStyle Value { get; set; } = null!;
+    [Parameter] public EventCallback<viewStyle> ValueChanged { get; set; }
+
+    public void Dispose() { }
+
+    protected void SelectBackgroundImage(string image)
+    {
+        Value.background = image;
+        ValueHasChanged();
+    }
+
+    protected void ValueHasChanged()
+    {
+        ValueChanged.InvokeAsync(Value);
+        StateHasChanged();
+    }
+}

@@ -1,0 +1,54 @@
+﻿@inject BlazorDataModel Model
+@implements IDisposable
+
+@if (Value != null) {
+    <div class="@(Preview ? "clock-preview" : "")">@_display</div>
+}
+
+@code {
+    [Parameter] public bool Preview { get; set; }
+    [Parameter] public clockItem? Value { get; set; }
+
+    protected string _display = "";
+    protected string _lastDisplay = "";
+
+    protected System.Timers.Timer? _timer = null;
+
+    public void Dispose(){
+        _timer?.Dispose();
+        _timer = null;
+    }
+
+    protected override void OnParametersSet() {
+        _timer = new System.Timers.Timer();
+        _timer.Interval = 100;
+        _timer.Elapsed += TimerElapsed;
+        _timer.AutoReset = false;
+
+        UpdateTimer();
+    }
+
+    protected void TimerElapsed(Object? source, System.Timers.ElapsedEventArgs e)
+    {
+        UpdateTimer();
+    }
+
+    protected void UpdateTimer() 
+    {
+        // Start the timer if it's not running.
+        if (_timer != null && !_timer.Enabled) {
+            _timer.Start();
+        }
+
+        if (Value != null && Value.showSeconds) {
+            _display = DateTime.Now.ToLongTimeString();
+        } else {
+            _display = DateTime.Now.ToShortTimeString();
+        }
+
+        if (_display != _lastDisplay) {
+            _lastDisplay = _display;
+            StateHasChanged();
+        }
+    }
+}

@@ -1,0 +1,2929 @@
+﻿@page "/"
+@using Toolbelt.Blazor.Splitter.V2
+@using BlazorSortableList
+@inject BlazorDataModel Model
+@inject IBlazorContextMenuService contextMenuService
+@inject Radzen.DialogService DialogService
+
+<PageTitle>@Text.AppName</PageTitle>
+
+@if (Model.Loaded) {
+    if (Model.LoggedIn) {
+        <ContextMenu Id="AvailableSetLists" Animation="Animation.Grow">
+            @foreach(var item in Model.SetListFilenames) {
+                bool current = item.fileName == Model.SetList.fileName;
+                <Item Id="@item.fileName" OnClick="@OpenSetListMenuClicked" Enabled="@(!current)">
+                    <Icon Name="SetList" /> @item.name
+                    @if (current) {
+                        <span class="disabled-menu-item"> (@Text.CurrentItem)</span>
+                    }
+                </Item>
+            }
+        </ContextMenu>
+
+        <ContextMenu Id="AvailableSongBooks" Animation="Animation.Grow">
+            @foreach(var item in Model.SongBooks) {
+                if (item.id != _selectedSongBook) {
+                    <Item Id="@item.id.ToString()" OnClick="@MoveToSongBookMenuItemClicked" >
+                        <Icon Name="SongBook" /> @item.name
+                    </Item>
+                }
+            }
+        </ContextMenu>
+
+        <ContextMenu Id="AddSetListItem" Animation="Animation.Grow">
+            <Item Id="@setListItemType.audio" OnClick="@AddSetListItemMenuClicked">
+                <Icon Name="Audio" /> @Text.AddAudioFile
+            </Item>
+            <Item Id="@setListItemType.clock" OnClick="@AddSetListItemMenuClicked">
+                <Icon Name="Clock" /> @Text.AddClock
+            </Item>
+            <Item Id="@setListItemType.countdown" OnClick="@AddSetListItemMenuClicked">
+                <Icon Name="Countdown" /> @Text.AddCountdown
+            </Item>
+            <Item Id="@setListItemType.image" OnClick="@AddSetListItemMenuClicked">
+                <Icon Name="Image" /> @Text.AddImage
+            </Item>
+            <Item Id="@setListItemType.slideshow" OnClick="@AddSetListItemMenuClicked">
+                <Icon Name="Slideshow" /> @Text.AddSlideshow
+            </Item>
+            <Item Id="@setListItemType.video" OnClick="@AddSetListItemMenuClicked">
+                <Icon Name="Video" /> @Text.AddVideo
+            </Item>
+            <Item Id="@setListItemType.youTube" OnClick="@AddSetListItemMenuClicked">
+                <Icon Name="YouTube" /> @Text.AddYouTube
+            </Item>
+        </ContextMenu>
+
+        <ContextMenu Id="SetListContextMenu" Animation="Animation.Grow">
+            <Item Id="view" OnClick="@SetListContextMenuOnClick">
+                <Icon Name="Present" /> @Text.Present
+            </Item>
+            <Item Id="delete" OnClick="@SetListContextMenuOnClick">
+                <Icon Name="Delete" /> @Text.Delete
+            </Item>
+        </ContextMenu>
+
+        <ContextMenu Id="SetListContextMenuWithEdit" Animation="Animation.Grow">
+            <Item Id="view" OnClick="@SetListContextMenuOnClick">
+                <Icon Name="Present" /> @Text.Present
+            </Item>
+            <Item Id="edit" OnClick="@SetListContextMenuOnClick">
+                <Icon Name="Edit" /> @Text.Edit
+            </Item>
+            <Item Id="delete" OnClick="@SetListContextMenuOnClick">
+                <Icon Name="Delete" /> @Text.Delete
+            </Item>
+        </ContextMenu>
+
+        <ContextMenu Id="SongbookContextMenu" Animation="Animation.Grow">
+            @if (Model.User.preferences.editMode) {
+                <Item Id="addsong" OnClick="@SongBookContextMenuOnClick">
+                    <Icon Name="AddSong" /> @Text.AddSong
+                </Item>
+                <Item Id="style" OnClick="@SongBookContextMenuOnClick">
+                    <Icon Name="Style" /> @Text.EditStyle
+                </Item>
+                <Item Id="import" OnClick="@SongBookContextMenuOnClick">
+                    <Icon Name="Import" /> @Text.ImportSong
+                </Item>
+                <Item Id="rename" OnClick="@SongBookContextMenuOnClick">
+                    <Icon Name="Edit" /> @Text.Rename
+                </Item>
+            }
+            <Item Id="save" OnClick="@SongBookContextMenuOnClick">
+                <Icon Name="Save" /> @Text.SaveSongbook
+            </Item>
+            @if (Model.User.preferences.editMode) {
+                <Item Id="delete" OnClick="@SongBookContextMenuOnClick">
+                    <Icon Name="Delete" /> @Text.Delete
+                </Item>
+            }
+        </ContextMenu>
+
+        <ContextMenu Id="SongContextMenu" Animation="Animation.Grow">
+            <Item Id="addtosetlist" OnClick="@SongContextMenuOnClick">
+                <Icon Name="List" /> @Text.AddToSetList
+            </Item>
+            @if (Model.User.preferences.editMode && Model.SongBooks.Count > 1) {
+                <Item Id="addsong" OnClick="@SongContextMenuOnClick">
+                    <Icon Name="AddSong" /> @Text.AddSong
+                </Item>
+                <Item Id="copy" OnClick="@SongContextMenuOnClick">
+                    <Icon Name="Copy" /> @Text.CopyToSongbook
+                </Item>
+                <Item Id="move" OnClick="@SongContextMenuOnClick">
+                    <Icon Name="Move" /> @Text.MoveToSongbook
+                </Item>
+            }
+            <Item Id="save" OnClick="@SongContextMenuOnClick">
+                <Icon Name="Save" /> @Text.SaveSong
+            </Item>
+            @if (Model.User.preferences.editMode) {
+                <Item Id="delete" OnClick="@SongContextMenuOnClick">
+                    <Icon Name="Delete" /> @Text.DeleteSong
+                </Item>
+            }
+        </ContextMenu>
+
+        <div class="jumbotron" @onclick="@(() => SetActivePageSection("setlist-element"))">
+            <table style="width:100%;">
+                <tr>
+                    <td class="no-wrap" style="width:1%;">
+                        <span class="app-title">@Text.AppName</span> <span class="app-version">v. @Model.Version</span>
+                    </td>
+
+                    <td class="right tiny theme-and-language no-wrap" style="width:auto;">
+                        @if (Model.LoggedIn) {
+                            var chordButtonClass = "btn-secondary";
+
+                            if (!Model.User.preferences.editMode) {
+                                if (Model.User.preferences.hideChords) {
+                                    chordButtonClass = "btn-secondary";
+                                } else {
+                                    chordButtonClass = "btn-success";
+                                }
+                            }
+
+                            <button type="button"
+                                    class="ms-1 btn btn-sm @(Model.User.preferences.editMode ? "btn-primary" : "btn-secondary")"
+                                    @onclick="ToggleEditMode"
+                                    title="@Text.ToggleEditMode">
+                                <Icon Name="EditMode" /> <span class="@(Model.User.preferences.editMode ? "" : "edit-mode-off")">@Text.EditMode</span>
+                            </button>
+
+                            <button type="button" @onclick="ToggleMessaging"
+                                    title="@Text.Messaging"
+                                    class="ms-1 btn btn-sm @(Model.User.preferences.showMessaging ? "btn-primary" : "btn-secondary")">
+                                <Icon Name="Messaging" />
+                            </button>
+
+                            <button type="button" @onclick="ToggleBlankScreen"
+                                    title="@Text.ToggleBlankScreen"
+                                    class="ms-1 btn btn-sm @(Model.BlankScreen ? "btn-danger" : "btn-secondary")">
+                                <Icon Name="Blank" />
+                            </button>
+
+                            <button type="button" @onclick="ToggleHideText"
+                                    title="@Text.ToggleHideText"
+                                    class="ms-1 btn btn-sm @(Model.HideText ? "btn-danger" : "btn-secondary")">
+                                <Icon Name="HideText" />
+                            </button>
+
+                            @if (Model.Settings.enableProjectionMode) {
+                                <a href="/Screen" target="_blank" class="ms-1 btn btn-sm btn-secondary" title="@Text.ScreenView">
+                                    <Icon Name="Screen" />
+                                </a>
+                            }
+
+                            <a href="/Tablet" target="_blank" class="ms-1 btn btn-sm btn-secondary" title="@Text.TabletView">
+                                <Icon Name="Tablet" />
+                            </a>
+
+                            <button type="button" class="ms-1 btn btn-sm btn-secondary" @onclick="Helpers.OpenSetting" title="@Text.Settings">
+                                <Icon Name="Settings" />
+                            </button>
+
+                            <button type="button" class="ms-1 btn btn-sm @chordButtonClass" disabled="@(Model.User.preferences.editMode || Model.ActiveItemType != setListItemType.song)" @onclick="@ToggleChords" title="@Text.ShowOrHideChords">
+                                <Icon Name="Chords" />
+                            </button>
+
+                            @if (Model.Settings.enableProjectionMode) {
+                                <button type="button"
+                                        class="ms-1 btn btn-sm btn-secondary dropdown-toggle"
+                                        data-toggle="dropdown"
+                                        role="button"
+                                        id="dropdownMenuPreview"
+                                        data-bs-toggle="dropdown"
+                                        aria-expanded="false"
+                                        disabled="@PreviewDisabledBasedOnSelectedItem"
+                                        title="@Text.Preview">
+                                    <Icon Name="Search" />
+                                    @Helpers.PreviewLabel(Model.User.preferences.showPreview)
+                                </button>
+                                <ul class="dropdown-menu" aria-labelledby="dropdownMenuPreview">
+                                    <li>
+                                        <a class="dropdown-item @(String.IsNullOrWhiteSpace(Model.User.preferences.showPreview) ? "active" : "")" href="javascript:void('0');" @onclick="@(() => SetPreview(""))">
+                                            @Text.PreviewOff
+                                        </a>
+                                        <a class="dropdown-item @(Model.User.preferences.showPreview == "xs" ? "active" : "")" href="javascript:void('0');" @onclick="@(() => SetPreview("xs"))">
+                                            @Text.PreviewXSmall
+                                        </a>
+                                        <a class="dropdown-item @(Model.User.preferences.showPreview == "s" ? "active" : "")" href="javascript:void('0');" @onclick="@(() => SetPreview("s"))">
+                                            @Text.PreviewSmall
+                                        </a>
+                                        <a class="dropdown-item @(Model.User.preferences.showPreview == "m" ? "active" : "")" href="javascript:void('0');" @onclick="@(() => SetPreview("m"))">
+                                            @Text.PreviewMedium
+                                        </a>
+                                        <a class="dropdown-item @(Model.User.preferences.showPreview == "l" ? "active" : "")" href="javascript:void('0');" @onclick="@(() => SetPreview("l"))">
+                                            @Text.PreviewLarge
+                                        </a>
+                                        <a class="dropdown-item @(Model.User.preferences.showPreview == "xl" ? "active" : "")" href="javascript:void('0');" @onclick="@(() => SetPreview("xl"))">
+                                            @Text.PreviewXLarge
+                                        </a>
+                                    </li>
+                                </ul>
+                            }
+
+                            <button type="button"
+                                    class="btn btn-sm btn-success @(Model.Settings.enableProjectionMode ? "" : "ms-1")" @onclick="Logout" title="@Text.SwitchUser">
+                                <Icon Name="User" /> @Model.User.name
+                            </button>
+                        }
+
+                        <button type="button"
+                                class="ms-1 btn btn-sm btn-secondary dropdown-toggle"
+                                data-toggle="dropdown"
+                                role="button"
+                                id="dropdownMenuButtonThemeHome"
+                                data-bs-toggle="dropdown"
+                                aria-expanded="false">
+                            <span title="@Text.Theme: @CurrentThemeLabel">@((MarkupString)CurrentThemeIcon)</span>
+                        </button>
+
+                        <ul class="dropdown-menu" aria-labelledby="dropdownMenuButtonThemeHome">
+                            <li>
+                                <a class="dropdown-item @(Model.User.preferences.theme == "" ? "active" : "")" href="javascript:void('0');" @onclick="@(() => Helpers.SetUserTheme(Model.User, ""))">
+                                    <Icon Name="ThemeAuto" /> @Text.ThemeAuto
+                                </a>
+                            </li>
+                            <li>
+                                <a class="dropdown-item @(Model.User.preferences.theme == "light" ? "active" : "")" href="javascript:void('0');" @onclick="@(() => Helpers.SetUserTheme(Model.User, "light"))">
+                                    <Icon Name="ThemeLight" /> @Text.ThemeLight
+                                </a>
+                            </li>
+                            <li>
+                                <a class="dropdown-item @(Model.User.preferences.theme == "dark" ? "active" : "")" href="javascript:void('0');" @onclick="@(() => Helpers.SetUserTheme(Model.User, "dark"))">
+                                    <Icon Name="ThemeDark" /> @Text.ThemeDark
+                                </a>
+                            </li>
+                        </ul>
+
+                        @if (Model.Languages.Count() > 1) {
+                            <button type="button"
+                                    class="btn btn-sm btn-secondary dropdown-toggle"
+                                    data-toggle="dropdown"
+                                    role="button"
+                                    id="dropdownMenuCultureCodeHome"
+                                    data-bs-toggle="dropdown"
+                                    aria-expanded="false"
+                                    title="@Text.Lang">
+                                @Model.User.preferences.cultureCode
+                            </button>
+                            <ul class="dropdown-menu" aria-labelledby="dropdownMenuCultureCodeHome">
+                                @foreach (var item in Model.Languages)
+                                {
+                                    <li>
+                                        <a class="dropdown-item @(Model.User.preferences.cultureCode == item.cultureCode ? "active" : "")" href="javascript:void('0');" @onclick="@(() => SetLanguage(item))">
+                                            @item.cultureName [@item.cultureCode]
+                                        </a>
+                                    </li>
+                                }
+                            </ul>
+                        }
+                    </td>
+                </tr>
+            </table>
+        </div>
+
+        <SplitContainer TSize="double"
+                @bind-FirstPaneSize="Model.User.preferences.layoutPanelLeft"
+                @bind-FirstPaneSize:after="PanelResized"
+                Class="split-bar-outer"
+                UnitOfPaneSize="UnitOfPaneSize.Percent"
+                FirstPaneMinSize="20"
+                SecondPaneMinSize="20">
+
+            <FirstPane>
+                <SplitContainer TSize="double"
+                        Orientation="SplitterOrientation.Horizontal"
+                        @bind-FirstPaneSize="Model.User.preferences.layoutPanelSetList" 
+                        @bind-FirstPaneSize:after="PanelResized"
+                        Class="split-bar-inner"
+                        UnitOfPaneSize="UnitOfPaneSize.Percent"
+                        FirstPaneMinSize="20"
+                        SecondPaneMinSize="20"
+                        Style="height:100%;">
+
+                    <FirstPane>
+                        <div class="prevent-select pane-content @(_activePageSection == "setlist" ? "active" : "")" @onclick="@(() => SetActivePageSection("setlist"))">
+                            <div class="pane-title">
+                            @if (!String.IsNullOrWhiteSpace(Model.SetList.name)) {
+                                <span class="title">
+                                    @Model.SetList.name
+                                </span>
+
+                                @if (Model.SetList.saveRequired.HasValue && Model.SetList.saveRequired.Value) {
+                                    <span class="save-required">@Text.Unsaved</span>
+                                }
+                            } else {
+                                <span class="title">@Text.SetList</span>
+                            }
+                            </div>
+
+                            <div class="btn-toolbar mb-1">
+                                <div class="me-1 btn-group btn-group-sm">
+                                    <button type="button"
+                                            class="btn btn-sm btn-secondary open-setlist"
+                                            title="@Text.OpenSetList"
+                                            @onclick="@((MouseEventArgs e) => OpenSetList(e))">
+                                        <Icon Name="FolderOpen" />
+                                    </button>
+                                    @if (!Model.EmptySetList) {
+                                        <button type="button"
+                                                class="btn btn-sm btn-secondary dropdown-toggle dropdown-toggle-split"
+                                                data-bs-toggle="dropdown"
+                                                aria-expanded="false">
+                                            <span class="visually-hidden">Toggle Dropdown</span>
+                                        </button>
+                                        <ul class="dropdown-menu">
+                                            <li>
+                                                <a class="dropdown-item" href="javascript:void('0');" @onclick="@((MouseEventArgs e) => OpenSetList(e))">
+                                                    <Icon Name="FolderOpen" /> @Text.OpenSetList
+                                                </a>
+                                            </li>
+                                            @if (!Model.EmptySetList) {
+                                                <li>
+                                                    <a class="dropdown-item" href="javascript:void('0');" @onclick="CloseSetList">
+                                                        <Icon Name="FolderClosed" /> @Text.CloseSetList
+                                                    </a>
+                                                </li>
+                                            }
+                                        </ul>
+                                    }
+                                </div>
+
+                                <div class="me-1 btn-group btn-group-sm">
+                                    <button type="button"
+                                            disabled="@(Model.EmptySetList || Helpers.BooleanValue(Model.SetList.saveRequired) == false)"
+                                            class="btn btn-sm btn-success"
+                                            title="@Text.Save"
+                                            @onclick="SaveSetList">
+                                        <Icon Name="Save" />
+                                    </button>
+                                    <button type="button"
+                                            disabled="@(Model.EmptySetList)"
+                                            class="btn btn-sm btn-success dropdown-toggle dropdown-toggle-split"
+                                            data-bs-toggle="dropdown" 
+                                            aria-expanded="false">
+                                        <span class="visually-hidden">Toggle Dropdown</span>
+                                    </button>
+                                    <ul class="dropdown-menu">
+                                        @if (!Model.EmptySetList && Model.SetList.saveRequired == true) {
+                                            <li>
+                                                <a class="dropdown-item" href="javascript:void('0');" @onclick="SaveSetList">
+                                                    <Icon Name="Save" /> @Text.SaveSetList
+                                                </a>
+                                            </li>
+                                        } else {
+                                            <li>
+                                                <a class="dropdown-item disabled" href="javascript:void('0');">
+                                                    <Icon Name="Save" /> @Text.SaveSetList
+                                                </a>
+                                            </li>
+                                        }
+                                        <li>
+                                            <a class="dropdown-item" href="javascript:void('0');" @onclick="SaveSetListAs">
+                                                <Icon Name="Save" /> @Text.SaveSetListAs
+                                            </a>
+                                        </li>
+                                    </ul>
+
+                                </div>
+
+                                <button type="button" class="btn btn-sm btn-success" title="@Text.AddItem" @onclick="@((MouseEventArgs e) => ContextMenuShow("AddSetListItem", e))">
+                                    <Icon Name="AddItem" />
+                                </button>
+                                
+                            </div>
+
+                            @if (Model.SetList.items.Any(x => x.id != Guid.Empty)) {
+                                var setListItems = Model.SetList.items.Where(x => x.id != Guid.Empty).ToList();
+
+                                <SortableList
+                                        Id="sortable-list"
+                                        Items="setListItems"
+                                        OnUpdate="SetListSorted"
+                                        Context="item"
+                                        Group="sort-share"
+                                        Pull="clone" >
+                                    <SortableItemTemplate>
+                                        @{
+                                            var selected = item.id == Model.SetList.selectedItem;
+                                            var itemClass = "setlist-item setlist-item-" + item.type.ToLower() + " pointer auto-overflow" +
+                                                (selected ? " selected" : "");
+
+                                            <div class="@itemClass"
+                                                    @onclick="@(() => SelectSetListItem(item))">
+                                                
+                                                @switch(item.type) {
+                                                    case setListItemType.audio:
+                                                        var audio = Tools.SetListItemAsAudio(item);
+                                                        if (audio != null) {
+
+                                                            <ContextMenuTrigger MenuId="SetListContextMenuWithEdit" Id="@item.id.ToString()">
+                                                                <span title="@Text.AudioFile - @audio.filename">
+                                                                        <Icon Name="Audio" />
+                                                                        @System.IO.Path.GetFileNameWithoutExtension(audio.filename)
+                                                                </span>
+                                                            </ContextMenuTrigger>
+                                                        }
+                                                        break;
+
+                                                    case setListItemType.clock:
+                                                        <ContextMenuTrigger MenuId="SetListContextMenuWithEdit" Id="@item.id.ToString()">
+                                                            <span title="@Text.Clock">
+                                                                <Icon Name="Clock" />
+                                                                @Text.Clock
+                                                            </span>
+                                                        </ContextMenuTrigger>
+                                                        break;
+
+                                                    case setListItemType.countdown:
+                                                        var countdown = Tools.SetListItemAsCountdown(item);
+                                                        if (countdown != null) {
+                                                            <ContextMenuTrigger MenuId="SetListContextMenuWithEdit" Id="@item.id.ToString()">
+                                                                @if (countdown.countdownType == "time") {
+                                                                    if (countdown.toTime.HasValue) {
+                                                                        <span>
+                                                                            <Icon Name="Countdown" />
+                                                                            @Text.CountdownTo @countdown.toTime.Value.ToShortTimeString()
+                                                                        </span>
+                                                                    }
+                                                                } else {
+                                                                    if (countdown.seconds.HasValue) {
+                                                                        <span>
+                                                                            <Icon Name="Countdown" />
+                                                                            @Text.Countdown @Helpers.SecondsToTime(countdown.seconds.Value)
+                                                                        </span>
+                                                                    }
+                                                                }
+                                                            </ContextMenuTrigger>
+                                                        }
+                                                        break;
+
+                                                    case setListItemType.image:
+                                                        var image = Tools.SetListItemAsImage(item);
+                                                        if (image != null) {
+                                                            string imageName = !String.IsNullOrWhiteSpace(image.name)
+                                                                ? image.name
+                                                                : System.IO.Path.GetFileNameWithoutExtension(Helpers.StringValue(image.filename));
+
+                                                            <ContextMenuTrigger MenuId="SetListContextMenuWithEdit" Id="@item.id.ToString()">
+                                                                <span title="@Text.Image -  @image.filename">
+                                                                    <Icon Name="Image" />
+                                                                    @imageName
+                                                                </span>
+                                                            </ContextMenuTrigger>
+                                                        }
+                                                        break;
+
+                                                    case setListItemType.slideshow:
+                                                        var slideshow = Tools.SetListItemAsSlideshow(item);
+                                                        if (slideshow != null) {
+                                                            <ContextMenuTrigger MenuId="SetListContextMenuWithEdit" Id="@item.id.ToString()">
+                                                                <span title="@Text.Slideshow -  @slideshow.folder">
+                                                                    <Icon Name="Slideshow" />
+                                                                    @slideshow.folder
+                                                                </span>
+                                                            </ContextMenuTrigger>
+                                                        }
+                                                        break;
+
+                                                    case setListItemType.song:
+                                                        var song = Tools.SetListItemAsSong(item);
+                                                        if (song != null) {
+                                                            var songDisplay = String.Empty;
+                                                            var songbookName = String.Empty; 
+                                                            
+                                                            // Only show the songbook name if there is more than one.
+                                                            if (Model.SongBooks.Count > 1) {
+                                                                songbookName = Helpers.SongBookName(song.songBookId) + ": ";
+                                                                songDisplay +=
+                                                                    "<span class=\"songbook-name\">" +
+                                                                    Tools.AbbreviateSongBookName(songbookName) +
+                                                                    "</span> ";
+                                                            }
+
+                                                            var songDisplayPlainText = songbookName + song.title;
+
+                                                            songDisplay += 
+                                                                "<span class=\"song-title\">" +
+                                                                song.title + 
+                                                                "</span>";
+
+                                                            if (!String.IsNullOrWhiteSpace(song.key)) {
+                                                                songDisplay += "<span class=\"key\"> (" + song.key + ")</span>";
+                                                                songDisplayPlainText += " - " + song.key;
+                                                            }
+
+                                                            <ContextMenuTrigger MenuId="SetListContextMenu" Id="@item.id.ToString()">
+                                                                <span title="@Text.Song - @songDisplayPlainText">
+                                                                    <Icon Name="Song" />
+                                                                    @((MarkupString)songDisplay)
+                                                                </span>
+                                                            </ContextMenuTrigger>
+                                                        }
+                                                        break;
+
+                                                    case setListItemType.video:
+                                                        var video = Tools.SetListItemAsVideo(item);
+                                                        if (video != null) {
+                                                            <ContextMenuTrigger MenuId="SetListContextMenuWithEdit" Id="@item.id.ToString()">
+                                                                <span title="@Text.Video">
+                                                                    <Icon Name="Video" />
+                                                                    @Text.Video - @System.IO.Path.GetFileNameWithoutExtension(video.filename)
+                                                                </span>
+                                                            </ContextMenuTrigger>
+                                                        }
+                                                        break;
+
+                                                    case setListItemType.youTube:
+                                                        var youTube = Tools.SetListItemAsYouTube(item);
+                                                        if (youTube != null && !String.IsNullOrWhiteSpace(youTube.videoId) && !String.IsNullOrWhiteSpace(youTube.name)) {
+                                                            <ContextMenuTrigger MenuId="SetListContextMenuWithEdit" Id="@item.id.ToString()">
+                                                                <span title="@Text.YouTube">
+                                                                    <Icon Name="YouTube" />
+                                                                    @Text.YouTube - @youTube.name
+                                                                </span>
+                                                            </ContextMenuTrigger>
+                                                        }
+                                                        break;
+                                                }
+                                            </div>
+                                        }
+                                    </SortableItemTemplate>
+                                </SortableList>
+                            } else {
+                                <div class="empty">@Text.EmptySetList</div>
+                            }
+                        </div>
+                    </FirstPane>
+
+                    <SecondPane>
+                        <div class="prevent-select pane-content songbooks @(_activePageSection == "songbooks" ? "active" : "")" @onclick="@(() => SetActivePageSection("setlist-element"))">
+                            <span class="pane-title">
+                                @if (Model.User.preferences.editMode) {
+                                    <button type="button" class="ms-1 btn btn-xs btn-success" @onclick="AddSongbook">
+                                        <Icon Name="Add" /> @Text.NewSongBook
+                                    </button>
+                                } else {
+                                    <span class="title">@Text.SongBooks</span>
+                                }
+                            </span>
+
+                            @foreach(var songbook in Model.SongBooks.OrderBy(x => x.name)) {
+                                bool saveRequired = songbook.saveRequired.HasValue && songbook.saveRequired.Value;
+                                
+                                var songCount = " <span class=\"songbook-song-count\">(" + songbook.songs.Count + " " + 
+                                    (songbook.songs.Count > 1 ? Text.Songs : Text.Song) +
+                                    ")</span>";
+
+                                var songbookName = saveRequired 
+                                    ? "*" + songbook.name + songCount + "<span class=\"save-required\">" + Text.Unsaved + "</span>"
+                                    : songbook.name + songCount;
+
+                                bool open = Model.User.preferences.openSongBooks.Contains(songbook.id);
+                                var songbookId = "songbook-" + songbook.id;
+
+                                <div class="mb-1">
+                                    <ContextMenuTrigger MenuId="SongbookContextMenu" Id="@songbook.id.ToString()">
+                                        <div class="songbook-name" @onclick="(() => ToggleSongBook(songbook.id))">
+                                            <span class="songbook-icon">
+                                                @if (open) {
+                                                    <Icon Name="Expanded" Size="Icon.IconSize.Small" />
+                                                } else {
+                                                    <Icon Name="Collapsed" Size="Icon.IconSize.Small" />
+                                                }
+
+                                                <Icon Name="SongBook" />
+                                            </span>
+                                            <span>@((MarkupString)songbookName)</span>
+                                        </div>
+                                    </ContextMenuTrigger>
+                                    @if (open) {
+                                        var activeSong = Model.ActiveSong;
+
+                                        if (activeSong != null) {
+                                            // If there is an active song in the songlist but an individual song has been clicked
+                                            // in the songbook list, then ignore the activeSong.
+                                            if (_selectedSong.songId != activeSong.id || _selectedSong.songBookId != activeSong.id){
+                                                activeSong = null;
+                                            }
+                                        }
+
+                                        var songbookSongs = songbook.songs.OrderBy(x => x.title).ThenBy(x => x.artist).ToList();
+
+                                        bool enableDragging = true;
+                                        if (enableDragging) {
+                                            <SortableList
+                                                Id="@("songbook-" + songbook.id)"
+                                                Group="sort-share"
+                                                Put="false"
+                                                Sort="false"
+                                                Items="@songbookSongs"
+                                                Context="song"
+                                                OnRemove="@(((int oldIndex, int newIndex) indices) => SongMovedToSetList(indices, songbook))"
+                                            >
+                                                <SortableItemTemplate>
+                                                    @{
+                                                        var songDisplay = song.title;
+
+                                                        if (song.saveRequired.HasValue && song.saveRequired.Value) {
+                                                            songDisplay = "*" + song.title;
+                                                        }
+
+                                                        bool selected = song.id == _selectedSong.songId && song.songBookId == _selectedSong.songBookId;
+
+                                                        string selectedClass = String.Empty;
+
+                                                        if (activeSong != null && activeSong.id == song.id && activeSong.songBookId == song.songBookId) {
+                                                            // This item is selected in the set list, so it gets a special class.
+                                                            selectedClass = "selected-in-setlist";
+                                                        } else if (selected) {
+                                                            selectedClass = "selected";
+                                                        }
+
+                                                        if (!String.IsNullOrWhiteSpace(song.artist)) {
+                                                            songDisplay += " - " + song.artist;
+                                                        }
+
+                                                        <ContextMenuTrigger MenuId="SongContextMenu" Id="@(songbook.id.ToString() + "|" + song.id.ToString())">
+                                                            <div class="pointer auto-overflow songlist-title @selectedClass"
+                                                                    title="@songDisplay"
+                                                                    @onclick="@(() => SetSong(song))">
+                                                                <Icon Name="Music" Size="Icon.IconSize.Small" /> <span class="song-title">@songDisplay</span>
+                                                            </div>
+                                                        </ContextMenuTrigger>
+                                                    }
+                                                </SortableItemTemplate>
+                                            </SortableList>
+                                        } else {
+                                            foreach (var song in songbook.songs.OrderBy(x => x.title).ThenBy(x => x.artist)) {
+                                                var songDisplay = song.title;
+
+                                                if (song.saveRequired.HasValue && song.saveRequired.Value) {
+                                                    songDisplay = "*" + song.title;
+                                                }
+
+                                                bool selected = song.id == _selectedSong.songId && song.songBookId == _selectedSong.songBookId;
+
+                                                string selectedClass = String.Empty;
+
+                                                if (activeSong != null && activeSong.id == song.id && activeSong.songBookId == song.songBookId) {
+                                                    // This item is selected in the set list, so it gets a special class.
+                                                    selectedClass = "selected-in-setlist";
+                                                } else if (selected) {
+                                                    selectedClass = "selected";
+                                                }
+                                            
+
+                                                if (!String.IsNullOrWhiteSpace(song.artist)) {
+                                                    songDisplay += " - " + song.artist;
+                                                }
+                                                <div class="pointer auto-overflow songlist-title @selectedClass"
+                                                        title="@songDisplay"
+                                                        @onclick="@(() => SetSong(song))" >
+                                                    <Icon Name="Music" /> @songDisplay
+                                                </div>
+                                            }
+                                        }
+                                    }
+                                </div>
+                            }
+                        </div>
+                    </SecondPane>
+                </SplitContainer>
+            </FirstPane>
+
+            <SecondPane>
+                <div class="panel-wrapper @(_activePageSection == "setlist-element" ? "active" : "") @(Model.User.preferences.editMode ? "" : "item-detail-view")" @onclick="@(() => SetActivePageSection("setlist-element"))">
+                    <div class="prevent-select pane-content pane-item-details">
+                        @{
+                            // The audio player renders here, but is only visible when playing.
+                            var fileNameWithoutExtension = System.IO.Path.GetFileNameWithoutExtension(Model.AudioPlayingFile);
+                            var playTime = Model.AudioPlayingTime.currentTime + " / " + Model.AudioPlayingTime.totalTime;
+
+                            <div class="audio-player-wrapper @(Model.AudioPlaying && !String.IsNullOrWhiteSpace(Model.AudioPlayingFile) ? "" : "hidden")">
+                                <div class="audio-player-file">@fileNameWithoutExtension</div>
+                                <div class="close-button" @onclick="Helpers.PlayAudioFileStop" title="@Text.StopAndClosePlayer">
+                                    <Icon Name="Close" />
+                                </div>
+                                <audio class="audio-player" id="audio-player" controls />
+                            </div>
+
+                            // Messaging interface renders here.
+                            if (Model.User.preferences.showMessaging) {
+                                <div class="messaging-wrapper">
+                                    <div class="row">
+                                        @if (Model.Settings.enableProjectionMode) {
+                                            <div class="col col-6">
+                                                <div class="mb-1">
+                                                    <label for="messaging-screen">@Text.ScreenMessage</label>
+
+                                                    <FreeBlazor.AutoGrowText 
+                                                            Id="messaging-screen"
+                                                            Class="mb-1 form-control form-control-sm"
+                                                            @bind-Value="Model.MessageItems.screenMessage.text" />
+
+                                                    <div class="input-group">
+                                                        <select class="form-select form-select-sm"
+                                                                id="messaging-screen-theme"
+                                                                @bind="Model.MessageItems.screenMessage.style"
+                                                                title="@Text.Theme">
+                                                            <option value="black" selected="@(Model.MessageItems.screenMessage.style == "black")">@Text.MessagingThemeBlack</option>
+                                                            <option value="blue" selected="@(Model.MessageItems.screenMessage.style == "blue")">@Text.MessagingThemeBlue</option>
+                                                            <option value="green" selected="@(Model.MessageItems.screenMessage.style == "green")">@Text.MessagingThemeGreen</option>
+                                                            <option value="red" selected="@(Model.MessageItems.screenMessage.style == "red")">@Text.MessagingThemeRed</option>
+                                                        </select>
+
+                                                        <button type="button" class="btn btn-sm btn-dark" @onclick="@(() => MessagingClear("screen"))">
+                                                            <Icon Name="Clear" /> @Text.Clear
+                                                        </button>
+
+                                                        <button type="button"
+                                                                class="btn btn-sm btn-success"
+                                                                @onclick="@(() => MessagingSend("screen"))">
+                                                            <Icon Name="Send" /> @Text.Send
+                                                        </button>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                        }
+
+                                        <div class="col @(Model.Settings.enableProjectionMode ? "col-6" : "col-12")">
+                                            <div class="mb-1">
+                                                <label for="messaging-tablet">@Text.TabletMessage</label>
+
+                                                <FreeBlazor.AutoGrowText
+                                                        Id="messaging-tablet"
+                                                        Class="mb-1 form-control form-control-sm"
+                                                        @bind-Value="Model.MessageItems.tabletMessage.text" />
+
+                                                <div class="input-group">
+                                                    <select class="form-select form-select-sm"
+                                                            id="messaging-tablet-theme"
+                                                            @bind="Model.MessageItems.tabletMessage.style"
+                                                            title="@Text.Theme">
+                                                        <option value="black" selected="@(Model.MessageItems.tabletMessage.style == "black")">@Text.MessagingThemeBlack</option>
+                                                        <option value="blue" selected="@(Model.MessageItems.tabletMessage.style == "blue")">@Text.MessagingThemeBlue</option>
+                                                        <option value="green" selected="@(Model.MessageItems.tabletMessage.style == "green")">@Text.MessagingThemeGreen</option>
+                                                        <option value="red" selected="@(Model.MessageItems.tabletMessage.style == "red")">@Text.MessagingThemeRed</option>
+                                                    </select>
+
+                                                    <button type="button" class="btn btn-sm btn-dark" @onclick="@(() => MessagingClear("tablet"))">
+                                                        <Icon Name="Clear" /> @Text.Clear
+                                                    </button>
+
+                                                    <button type="button"
+                                                            class="btn btn-sm btn-success"
+                                                            @onclick="@(() => MessagingSend("tablet"))">
+                                                        <Icon Name="Send" /> @Text.Send
+                                                    </button>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            }
+
+                            // Get the current active item
+                            var activeItem = Model.SetList.items.FirstOrDefault(x => x.id == Model.SetList.activeItem);
+
+                            if (activeItem != null) {
+                                switch(activeItem.type) {
+                                    case setListItemType.clock:
+                                        var clock = Tools.SetListItemAsClock(activeItem);
+                                        if (clock != null) {
+                                            <ClockEngine Value="clock" Preview="true" />
+                                        }
+                                        break;
+
+                                    case setListItemType.countdown:
+                                        // Only render in the item area if no preview is being shown.
+                                        if (String.IsNullOrWhiteSpace(Model.User.preferences.showPreview)) {
+                                            var countdown = Tools.SetListItemAsCountdown(activeItem);
+                                            if (countdown != null) {
+                                                <div class="countdown-preview-label">
+                                                    @if (countdown.countdownType == "time" && countdown.toTime.HasValue) {
+                                                        <span>@Text.CountdownTo</span>
+                                                        <span>@countdown.toTime.Value.ToShortTimeString()</span>
+                                                    } else {
+                                                        @Text.Countdown
+                                                    }
+                                                </div>
+                                                <CountdownTimer Value="countdown" Preview="true" UniqueId="main-screen-preview" />
+                                            }
+                                        }
+                                        break;
+
+                                    case setListItemType.image:
+                                        var img = Tools.SetListItemAsImage(activeItem);
+                                        if (img != null && !String.IsNullOrWhiteSpace(img.filename)) {
+                                            <div class="mb-2">
+                                                <img class="slideshow-image" src="@Helpers.MediaUrl("Images", img.filename)" />
+                                            </div>
+                                        }
+                                        break;
+
+                                    case setListItemType.slideshow:
+                                        var slideshow = Tools.SetListItemAsSlideshow(activeItem);
+                                        if (slideshow != null && slideshow.images != null && slideshow.images.Count > 0) {
+                                            <div class="mb-2">
+                                                <label for="slideshow-thumbnail-size">@Text.ThumbnailColumns (@Model.User.preferences.slideshowThumbnailColumns)</label>
+                                                <input type="range" class="form-range" min="1" max="10" step="1" 
+                                                        id="slideshow-thumbnail-size" @bind="Model.User.preferences.slideshowThumbnailColumns"/>
+                                            </div>
+
+                                            <div class="mb-2 slideshow-thumbnails">
+                                                @foreach (var image in slideshow.images.Index()) {
+                                                    string thumbnailColumnClass = "c-" + Model.User.preferences.slideshowThumbnailColumns.ToString();
+
+                                                    <div class="slideshow-thumbnail @thumbnailColumnClass  @Model.AspectRatio @(image.Index == Model.SetList.activeItemPart ? "active" : "")"
+                                                         @onclick="@(() => SetActiveElement(image.Index))">
+                                                        <img src="@Helpers.SlideShowUrl(slideshow.folder, image.Item)" />
+                                                    </div>
+                                                }
+                                            </div>
+                                        }
+                                        break;
+
+                                    case setListItemType.song:
+                                        // The song item will already be loaded in the Model.Song
+
+                                        if (Model.Song != null) {
+                                            Helpers.UsingDoReMi = Helpers.SongUsesDoReMiSystem(Model.Song);
+                                            Helpers.UsingNashvilleNumbering = Helpers.SongUsesNashvilleNumberingSystem(Model.Song);
+
+                                            var key = Model.Song.key;
+
+                                            if (Model.User.preferences.editMode) {
+                                                // Edit View
+                                                var colspan = Model.Settings.churchMode ? 9 : 7;
+
+                                                // If this is in a set list, not just viewing a song
+                                                // in an empty fake setlist, then show the transpose option bound
+                                                // to the setlist .Transpose property.
+                                                if (Model.ActiveItem != null && Model.ActiveItem.id != Guid.Empty) {
+                                                    colspan += 1;
+                                                }
+
+                                                <div class="mb-1">
+                                                    <button type="button" class="btn btn-sm btn-success" @onclick="SaveSong">
+                                                        <Icon Name="Save" /> @Text.Save
+                                                    </button>
+
+                                                    <FreeBlazor.DeleteConfirmation 
+                                                            ButtonSize="small"
+                                                            CancelText="@Text.Cancel"
+                                                            ConfirmDeleteText="@Text.Confirm"
+                                                            DeleteText="@Text.Delete"
+                                                            CancelIcon="@Helpers.Icon("Cancel")"
+                                                            DeleteIcon="@Helpers.Icon("Delete")"
+                                                            ConfirmDeleteIcon="@Helpers.Icon("Delete")"
+                                                            OnConfirmed="DeleteSong" />
+
+                                                    <span class="edit-message">@((MarkupString)_editMessage)</span>
+                                                </div>
+
+                                                <table class="table-sm mb-2">
+                                                    <tbody>
+                                                        <tr>
+                                                            <td style="width:1%;" class="no-wrap right">
+                                                                <label for="edit-song-title">@Text.Title</label>
+                                                            </td>
+
+                                                            <td colspan="@colspan">
+                                                                <input type="text" class="form-control form-control-sm" id="edit-song-title" @bind="Model.Song.title" @bind:after="SongModified" />
+                                                            </td>
+                                                        </tr>
+
+                                                        <tr>
+                                                            <td style="width:1%;" class="no-wrap right">
+                                                                <label for="edit-song-artist">@Text.Artist</label>
+                                                            </td>
+
+                                                            <td colspan="@colspan">
+                                                                <input type="text" class="form-control form-control-sm" id="edit-song-artist" @bind="Model.Song.artist" @bind:after="SongModified" />
+                                                            </td>
+                                                        </tr>
+
+                                                        <tr>
+                                                            <td style="width:1%;" class="no-wrap right">
+                                                                <label for="edit-song-copyright">@Text.Copyright</label>
+                                                            </td>
+
+                                                            <td colspan="@colspan">
+                                                                <input type="text" class="form-control form-control-sm" id="edit-song-copyright" @bind="Model.Song.copyright" @bind:after="SongModified" />
+                                                            </td>
+                                                        </tr>
+
+                                                        <tr>
+                                                            <td style="width:1%;" class="no-wrap right">
+                                                                <label for="edit-song-key">@Text.SongKey</label>
+                                                            </td>
+                                                            <td>
+                                                                <select class="form-select form-select-sm" id="edit-song-key" @bind="Model.Song.key" @bind:after="SongModified">
+                                                                    @foreach(var keyOption in Helpers.SongKeys) {
+                                                                        <option value="@keyOption.key" selected="@(keyOption.key == Model.Song.key)">@keyOption.label</option>
+                                                                    }
+                                                                </select>
+                                                            </td>
+
+                                                            <td style="width:1%;" class="no-wrap right">
+                                                                <label for="edit-song-tempo">@Text.Tempo</label>
+                                                            </td>
+                                                            <td>
+                                                                <input type="text" class="form-control form-control-sm" id="edit-song-tempo" @bind="Model.Song.tempo" @bind:after="SongModified" />
+                                                            </td>
+
+                                                            <td style="width:1%;" class="no-wrap right">
+                                                                <label for="edit-song-time-signature">@Text.TimeSignature</label>
+                                                            </td>
+                                                            <td>
+                                                                <input type="text" class="form-control form-control-sm" id="edit-song-time-signature" @bind="Model.Song.timeSignature" @bind:after="SongModified" />
+                                                            </td>
+
+                                                            <td style="width:1%;" class="no-wrap right">
+                                                                <label for="edit-song-Transpose">@Text.Transpose</label>
+                                                            </td>
+                                                            <td>
+                                                                @if (Model.ActiveItem != null) {
+                                                                    <select class="form-select form-select-sm" id="edit-song-Transpose" @bind="Model.ActiveItem.transpose" @bind:after="SongModified">
+                                                                        <option></option>
+                                                                        @foreach (var keyOption in Helpers.SongKeys) {
+                                                                            <option value="@keyOption.key" selected="@(keyOption.key == Model.ActiveItem.transpose)">@keyOption.label</option>
+                                                                        }
+                                                                    </select>
+                                                                }
+                                                            </td>
+
+                                                            @if (Model.Settings.churchMode) {
+                                                                <td style="width:1%;" class="no-wrap right">
+                                                                    <label for="edit-song-ccliNumber">@Text.ccliNumber</label>
+                                                                </td>
+                                                                <td>
+                                                                    <input type="text" class="form-control form-control-sm" id="edit-song-ccliNumber" @bind="Model.Song.ccliNumber" @bind:after="SongModified" />
+                                                                </td>
+                                                            }
+                                                        </tr>
+                                                    </tbody>
+                                                </table>
+
+                                                var chordsInSong = Model.ChordsInSong;
+                                                if (chordsInSong.Any()) {
+                                                    <div class="chords-in-song mb-2">
+                                                        <span class="text">@((MarkupString)(Text.ChordsInSong + ": " ))</span>
+                                                        @foreach(var chord in chordsInSong) {
+                                                            <span class="insert-chord" @onclick="@(() => EditorInsertChord(chord))">@chord</span>
+                                                        }
+                                                    </div>
+                                                }
+                                            } else {
+                                                // View Mode
+
+                                                var title = Model.Song.title;
+                                                if (!String.IsNullOrWhiteSpace(Model.Song.artist)) {
+                                                    title += " - " + Model.Song.artist;
+                                                }
+
+                                                <div id="item-detail-view-control">
+                                                    <div class="songview-title auto-overflow" title="@title">@((MarkupString)title)</div>
+
+                                                    <div class="songview-key">@Text.SongKey @Model.SongKey</div>
+
+                                                    @foreach(var part in Model.SongParts.Index()) {
+                                                        var elementId = "current-song-part-"  + part.Index.ToString();
+
+                                                        <div id="@elementId" class="current-song-part @(part.Index == Model.SetList.activeItemPart ? "active" : "")"
+                                                        @onclick="@(() => SetActiveElement(part.Index))">
+                                                            @if (!part.Item.partOfPrevious) {
+                                                                <div class="songview-part-label">@part.Item.label</div>
+                                                            }
+                                                            
+                                                            <div>
+                                                                @((MarkupString)Helpers.RenderSongElement(Model.Song, part.Item, Model.SongKey))
+                                                            </div>
+                                                        </div>
+                                                    }
+                                                </div>
+                                            }
+                                        }
+                                        break;
+
+                                    case setListItemType.video:
+                                        var video = Tools.SetListItemAsVideo(activeItem);
+
+                                        if (video != null && !String.IsNullOrWhiteSpace(video.filename)) {
+                                            var videoUrl = Helpers.MediaUrl("Videos", video.filename);
+                                            <VideoPlayer ElementId="video-player-main" 
+                                                Loop="@video.loop"
+                                                Mute="@video.muteInMainWindow"
+                                                ShowControls="true" 
+                                                VideoUrl="@videoUrl"/>
+                                        }
+                                        break;
+
+                                    case setListItemType.youTube:
+                                        var youTube = Tools.SetListItemAsYouTube(activeItem);
+                                        if (youTube != null) {
+                                            <YouTubePlayer VideoId="@youTube.videoId" ElementId="youtube-player-main" />
+                                        }
+                                        
+                                        break;
+                                }
+                            }
+                        }
+
+                        <div class="mb-2" @ondblclick="EditorDoubleClicked">
+                            <BlazorMonaco.Editor.StandaloneCodeEditor @ref="_editor"
+                                    CssClass="@EditorClass"
+                                    Id="code-editor"
+                                    OnDidChangeModelContent="EditorUpdated"
+                                    OnDidChangeCursorPosition="EditorCursorPosition"
+                                    ConstructionOptions="@((BlazorMonaco.Editor.StandaloneCodeEditor editor) => { return new BlazorMonaco.Editor.StandaloneEditorConstructionOptions {
+                                        AutomaticLayout = true,
+                                        Language = "plaintext",
+                                        AutoClosingBrackets = "always",
+                                        AutoClosingComments = "never",
+                                        AutoClosingQuotes = "always",
+                                        AutoIndent="none",
+                                        CodeLens = false,
+                                        DefaultColorDecorators = false,
+                                        DragAndDrop = false,
+                                        FormatOnPaste = false,
+                                        FormatOnType = false,
+                                        LineNumbers = "off",
+                                        GlyphMargin = false,
+                                        Folding = false,
+                                        ShowFoldingControls = "never",
+                                        LineDecorationsWidth = 0,
+                                        LineNumbersMinChars = 0,
+                                        Minimap = new BlazorMonaco.Editor.EditorMinimapOptions {
+                                        Enabled = false,
+                                        },
+                                        RenderWhitespace = "all",
+                                    };})"
+                            />
+                        </div>
+
+                        @if (Model.Settings.enableProjectionMode && !String.IsNullOrWhiteSpace(Model.User.preferences.showPreview) && !PreviewDisabledBasedOnSelectedItem) {
+                            <div class="preview-area docked @Model.User.preferences.showPreview @Model.AspectRatio">
+                                <ProjectorView @ref="_preview"
+                                        AspectRatio="@Model.Settings.projectionModeAspectRatio"
+                                        Id="main-screen-preview"
+                                        Scale="Helpers.PreviewScale(Model.User.preferences.showPreview)" />
+                            </div>
+                        }
+                    </div>
+                </div>
+            </SecondPane>
+        </SplitContainer>
+    } else {
+        <div class="ms-2 me-2 mt-5 row">
+            <div class="col col-12 col-sm-1 col-md-2 col-lg-3 col-xl-4 col-xxl-4"></div>
+
+            <div class="col col-12 col-sm-10 col-md-8 col-lg-6 col-xl-4 col-xxl-4">
+                <h1>
+                    @Text.SelectUser
+                </h1>
+
+                <div class="mb-2">
+                    <input type="text" id="add-new-user" class="form-control" placeholder="@Text.NewUser" @bind="_newUserName" @bind:after="AddNewUser" />
+                </div>
+
+                @foreach (var item in Model.Users.Where(x => x.id != Guid.Empty && (x.enabled == true || _activeUsersOnly == false)).OrderBy(x => x.name)) {
+                    <div class="mb-1">
+                        <button type="button" class="btn btn-sm btn-success user-button" @onclick="@(() => SelectedUser(item))">
+                            @if (item.enabled) {
+                                <span>@item.name</span>
+                            } else {
+                                <em>@item.name</em>
+                            }
+                        </button>
+                    </div>
+                }
+            </div>
+
+            <div class="col col-12 col-sm-1 col-md-2 col-lg-3 col-xl-4 col-xxl-4"></div>
+        </div>
+    }
+}
+
+
+@code{
+    protected string _activePageSection = "";
+    protected bool _activeUsersOnly = false;
+    protected double _audioPlayerScrubber = 0;
+    protected DateTime _doubleClickingSetListItem = DateTime.Now;
+    protected Guid _doubleClickingSetListItemId = Guid.Empty;
+    protected DateTime _doubleClickingSong = DateTime.Now;
+    protected Guid _doubleClickingSongId = Guid.Empty;
+    protected string _editMessage = "";
+    protected string _newUserName = "";
+    protected string _pageName = "home";
+    protected selectedSong _selectedSong = new selectedSong();
+    protected Guid _selectedSongBook = Guid.Empty;
+    protected string _selectedSongBookMoveOrCopy = "";
+    protected song _selectedSongBookMoveOrCopySong = new song();
+    protected bool _showUserList = false;
+
+    protected BlazorMonaco.Editor.StandaloneCodeEditor _editor = null!;
+    protected int _editorLine = 0;
+    protected int _editorColumn = 0;
+    protected BlazorMonaco.Position _editorPosition = new BlazorMonaco.Position();
+
+    protected System.Timers.Timer _timer_Editor = new System.Timers.Timer();
+
+    protected bool _initialLoad = false;
+    protected ProjectorView _preview = null!;
+
+    protected override void OnAfterRender(bool firstRender)
+    {
+        if (firstRender) {
+            SetActivePageSection("setlist");
+        }
+    }
+
+    protected override void OnInitialized()
+    {
+        if (!Model.Subscribers_OnAudioPlaybackEnded.Contains(_pageName)) {
+            Model.Subscribers_OnAudioPlaybackEnded.Add(_pageName);
+            Model.OnAudioPlaybackEnded += OnAudioPlaybackEnded;
+        }
+
+        if (!Model.Subscribers_OnChange.Contains(_pageName)) {
+            Model.Subscribers_OnChange.Add(_pageName);
+            Model.OnChange += OnDataModelUpdated;
+        }
+
+        if (!Model.Subscribers_OnKeyUp.Contains(_pageName)) {
+            Model.Subscribers_OnKeyUp.Add(_pageName);
+            Model.OnKeyUp += OnKeyUp;
+        }
+
+        if (!Model.Subscribers_OnSignalRSetList.Contains(_pageName)) {
+            Model.Subscribers_OnSignalRSetList.Add(_pageName);
+            Model.OnSignalRSetList += ProcessSignalRSetList;
+        }
+
+        if (!Model.Subscribers_OnSignalRUpdate.Contains(_pageName)) {
+            Model.Subscribers_OnSignalRUpdate.Add(_pageName);
+            Model.OnSignalRUpdate += ProcessSignalRUpdate;
+        }
+
+        Model.View = _pageName;
+
+        _timer_Editor = new System.Timers.Timer();
+        _timer_Editor.Interval = 1000;
+        _timer_Editor.Elapsed += EditorUpdatedTimer;
+        _timer_Editor.AutoReset = false;
+    }
+
+    protected void OnAudioPlaybackEnded()
+    {
+        if (Model.View == _pageName) {
+
+        }
+    }
+
+    protected async void OnDataModelUpdated()
+    {
+        if (Model.View == _pageName) {
+            // InvokeAsync(() => { StateHasChanged(); });
+            if (!_initialLoad && Model.SetList.items.Count > 0){
+                _initialLoad = true;
+                var firstSetListItem = Model.SetList.items.FirstOrDefault();
+                if (firstSetListItem != null) {
+                    await SelectSetListItem(firstSetListItem, false);
+                }
+            }
+
+            StateHasChanged();
+        }
+    }
+
+    protected async void OnKeyUp(keyboardEvent keyboardEvent)
+    {
+        if (Model.DialogOpen) {
+            return;
+        }
+
+        bool editMode = Model.User.preferences.editMode;
+        int activePart = Model.SetList.activeItemPart.HasValue ? (int)Model.SetList.activeItemPart : 0;
+
+        // Handlers are different depending on which element has the focus.
+        switch (Helpers.StringLower(_activePageSection)) {
+            case "setlist":
+                var setListIndex = Model.ActiveSetListIndex;
+
+                switch(Helpers.StringLower(keyboardEvent.key)) {
+                    case "arrowdown":
+                        if (setListIndex < Model.SetList.items.Count - 1) {
+                            Model.SetList.selectedItem = Model.SetList.items[setListIndex + 1].id;
+                            StateHasChanged();
+                        }
+                        break;
+
+                    case "arrowup":
+                        if (setListIndex > 0) {
+                            Model.SetList.selectedItem = Model.SetList.items[setListIndex - 1].id;
+                            StateHasChanged();
+                        }
+                        break;
+
+                    case "enter":
+                        var selectedSetListItem = Model.SetList.items.FirstOrDefault(x => x.id == Model.SetList.selectedItem);
+                        if (selectedSetListItem != null) {
+                            await SelectSetListItem(selectedSetListItem, true);
+                        }
+                        break;
+                }
+                break;
+
+            case "setlist-element":
+                if (!editMode) {
+                    switch(Helpers.StringLower(keyboardEvent.key)) {
+                        case "arrowdown":
+                        case "arrowright":
+                        case "pagedown":
+                            if (activePart < Model.ActiveItemPartCount - 1)
+                            {
+                                await MoveForward();
+                            } else {
+                                await MoveNext();
+                            }
+                            break;
+
+                        case "arrowup":
+                        case "arrowleft":
+                        case "pageup":
+                            if (activePart > 0) {
+                                await MoveBackward();
+                            } else {
+                                await MovePrevious();
+                            }
+                            break;
+                    }
+                } else if (keyboardEvent.ctrlKey || keyboardEvent.metaKey || keyboardEvent.altKey) {
+                    // In edit mode we will move on CTRL+Arrow keys.
+                    switch(Helpers.StringLower(keyboardEvent.key)) {
+                        case "arrowdown":
+                        case "arrowright":
+                            if (activePart < Model.ActiveItemPartCount - 1)
+                            {
+                                await MoveForward();
+                            } else {
+                                await MoveNext();
+                            }
+                            break;
+
+                        case "arrowup":
+                        case "arrowleft":
+                            if (activePart > 0) {
+                                await MoveBackward();
+                            } else {
+                                await MovePrevious();
+                            }
+                            break;
+                    }
+                    
+                }
+                break;
+        }
+    }
+
+    protected async Task AddNewUser() 
+    {
+        if (!String.IsNullOrWhiteSpace(_newUserName)) {
+            // Make sure the name is unique.
+            if (Model.Users.Any(x => x.name == _newUserName)) {
+                _newUserName = "";
+                StateHasChanged();
+                await Helpers.DelayedFocus("new-username");
+                return;
+            }
+
+            var result = await Helpers.GetOrPost<user>("api/SaveUser", new user {
+                id = Guid.NewGuid(),
+                name = _newUserName,
+                enabled = true,
+            });
+
+            if (result != null && result.id != Guid.Empty) {
+                await Helpers.ReloadUsers();
+            } else {
+                await Helpers.DelayedFocus("new-username");
+            }
+
+            _newUserName = "";
+            StateHasChanged();
+        }
+    }
+
+    protected async void AddSetListItemMenuClicked(ItemClickEventArgs e)
+    {
+        var selectedAction = e.MenuItem.Id;
+
+        var newSetListItem = new setListItem();
+
+        switch(selectedAction) {
+            case setListItemType.audio:
+                newSetListItem = new setListItem {
+                    id = Guid.Empty,
+                    type = setListItemType.audio,
+                    item = new audioItem(),
+                };
+                break;
+
+            case setListItemType.clock:
+                newSetListItem = new setListItem {
+                    id = Guid.Empty,
+                    type = setListItemType.clock,
+                    item = new clockItem(),
+                };
+                break;
+
+            case setListItemType.countdown:
+                newSetListItem = new setListItem {
+                    id = Guid.Empty,
+                    type = setListItemType.countdown,
+                    item = new countdownItem(),
+                };
+                break;
+
+            case setListItemType.image:
+                newSetListItem = new setListItem {
+                    id = Guid.Empty,
+                    type = setListItemType.image,
+                    item = new imageItem(),
+                };
+                break;
+
+            case setListItemType.slideshow:
+                newSetListItem = new setListItem {
+                    id = Guid.Empty,
+                    type = setListItemType.slideshow,
+                        item = new slideshowItem(),
+                };
+                break;
+
+            case setListItemType.video:
+                newSetListItem = new setListItem {
+                    id = Guid.Empty,
+                    type = setListItemType.video,
+                    item = new videoItem {
+                        muteOnScreens = true,
+                    },
+                };
+                break;
+
+            case setListItemType.youTube:
+                newSetListItem = new setListItem {
+                    id = Guid.Empty,
+                    type = setListItemType.youTube,
+                    item = new youTubeItem {
+                        muteInMainWindow = false,
+                        muteOnScreens = true,
+                        videoId = "dQw4w9WgXcQ",
+                    },
+                };
+                break;
+        }
+
+        if (newSetListItem.id == Guid.Empty) {
+            await Helpers.EditSetListItem(newSetListItem);
+        } else {
+            // Insert the item after the currently selected item, or at the end of the list if no item is selected.
+            Helpers.InsertSetListItem(newSetListItem);
+        }
+    }
+
+    protected async Task AddSong(songBook songBook)
+    {
+        Delegate newName = async (string name) => {
+            if (!String.IsNullOrWhiteSpace(name)) {
+                var now = DateTime.Now;
+
+                var song = new song {
+                    created = now,
+                    id = Guid.NewGuid(),
+                    songBookId = songBook.id,
+                    title = name,
+                    updated = now,
+                };
+
+                var results = await Helpers.GetOrPost<booleanResponse>("api/AddSong", song);
+                if (results != null) {
+                    if (results.result) {
+                        Model.Message_Success();
+
+                        if (Model.EmptySetList) {
+                            // Set this as the active song. However, this will need to load first via SignalR, so set a delay.
+                            //Helpers.SetTimeout(async() => await SetSong(song, true), 500);
+                            await SetSong(song, true);
+                        }
+
+                    } else {
+                        if (results.messages.Any()) {
+                            Model.ErrorMessages(results.messages);
+                        } else {
+                            Model.UnknownError();
+                        }
+                    }
+                } else {
+                    Model.UnknownError();
+                }
+            }
+        };
+
+        await Helpers.GetInput(newName, FreeBlazor.GetInput.InputType.Text, Text.NewSongName, "new-song-name", "", "", "form-control", null, "", true);
+    }
+
+    protected async Task AddSongbook() 
+    {
+        Delegate newName = async(string name) => {
+            if (!String.IsNullOrWhiteSpace(name)) {
+                var results = await Helpers.GetOrPost<booleanResponse>("api/AddSongBook", new simplePost { singleItem = name });
+                if (results != null) {
+                    if (results.result) {
+                        Model.Message_Success();
+                    } else {
+                        if (results.messages.Any()) {
+                            Model.ErrorMessages(results.messages);
+                        } else {
+                            Model.UnknownError();
+                        }
+                    }
+                } else {
+                    Model.UnknownError();
+                }
+            }
+        };
+
+        await Helpers.GetInput(
+            newName,
+            FreeBlazor.GetInput.InputType.Text,
+            Text.NewSongBookName,
+            "new-songbook-name",
+            "",
+            Text.NewSongBookNameInfo,
+            "form-control",
+            null,
+            "",
+            true);
+
+        await Helpers.DelayedFocus("new-songbook-name");
+    }
+
+    protected void AddSongToSetList(song song)
+    {
+        // If we currrently have an empty set list with just a preview song placeholder, clean that out.
+        if (Model.SetList.items.Count == 1 && Model.SetList.items[0].id == Guid.Empty) {
+            Model.SetList.items = new List<setListItem>();
+        }
+
+        Helpers.InsertSetListItem(new setListItem {
+            id = Guid.NewGuid(),
+            type = setListItemType.song,
+            item = song,
+        });
+    }
+
+    protected async Task AudioPlayerScrubberMoved(ChangeEventArgs e)
+    {
+        double time = 0;
+
+        try {
+            if (e.Value != null) {
+                time = Convert.ToDouble(e.Value.ToString());
+            }
+        } catch {}
+
+        await Helpers.PlayAudioFileSetTime(time);
+    }
+
+    protected void ClearEditMessage()
+    {
+        _editMessage = "";
+        StateHasChanged();
+    }
+
+    protected async Task CloseSetList()
+    {
+        Model.SetList = new setList();
+        Model.CurrentComponentType = String.Empty;
+        StateHasChanged();
+
+        Model.Settings.lastSetList = null;
+        await Helpers.SaveSettings();
+    }
+
+    protected async Task ConfirmDeleteSong(song song)
+    {
+        Delegate onConfirmed = async (bool confirmed) => {
+            if (confirmed) {
+                await DeleteSong(song);
+            }
+        };
+
+        var songtitle = song.title;
+        if (!String.IsNullOrWhiteSpace(song.artist)) {
+            songtitle += " - " + song.artist;
+        }
+        var confirmDeleteSongInfo = Text.ConfirmDeleteSongInfo.Replace("{0}", "<b>" + songtitle + "</b>");
+
+        await Helpers.GetConfirmation(
+            onConfirmed,
+            Text.ConfirmDeleteSong,
+            confirmDeleteSongInfo,
+            Text.YesDeleteSong,
+            "",
+            "btn btn-danger",
+            ""
+        );
+    }
+
+    protected async Task ContextMenuShow(string menu, MouseEventArgs e)
+    {
+         await contextMenuService.ShowMenu(menu, (int)e.ClientX, (int)e.ClientY);
+
+    }
+
+    protected string CurrentThemeIcon {
+        get {
+            string output = Helpers.CurrentThemeIconForUser(Model.User);
+            return output;
+        }
+    }
+
+    protected void DeleteSetListItem(setListItem item)
+    {
+        Model.SetList.items.Remove(item);
+        Model.SetList.saveRequired = true;
+        StateHasChanged();
+    }
+
+    protected async Task DeleteSong()
+    {
+        Model.ClearMessages();
+        Model.Message_Deleting();
+
+        var result = await Helpers.GetOrPost<booleanResponse>("api/DeleteSong", Model.Song);
+
+        Model.ClearMessages();
+
+        if (result != null) {
+            if (!result.result) {
+                if (result.messages.Any()){
+                    Model.ErrorMessages(result.messages);
+                } else {
+                    Model.UnknownError();
+                }
+            }
+        } else {
+            Model.UnknownError();
+        }
+    }
+
+    protected async Task DeleteSong(song song)
+    {
+        Model.ClearMessages();
+        Model.Message_Deleting();
+
+        var songbook = Helpers.GetSongBook(song.songBookId);
+        if (songbook != null) {
+            var songbookDup = Helpers.DuplicateObject<songBook>(songbook);
+
+            if (songbookDup != null) {
+                songbookDup.songs = songbookDup.songs.Where(x => x.id != song.id).ToList();
+
+                var result = await Helpers.GetOrPost<booleanResponse>("api/SaveSongBook", songbookDup);
+
+                Model.ClearMessages();
+
+                if (result != null) {
+                    if (!result.result) {
+                        if (result.messages.Any()) {
+                            Model.ErrorMessages(result.messages);
+                        } else {
+                            Model.UnknownError();
+                        }
+                    }
+                } else {
+                    Model.UnknownError();
+                }
+            }
+        }
+    }
+
+    protected async Task DeleteSongBook(songBook songBook)
+    {
+        Delegate onConfirmed = async(bool confirmed) => {
+            if (confirmed) {
+                Model.ClearMessages();
+                Model.Message_Deleting();
+
+                var result = await Helpers.GetOrPost<booleanResponse>("api/DeleteSongBook", new simplePost { singleItem = songBook.fileName });
+
+                Model.ClearMessages();
+
+                if (result != null) {
+                    if (!result.result) {
+                        if (result.messages.Any()){
+                            Model.ErrorMessages(result.messages);
+                        } else {
+                            Model.UnknownError();
+                        }
+                    }
+                } else {
+                    Model.UnknownError();
+                }
+            }
+        };
+
+        await Helpers.GetConfirmation(
+            onConfirmed,
+            Text.ConfirmDeleteSongbook,
+            Text.ConfirmDeleteSongbookInfo,
+            Text.YesDeleteSongbook,
+            "",
+            "btn btn-danger",
+            ""
+        );
+    }
+
+    protected string CurrentThemeLabel {
+        get {
+            string output = Helpers.CurrentThemeLabelForUser(Model.User);
+            return output;
+        }
+    }
+
+    protected void EditMessage(string message, string messageClass = "success")
+    {
+        _editMessage = "<span class=\"alert alert-" + messageClass + "\">" + message + "</span>";
+        StateHasChanged();
+    }
+
+    protected string EditorClass
+    {
+        get {
+            string output = "code-editor hidden";
+
+            if (Model.CurrentComponentType == setListItemType.song && Model.User.preferences.editMode) {
+                output = "code-editor edit-mode"; 
+            }
+
+            //return Model.Song.id != Guid.Empty && Model.User.preferences.editMode ? "code-editor edit-mode" : "code-editor hidden";
+            
+            return output;
+        }
+    }
+
+    protected async Task EditorCursorPosition(BlazorMonaco.Editor.CursorPositionChangedEvent e)
+    {
+        await System.Threading.Tasks.Task.Delay(0);
+        // if (e != null && e.Position != null) {
+        //     Console.WriteLine("Position: Line=" + e.Position.LineNumber + ", Column=" + e.Position.Column);
+        // }
+
+        // Find the song element at this line.
+        _editorLine = e.Position.LineNumber;
+        _editorColumn = e.Position.Column;
+        _editorPosition = e.Position;
+    }
+
+    protected async Task EditorDoubleClicked(MouseEventArgs e)
+    {
+        // Find the current element for the given position.
+        var part = Model.SongParts.FirstOrDefault(x => x.startLine <= _editorLine && x.endLine >= _editorLine);
+        if (part != null) {
+            await SetActiveElement(part.index);
+        }
+    }
+
+    protected async Task EditorInsertChord(string chord) 
+    {
+        var selection = await _editor.GetSelection();
+
+        var edits = new List<BlazorMonaco.Editor.IdentifiedSingleEditOperation>();
+        edits.Add(new BlazorMonaco.Editor.IdentifiedSingleEditOperation {
+            ForceMoveMarkers = false,
+            Range = selection,
+            Text = "[" + chord + "]",
+        });
+
+        var selectionList = new List<BlazorMonaco.Selection> {
+            new BlazorMonaco.Selection {
+                StartLineNumber = selection.StartLineNumber,
+                EndLineNumber = selection.StartLineNumber,
+                StartColumn = selection.StartColumn,
+                EndColumn = selection.StartColumn,
+                PositionColumn = selection.StartColumn,
+                PositionLineNumber = selection.StartLineNumber,
+                SelectionStartColumn = selection.StartColumn,
+                SelectionStartLineNumber = selection.StartLineNumber,
+            },
+        };
+
+        await _editor.ExecuteEdits("insert-field", edits, selectionList);
+        await _editor.Focus();
+
+        Model.Song.content = await _editor.GetValue();
+
+        await UpdateSongSaveRequired(Model.Song);
+
+        await EditorUpdatedApplyStyles();
+    }
+
+    protected void EditorUpdated(BlazorMonaco.Editor.ModelContentChangedEvent e)
+    {
+        _timer_Editor.Stop();
+        _timer_Editor.Start();
+    }
+
+    protected async Task EditorUpdatedApplyStyles()
+    {
+        await _editor.ResetDeltaDecorations();
+
+        var dec = new List<BlazorMonaco.Editor.ModelDeltaDecoration>();
+
+        foreach(var part in Model.SongParts.Index()) {
+            if (part.Index == Model.SetList.activeItemPart) {
+                var startLine = part.Item.partOfPrevious ? part.Item.startLine + 1 : part.Item.startLine;
+
+                // This is the active song element.
+                dec.Add(new BlazorMonaco.Editor.ModelDeltaDecoration {
+
+                    //Range = new BlazorMonaco.Range(part.Item.startLine, 1, part.Item.startLine, part.Item.label.Length + 1),
+                    Range = new BlazorMonaco.Range(startLine, 1, part.Item.endLine, 1),
+                    Options = new BlazorMonaco.Editor.ModelDecorationOptions {
+                        //InlineClassName = "song-part-label active",
+                        ClassName = "active-song-part",
+                        InlineClassName = "active-song-part",
+                        IsWholeLine = true,
+                    }
+                });
+
+                // dec.Add(new BlazorMonaco.Editor.ModelDeltaDecoration {
+                //     Range = new BlazorMonaco.Range(part.Item.StartLine, 1, part.Item.EndLine, 1),
+                //     Options = new BlazorMonaco.Editor.ModelDecorationOptions {
+                //         InlineClassName = "active-song-part",
+                //         IsWholeLine = true,
+                //     }
+                // });
+
+            } else {
+                dec.Add(new BlazorMonaco.Editor.ModelDeltaDecoration {
+                    Range = new BlazorMonaco.Range(part.Item.startLine, 1, part.Item.startLine, part.Item.label.Length + 1),
+                    Options = new BlazorMonaco.Editor.ModelDecorationOptions {
+                        InlineClassName = "song-part-label",
+                    }
+                });
+            }
+
+            // Highlight chords
+            if (part.Item.content.Contains("[")) {
+                var lines = part.Item.content.Split(new string[] { Environment.NewLine }, StringSplitOptions.None).ToList();
+                var startingLine = part.Item.startLine;
+                foreach(var line in lines) {
+                    startingLine++;
+
+                    // Find all text in the line surrounded by square brackets.
+                    var matches = System.Text.RegularExpressions.Regex.Matches(line, @"\[([^\]]*)\]");
+                    foreach (System.Text.RegularExpressions.Match match in matches) {
+                        dec.Add(new BlazorMonaco.Editor.ModelDeltaDecoration {
+                            Range = new BlazorMonaco.Range(startingLine, match.Index + 1, startingLine, match.Index + match.Length + 1),
+                            Options = new BlazorMonaco.Editor.ModelDecorationOptions {
+                                InlineClassName = match.Value.StartsWith("[!") ? "song-part-note" : "song-part-chord",
+                            }
+                        });
+                    }
+                }
+            }
+        }
+
+        await _editor.DeltaDecorations(null, dec.ToArray());
+    }
+
+    protected async void EditorUpdatedTimer(Object? source, System.Timers.ElapsedEventArgs e)
+    {
+        _editorPosition = await _editor.GetPosition();
+
+        var task = Task.Run(async () => { 
+            var content = await _editor.GetValue();
+
+            if (content != Model.Song.content) {
+                Model.Song.content = content;
+                Model.Song.parts = Tools.SongParts(Model.Song); 
+                
+                await UpdateSongSaveRequired(Model.Song);
+
+                await EditorUpdatedApplyStyles();
+
+                // If this song is in the set list then update all instances there as well.
+                //bool updatedSongsInSonglist = false;
+                // foreach(var item in Model.SetList.items) {
+                //     if (item.item != null && item.type == setListItemType.song) {
+                //         var song = (song)item.item;
+                //         if (song.id == Model.Song.id && song.songBookId == Model.Song.songBookId) {
+                //             song.content = Model.Song.content;
+                //             //updatedSongsInSonglist = true;
+                //         }
+                //     }
+                // }
+
+                // if (updatedSongsInSonglist) {
+                //     await Model.SendSignalRSetListUpdate(Model.SetList);
+                // }
+
+                StateHasChanged();
+            }
+        });
+    }
+
+    protected async Task EditorUpdateValues()
+    {
+        var positionBeforeUpdate = await _editor.GetPosition();
+
+        await _editor.SetValue(!String.IsNullOrWhiteSpace(Model.Song.content) ? Model.Song.content : " ");
+        await EditorUpdatedApplyStyles();
+
+        await _editor.SetPosition(positionBeforeUpdate, "");
+
+        //await ResizeEditor();
+    }
+
+    protected void EditorUpdateOptions()
+    {
+        _editor.UpdateOptions(new BlazorMonaco.Editor.EditorUpdateOptions {
+            ReadOnly = !Model.User.preferences.editMode
+        });
+    }
+
+    protected void EditUser(user user)
+    {
+        Helpers.NavigateTo("EditUser/" + user.id.ToString());
+    }
+
+    protected async Task ImportSong(songBook songbook)
+    {
+        Delegate onImportComplete = (List<song> songs) => {
+            if (songs != null && songs.Any()) {
+                var now = DateTime.Now;
+
+                foreach(var song in songs) {
+                    song.id = Guid.NewGuid();
+                    song.songBookId = songbook.id;
+                    song.created = now;
+                    song.updated = now;
+                    song.saveRequired = true;
+
+                    songbook.songs.Add(song);
+                }
+
+                songbook.songs = songbook.songs.OrderBy(x => x.title).ThenBy(x => x.artist).ToList();
+                songbook.saveRequired = true;
+
+                StateHasChanged();
+            }
+        };
+
+        await Helpers.Import(onImportComplete, Text.ImportSong, setListItemType.song, Text.ImportSongInfo, true, new List<string> { ".txt" });
+    }
+
+    protected async Task Logout() 
+    {
+        SetActivePageSection("");
+
+        await Helpers.ClearLocalStorageItem("UserId");
+
+        Model.User = new user();
+        //StateHasChanged();
+    }
+
+    protected async Task MessagingClear(string target)
+    {
+        message? msg = null;
+
+        switch (Helpers.StringLower(target)) {
+            case "screen":
+                msg = Model.MessageItems.screenMessage;
+                break;
+
+            case "tablet":
+                msg = Model.MessageItems.tabletMessage;
+                break;
+        }
+
+        if (msg != null) {
+            msg.active = false;
+            msg.target = target;
+            msg.text = "";
+
+            await Model.SendSignalRMessage(msg);
+        }
+    }
+
+    protected async Task MessagingSend(string target)
+    {
+        message? msg = null;
+
+        switch(Helpers.StringLower(target)) {
+            case "screen":
+                msg = Model.MessageItems.screenMessage;
+                break;
+
+            case "tablet":
+                msg = Model.MessageItems.tabletMessage;
+                break;
+        }
+
+        if (msg != null) {
+            msg.active = true;
+            msg.target = target;
+            await Model.SendSignalRMessage(msg);
+        }
+    }
+
+    protected async Task MoveBackward(bool focusElement = true)
+    {
+        int activePart = Model.SetList.activeItemPart.HasValue ? (int)Model.SetList.activeItemPart : 0;
+        activePart--;
+
+        if(focusElement) {
+            await SetActiveElement(activePart);
+
+            if (Model.User.preferences.editMode) {
+                await EditorUpdatedApplyStyles();
+            }
+        }
+    }
+
+    protected async Task MoveForward(bool focusElement = true)
+    {
+        int activePart = Model.SetList.activeItemPart.HasValue ? (int)Model.SetList.activeItemPart : 0;
+        activePart++;
+
+        if(focusElement) {
+            await SetActiveElement(activePart);
+
+            if (Model.User.preferences.editMode) {
+                await EditorUpdatedApplyStyles();
+            }
+        }
+    }
+
+    protected async Task MoveNext(bool focusElement = true)
+    {
+        int currentSetListIndex = Model.CurrentSetListIndex;
+
+        if (currentSetListIndex < Model.SetList.items.Count - 1) {
+            int newIndex = currentSetListIndex + 1;
+            var setListItem = Model.SetList.items[newIndex];
+            if (setListItem != null) {
+                await SelectSetListItem(setListItem, true);
+            }
+        }
+    }
+
+    protected async Task MovePrevious(bool focusElement = true)
+    {
+        if (Model.CurrentSetListIndex > 0) {
+            int newIndex = Model.CurrentSetListIndex - 1;
+            var setListItem = Model.SetList.items[newIndex];
+            if (setListItem != null) {
+                // Various types will either go to the first element or the last based on their type.
+
+                var song = Tools.SetListItemAsSong(setListItem);
+                if (song != null && song.parts != null && song.parts.Count > 0) {
+                    await SelectSetListItem(setListItem, true, song.parts.Count - 1);
+                    return;
+                }
+
+                await SelectSetListItem(setListItem, true);
+            }
+        }
+    }
+
+    protected void MoveSongFromSongbookToSetList((int oldIndex, int newIndex) indices)
+    {
+        bool here = true;
+        if (here){
+
+        }
+    }
+
+    protected async Task OpenSetList(MouseEventArgs e)
+    {
+        await Helpers.ReloadSetListFilenames();
+
+        await contextMenuService.ShowMenu("AvailableSetLists", (int)e.ClientX, (int)e.ClientY);
+    }
+
+    protected async void OpenSetListMenuClicked(ItemClickEventArgs e)
+    {
+        await Helpers.LoadSetList(e.MenuItem.Id);
+    }
+
+    protected async void MoveToSongBookMenuItemClicked(ItemClickEventArgs e)
+    {
+        var songbookId = e.MenuItem.Id;
+        if (!String.IsNullOrWhiteSpace(songbookId)) {
+            var id = Helpers.GuidValue(songbookId);
+
+            if (id != Guid.Empty) {
+                var songbook = Helpers.GetSongBook(id);
+                if (songbook != null) {
+                    var duplicateSong = Helpers.DuplicateObject<song>(_selectedSongBookMoveOrCopySong);
+                    var duplicateSongbook = Helpers.DuplicateObject<songBook>(songbook);
+
+                    if (duplicateSong != null && duplicateSongbook != null) {
+                        duplicateSong.songBookId = songbook.id;
+
+                        Model.ClearMessages();
+                        Model.Message_Processing();
+
+                        var result = new booleanResponse();
+
+                        switch (Helpers.StringLower(_selectedSongBookMoveOrCopy)) {
+                            case "copy":
+                                duplicateSong.id = Guid.NewGuid();
+                                duplicateSongbook.songs.Add(duplicateSong);
+
+                                result = await Helpers.SaveSongBook(duplicateSongbook);
+                                break;
+
+                            case "move":
+                                var existingSongbook = Helpers.GetSongBook(_selectedSongBook);
+                                if (existingSongbook != null) {
+                                    var duplicatExistingSongbook = Helpers.DuplicateObject<songBook>(existingSongbook);
+                                    if (duplicatExistingSongbook != null) {
+                                        duplicatExistingSongbook.songs = duplicatExistingSongbook.songs.Where(x => x.id != _selectedSongBookMoveOrCopySong.id).ToList();
+                                        result = await Helpers.SaveSongBook(duplicatExistingSongbook);
+
+                                        if (result.result) {
+                                            duplicateSongbook.songs.Add(duplicateSong);
+                                            var moved = await Helpers.SaveSongBook(duplicateSongbook);
+                                            if (!moved.result) {
+                                                result.messages.AddRange(moved.messages);
+                                            }
+                                        }
+                                    }
+                                }
+                                break;
+                        }
+
+                        Model.ClearMessages();
+
+                        if (result.result) {
+                            Model.Message_Success();
+                        } else if (result.messages.Count > 0) {
+                            Model.ErrorMessages(result.messages);
+                        } else {
+                            Model.UnknownError();
+                        }
+                    }
+                }
+            }
+        }
+
+    }
+
+    protected void PanelResized()
+    {
+        StateHasChanged();
+    }
+
+    protected bool PreviewDisabledBasedOnSelectedItem {
+        get {
+            bool output = false;
+
+            if (Model.ActiveItem != null) {
+                switch(Model.ActiveItem.type) {
+                    // The following types will turn off the preview, since they render the same view.
+                    //case setListItemType.image:
+                    case setListItemType.video:
+                    case setListItemType.youTube:
+                        output = true;
+                        break;
+                }
+            }
+
+            return output;
+        }
+    }
+
+    protected async void ProcessSignalRSetList(setList setlist) {
+        if (Model.User.preferences.editMode) {
+            await EditorUpdatedApplyStyles();
+        }
+
+        song? currentSong = null;
+        var activeItem = setlist.items.FirstOrDefault(x => x.id == setlist.activeItem);
+
+        // Clear any previously-playing YouTube tools.
+        await Helpers.ClearVideoPlayers();
+
+        if (activeItem != null && activeItem.item != null) {
+            switch (Helpers.StringLower(activeItem.type)) {
+                case setListItemType.song:
+                    currentSong = (song)activeItem.item;
+                    break;
+
+                case setListItemType.video:
+                    var video = (videoItem)activeItem.item;
+                    if (video != null) {
+                        var videoUrl = Helpers.MediaUrl("Videos", video.filename);
+                        await Helpers.PlayVideo("video-player-main", video.volume);
+                    }
+                    break;
+
+                case setListItemType.youTube:
+                    var youTube = (youTubeItem)activeItem.item;
+                    if (youTube != null) {
+                        await Helpers.PlayYouTubeVideo("main", youTube.videoId, youTube.muteInMainWindow, youTube.volume);
+                    }
+                    break;
+            }
+        }
+
+        // If no song is loaded in the view pane, then load the active song now.
+        if (currentSong != null) {
+            bool editorUpdateRequired = false;
+
+            if (Model.Song.id == Guid.Empty) {
+                Model.Song = currentSong;
+                editorUpdateRequired = true;
+            }
+
+            if (Model.Song.id == currentSong.id) {
+                // This is the current song in the view.
+                // If we are in editor mode update the editor.
+                // Otherwise scroll the current song part into view.
+                if (Model.User.preferences.editMode) {
+                    editorUpdateRequired = true;
+
+                    // Set the focus to the active part.
+                    var part = Model.SongParts.FirstOrDefault(x => x.startLine <= _editorLine && x.endLine >= _editorLine);
+                    if (part != null) {
+                        await _editor.RevealLineInCenter(part.startLine, BlazorMonaco.Editor.ScrollType.Immediate);
+                    }
+                } else {
+                    await Helpers.ScrollElementToCenter("current-song-part-" + Model.SetList.activeItemPart.ToString(), "item-detail-view-control");
+                }
+            }
+
+            if (editorUpdateRequired) {
+                await EditorUpdateValues();
+            }
+        }
+    }
+
+    protected async void ProcessSignalRUpdate(signalRUpdate update)
+    {
+        await System.Threading.Tasks.Task.Delay(0);
+        //double playbackTime = 0;
+
+        //switch (update.UpdateType) {
+            // These are disabled as the preview is now hidden for videos
+            // case SignalRUpdateType.VideoPlayerPlabackTime:
+            //     playbackTime = Tools.Double(update.Message);
+            //     await Helpers.PlayVideoUpdatePlaybackTime("main-screen-preview", playbackTime);
+            //     break;
+
+            // case SignalRUpdateType.VideoPlayerState:
+            //     await Helpers.PlayVideoSetPlaybackState("main-screen-preview", update.Message);
+            //     break;
+
+            // case SignalRUpdateType.YouTubePlayState:
+            //     await Helpers.PlayYouTubeVideoSetPlaybackState("main-screen-preview", update.Message);
+            //     break;
+
+            // case SignalRUpdateType.YouTubePlaybackTime:
+            //     playbackTime = Tools.Double(update.Message);
+            //     await Helpers.PlayYouTubeVideoUpdatePlayTimeForPlayer("main-screen-preview", playbackTime);
+            //     break;
+        //}
+    }
+
+    // protected async Task ResizeEditor()
+    // {
+    //     var m = await _editor.GetModel();
+    //     var lines = await m.GetLineCount();
+        
+    //     var cssHeight = (lines * 19) + 20;
+
+    //     await Helpers.SetElementHeight("code-editor", cssHeight + "px");
+    // }
+
+    protected async Task RenameSongbook(songBook songbook)
+    {
+        Delegate onNewName = async(string newName) => {
+            if (!String.IsNullOrWhiteSpace(newName) && newName.ToLower() != songbook.name.ToLower()){
+                // Make sure this name is not in use.
+                var inUse = Model.SongBooks.FirstOrDefault(x => x.name.ToLower() == newName.ToLower());
+                if (inUse == null) {
+                    var dupSongBook = Helpers.DuplicateObject<songBook>(songbook);
+                    if (dupSongBook != null) {
+                        dupSongBook.name = newName;
+
+                        Model.ClearMessages();
+                        Model.Message_Saving();
+
+                        var saved = await Helpers.SaveSongBook(dupSongBook);
+
+                        Model.ClearMessages();
+
+                        if (saved != null) {
+                            if (saved.result) {
+                                Model.Message_Saved();
+                            } else if (saved.messages.Any()) {
+                                Model.ErrorMessages(saved.messages);
+                            } else {
+                                Model.UnknownError();
+                            }
+                        } else {
+                            Model.UnknownError();
+                        }
+                    }
+                }
+            }
+        };
+
+        await Helpers.GetInput(
+            onNewName,
+            FreeBlazor.GetInput.InputType.Text,
+            Text.RenameSongbook,
+            "rename-songbook",
+            songbook.name,
+            Text.RenameSongbookInfo,
+            "form-control",
+            null,
+            "", 
+            true
+        );
+    }
+
+    protected void ResetLayout()
+    {
+        Model.User.preferences.layoutPanelLeft = 20;
+        Model.User.preferences.layoutPanelSetList = 50;
+
+        StateHasChanged();
+    }
+
+    protected async Task SaveActiveUsersOnlySetting()
+    {
+        await Helpers.SetLocalStorageItem("ActiveUsersOnly", _activeUsersOnly);
+    }
+
+    protected async Task SaveSetList()
+    {
+        if (!String.IsNullOrWhiteSpace(Model.SetList.name)) {
+            await SaveSetList(Model.SetList.name);
+        } else {
+            Delegate onNewName = async(string name) => {
+                if (!String.IsNullOrWhiteSpace(name)) {
+                    await SaveSetList(name);
+                }
+            };
+
+            await Helpers.GetInput(onNewName, FreeBlazor.GetInput.InputType.Text, Text.EnterFileName, "", "", Text.EnterFileNameInfo, "form-control", null, "", true);
+        }
+    }
+
+    protected async Task SaveSetList(string name)
+    {
+        Model.ClearMessages();
+        Model.Message_Saving();
+
+        // Prepare the set list object for saving.
+        var save = Helpers.DuplicateObject<setList>(Model.SetList);
+        if (save != null) {
+            save.name = name;
+            save.fileName = name;
+
+            // Need to serialize the items as JSON and clear out the regular objects as they don't serialize and deserialize well with System.Text.Json.
+            foreach(var item in save.items) {
+                if (item.item != null) {
+                    item.itemJson = Helpers.SerializeObject(item.item);
+                    item.item = null;
+                }
+            }
+
+            var result = await Helpers.GetOrPost<booleanResponse>("api/SaveSetList", save);
+
+            Model.ClearMessages();
+
+            if (result != null) {
+                if (result.result) {
+                    Model.SetList.name = name;
+                    Model.SetList.fileName = Tools.SafeFileName(name);
+                    Model.SetList.saveRequired = false;
+                    Model.Message_Saved();
+                } else {
+                    if (result.messages.Any()) {
+                        Model.ErrorMessages(result.messages);
+                    } else {
+                        Model.UnknownError();
+                    }
+                }
+            } else {
+                Model.UnknownError();
+            }
+        }
+    }
+
+    protected async Task SaveSetListAs() {
+        Delegate onNewName = async (string name) => {
+            if (!String.IsNullOrWhiteSpace(name)) {
+                await SaveSetList(name);
+            }
+        };
+
+        await Helpers.GetInput(onNewName, FreeBlazor.GetInput.InputType.Text, Text.EnterFileName, "", "", Text.EnterFileNameInfo, "form-control", null, "", true);
+    }
+
+    protected async Task SaveSetListAs(string name) {
+
+    }
+
+    protected async Task SaveSong()
+    {
+        EditMessage(Text.SavingWait, "success");
+
+        var saved = await Helpers.GetOrPost<booleanResponse>("api/SaveSong", Model.Song);
+
+        if (saved != null) {
+            if (saved.result) {
+                EditMessage(Text.SavedAt + " " + DateTime.Now.ToString());
+            } else {
+                EditMessage(Helpers.CleanErrorMessages(saved.messages), "danger");
+            }
+        } else {
+            EditMessage(Text.UnknownError, "danger");
+        }
+    }
+
+    protected async Task SaveSong(song song)
+    {
+        Model.ClearMessages();
+        Model.Message_Saving();
+
+        var saved = await Helpers.GetOrPost<booleanResponse>("api/SaveSong", song);
+
+        Model.ClearMessages();
+
+        if (saved != null) {
+            if (saved.result) {
+                Model.Message_Saved();
+            } else {
+                if (saved.messages.Count > 0) {
+                    Model.ErrorMessages(saved.messages);
+                } else {
+                    Model.UnknownError();
+                }
+            }
+        } else {
+            Model.UnknownError();
+        }
+    }
+
+    protected async Task SaveSongBook(songBook songbook)
+    {
+        Model.Message_Saving();
+        
+        var saved = await Helpers.GetOrPost<booleanResponse>("api/SaveSongBook", songbook);
+
+        Model.ClearMessages();
+
+        if (saved != null) {
+            if (saved.result) {
+                Model.Message_Saved();
+            } else {
+                Model.ErrorMessages(saved.messages);
+            }
+        } else {
+            Model.UnknownError();
+        }
+    }
+
+    protected async Task SelectSetListItem(setListItem item, bool setAsActiveItem = false, int? setItemPart = null)
+    {
+        var previousItem = Model.SetList.activeItem;
+
+        Model.SetList.selectedItem = item.id;
+
+        bool doubleClicked = false;
+        var ms = (DateTime.Now - _doubleClickingSetListItem).TotalMilliseconds;
+        if (ms < 500 && _doubleClickingSetListItemId == item.id) {
+            doubleClicked = true;
+        }
+        _doubleClickingSetListItem = DateTime.Now;
+        _doubleClickingSetListItemId = item.id;
+
+        _selectedSong = new selectedSong();
+
+        bool setFocusToSetlistElement = false;
+
+        if (item.item != null) {
+            switch (item.type){
+                case setListItemType.song:
+                    //var song = (Song)item.Item;
+                    var song = Tools.SetListItemAsSong(item);
+                    if (song != null) {
+                        _selectedSong = new selectedSong {
+                            songId = song.id,
+                            songBookId = Helpers.GuidValue(song.songBookId),
+                        };
+
+                        if (doubleClicked || setAsActiveItem) {
+                            _doubleClickingSetListItem = DateTime.MinValue;
+                            _doubleClickingSetListItemId = Guid.Empty;
+                            if (Model.Song.id != song.id || Model.Song.songBookId != song.songBookId || Model.SetList.activeItem != item.id) {
+                                Model.Song = song;
+                                Model.SetList.activeItem = item.id;
+
+                                await SetActiveElement(setItemPart != null ? setItemPart.Value : 0);
+                                //Model.SetList.ActiveItemPart = 0;
+                            }
+                            setFocusToSetlistElement = true;
+                        }
+                    }
+                    break;
+
+                case setListItemType.audio:
+                    // Audio files don't render in the view pane. Rather, they have their own
+                    // area in the top toolbar so the audio can be controlled when other items
+                    // are playing.
+
+                    if (doubleClicked || setAsActiveItem) {
+                        var audioItem = Tools.SetListItemAsAudio(item);
+                        if (audioItem != null && !String.IsNullOrWhiteSpace(audioItem.filename)) {
+                            await Helpers.PlayAudioFile(audioItem.filename, audioItem.volume);
+                        }
+                        setFocusToSetlistElement = true;
+                    }
+                    break;
+
+                case setListItemType.slideshow:
+                    if (doubleClicked || setAsActiveItem) {
+                        var slideshow = Tools.SetListItemAsSlideshow(item);
+                        if (slideshow != null) {
+                            if (slideshow.images == null || slideshow.images.Count == 0) {
+                                var ss = await Helpers.LoadSlideshow(slideshow.folder);
+                                if (ss != null && ss.images != null && ss.images.Count > 0) {
+                                    slideshow.images = ss.images;
+                                }
+                            }
+
+                            Model.SetList.activeItem = item.id;
+                            await SetActiveElement(setItemPart != null ? setItemPart.Value : 0);
+                        }
+                        setFocusToSetlistElement = true;
+                    }
+                    break;
+
+                case setListItemType.youTube:
+                    if (doubleClicked || setAsActiveItem) {
+                        if (item.id !=  previousItem) {
+                            Model.YouTubePlayingStatus = -1;
+                        }
+
+                        Model.SetList.activeItem = item.id;
+                        await SetActiveElement(setItemPart != null ? setItemPart.Value : 0);
+                        setFocusToSetlistElement = true;
+                    }
+                    break;
+
+                default:
+                    if (doubleClicked || setAsActiveItem) {
+                        Model.SetList.activeItem = item.id;
+                        await SetActiveElement(setItemPart != null ? setItemPart.Value : 0);
+                        setFocusToSetlistElement = true;
+                    }
+                    break;
+            }
+        } else {
+            // See if this is a type that doesn't require an .Item property
+        }
+
+        StateHasChanged();
+
+        if (setFocusToSetlistElement == true) {
+            Helpers.SetTimeout(() => SetActivePageSection("setlist-element"), 200);
+        }
+    }
+
+    protected async Task SelectedUser(user user)
+    {
+        SetActivePageSection("");
+
+        await Helpers.SetLocalStorageItem("UserId", user.id);
+
+        _showUserList = false;
+
+        user.preferences.cultureCode = Model.User.preferences.cultureCode;
+        Model.User = user;
+    }
+
+    protected async Task SetActiveElement(int index){
+        // Instead of updating the model directly, send this out via SignalR so all clients are updated.
+        var setlist = Helpers.DuplicateObject<setList>(Model.SetList);
+        if (setlist != null) {
+            setlist.activeItemPart = index;
+
+            // If there are no items in the set list and we are just viewing a song, add that song to this object.
+            if (Model.EmptySetList) {
+                var newItem = new setListItem {
+                    id = Guid.Empty,
+                    item = Model.Song,
+                    type = setListItemType.song,
+                };
+                setlist.items = new List<setListItem> { newItem };
+                
+                setlist.activeItem = Guid.Empty;
+            }
+
+            await Model.SendSignalRSetListUpdate(setlist);
+        }
+
+        // Model.SetList.ActiveItemPart = index;
+        // Model.TriggerUpdate();
+    }
+
+    protected void SetActivePageSection(string section)
+    {
+        _activePageSection = section;
+        StateHasChanged();
+    }
+
+    protected void SetLanguage(Language language)
+    {
+        Helpers.LoadAndUpdateLanguage(language);
+        Model.User.preferences.cultureCode = language.cultureCode;
+        StateHasChanged();
+    }
+
+    protected async void SetListContextMenuOnClick(ItemClickEventArgs e) {
+        if (e != null) {
+            var setItemId = e.ContextMenuTrigger.Id;
+            var selectedAction = e.MenuItem.Id;
+
+            if (!String.IsNullOrWhiteSpace(setItemId)) {
+                var item = Model.SetList.items.FirstOrDefault(x => x.id.ToString() == setItemId);
+                if (item != null) {
+                    switch (selectedAction) {
+                        case "delete":
+                            DeleteSetListItem(item);
+                            break;
+                        case "edit":
+                            await Helpers.EditSetListItem(item);
+                            break;
+                        case "view":
+                            await SelectSetListItem(item, true);
+                            break;
+                    }
+                }
+            }
+        }
+    }
+
+    protected void SetListSorted((int oldIndex, int newIndex) indices)
+    {
+        // deconstruct the tuple
+        var (oldIndex, newIndex) = indices;
+
+        var items = Model.SetList.items;
+        var itemToMove = items[oldIndex];
+        items.RemoveAt(oldIndex);
+
+        if (newIndex < items.Count) {
+            items.Insert(newIndex, itemToMove);
+        } else {
+            items.Add(itemToMove);
+        }
+
+        Model.SetList.saveRequired = true;
+        StateHasChanged();
+    }
+
+    protected void SetPreview(string? preview) 
+    {
+        Model.User.preferences.showPreview = preview;
+        StateHasChanged();
+
+        Helpers.SetTimeout(() => { _preview.Redraw(); }, 100);
+    }
+
+    protected async Task SetSong(song song, bool emulateDoubleClick = false)
+    {
+        ClearEditMessage();
+
+        _selectedSong = new selectedSong {
+            songId = song.id,
+            songBookId = Helpers.GuidValue(song.songBookId),
+        };
+
+        bool doubleClicked = false;
+        var ms = (DateTime.Now - _doubleClickingSong).TotalMilliseconds;
+        if (ms < 800 && _doubleClickingSongId == song.id) {
+            doubleClicked = true;
+        }
+        _doubleClickingSong = DateTime.Now;
+        _doubleClickingSongId = song.id;
+
+        if (Model.SetList.items.Count == 0){
+            // If nothing has been loaded into the set list at all
+            // allow a single click to show this first song.
+            doubleClicked = true;
+        }
+
+        if (emulateDoubleClick) {
+            doubleClicked = true;
+        }
+
+        if (doubleClicked && Model.EmptySetList) {
+            _doubleClickingSong = DateTime.MinValue;
+            _doubleClickingSongId = Guid.Empty;
+
+            // Only set the song in the song pane if a song is not already being shown.
+            // Otherwise, songs are shown from the set list.
+            if (Model.Song.id == Guid.Empty || Model.EmptySetList) {
+                Model.Song = song;
+
+                // Create the fake set list to send to clients.
+                var newItem = new setListItem {
+                        id = Guid.Empty,
+                        item = Model.Song,
+                        type = setListItemType.song,
+                    };
+
+                Model.SetList.items = new List<setListItem> { newItem };
+                Model.SetList.activeItem = Guid.Empty;
+                Model.SetList.activeItemPart = 0;
+
+                await SetActiveElement(0);
+                await EditorUpdateValues();
+                EditorUpdateOptions();
+            }
+        }
+
+        StateHasChanged();
+    }
+
+    protected List<setListItem> SongBookAsSetListItems(songBook songBook) 
+    {
+        var output = new List<setListItem>();
+
+        if (songBook.songs.Count > 0) {
+            foreach (var song in songBook.songs.OrderBy(x => x.title).ThenBy(x => x.artist)) {
+                output.Add(new setListItem {
+                    id = Guid.NewGuid(),
+                    item = song,
+                    type = setListItemType.song,
+                });
+            }
+        }
+
+        return output;
+    }
+
+    protected async void SongBookContextMenuOnClick(ItemClickEventArgs e) {
+        if (e != null) {
+            var songbookId = e.ContextMenuTrigger.Id;
+            var selectedAction = e.MenuItem.Id;
+
+            if (!String.IsNullOrWhiteSpace(songbookId)) {
+                if (!String.IsNullOrWhiteSpace(songbookId)) {
+                    var songbook = Model.SongBooks.FirstOrDefault(x => x.id.ToString() == songbookId);
+                    if (songbook != null) {
+
+                        switch (selectedAction) {
+                            case "addsong":
+                                await AddSong(songbook);
+                                break;
+
+                            case "rename":
+                                await RenameSongbook(songbook);
+                                break;
+
+                            case "delete":
+                                await DeleteSongBook(songbook);
+                                break;
+
+                            case "import":
+                                await ImportSong(songbook);
+                                break;
+
+                            case "save":
+                                await SaveSongBook(songbook);
+                                break;
+
+                            default:
+                                break;
+                        }
+                    }
+                }
+            }
+        }
+    }
+
+    protected async void SongContextMenuOnClick(ItemClickEventArgs e)
+    {
+        var itemId = e.ContextMenuTrigger.Id;
+        var selectedAction = e.MenuItem.Id;
+
+        if (!String.IsNullOrWhiteSpace(itemId)) {
+            string songbookId = String.Empty;
+            string songId = String.Empty;
+
+            if (itemId.Contains("|")) {
+                var parts = itemId.Split("|");
+                songbookId = parts[0];
+                songId = parts[1];
+            }
+
+            if (!String.IsNullOrWhiteSpace(songbookId) && !String.IsNullOrWhiteSpace(songId)) {
+                var songbook = Model.SongBooks.FirstOrDefault(x => x.id.ToString() == songbookId);
+                if (songbook != null) {
+                    var song = songbook.songs.FirstOrDefault(x => x.id.ToString() == songId);
+
+                    if (song != null) {
+                        switch(selectedAction) {
+                            case "addsong":
+                                await AddSong(songbook);
+                                break;
+
+                            case "addtosetlist":
+                                AddSongToSetList(song);
+                                break;
+
+                            case "copy":
+                                //await Helpers.MoveOrCopySong(Text.CopySongToSongbook, song, "copy");
+                                _selectedSongBook = songbook.id;
+                                _selectedSongBookMoveOrCopy = "copy";
+                                _selectedSongBookMoveOrCopySong = song;
+                                await contextMenuService.ShowMenu("AvailableSongBooks", (int)e.MouseEvent.ClientX, (int)e.MouseEvent.ClientY);
+                                break;
+
+                            case "delete":
+                                await ConfirmDeleteSong(song);
+                                break;
+
+                            case "move":
+                                //await Helpers.MoveOrCopySong(Text.MoveToSongbook, song, "move");
+                                _selectedSongBook = songbook.id;
+                                _selectedSongBookMoveOrCopy = "move";
+                                _selectedSongBookMoveOrCopySong = song;
+                                await contextMenuService.ShowMenu("AvailableSongBooks", (int)e.MouseEvent.ClientX, (int)e.MouseEvent.ClientY);
+                                break;
+
+                            case "save":
+                                await SaveSong(song);
+                                break;
+
+                            default:
+                                break;
+                        }
+                    }
+                }
+            }
+        }
+    }
+
+    protected async Task SongModified()
+    {
+        await UpdateSongSaveRequired(Model.Song);
+    }
+
+    protected void SongMovedToSetList((int oldIndex, int newIndex) indices, songBook songbook)
+    {
+        // oldIndex is the index of the song in the songbook.
+        // newIndex is the position it was dropped in the set list
+
+        var song = songbook.songs[indices.oldIndex];
+
+        // Insert the new song into the set list at the new index.
+        Model.SetList.items.Insert(indices.newIndex, new setListItem {
+            id = Guid.NewGuid(),
+            item = song,
+            type = setListItemType.song,
+        });
+        Model.SetList.saveRequired = true;
+        StateHasChanged();
+    }
+
+    protected async Task ToggleBlankScreen() {
+        if (Model.BlankScreen) {
+            await Model.SendSignalRUpdate(new signalRUpdate {
+                updateType = signalRUpdateType.unblankScreen,
+            });
+        } else {
+            await Model.SendSignalRUpdate(new signalRUpdate {
+                updateType = signalRUpdateType.blankScreen,
+            });
+        }
+    }
+
+    protected void ToggleChords()
+    {
+        Model.User.preferences.hideChords = !Model.User.preferences.hideChords;
+        StateHasChanged();
+    }
+
+    protected async Task ToggleEditMode()
+    {
+        Model.User.preferences.editMode = !Model.User.preferences.editMode;
+
+        await EditorUpdateValues();
+        EditorUpdateOptions();
+
+        StateHasChanged();
+    }
+
+    protected async Task ToggleHideText(){
+        if (Model.HideText) {
+            await Model.SendSignalRUpdate(new signalRUpdate {
+                updateType = signalRUpdateType.unhideText,
+            });
+        } else {
+            await Model.SendSignalRUpdate(new signalRUpdate {
+                updateType = signalRUpdateType.hideText,
+            });
+        }
+    }
+
+    protected void ToggleMessaging()
+    {
+        Model.User.preferences.showMessaging = !Model.User.preferences.showMessaging;
+        StateHasChanged();
+    }
+
+    protected void ToggleShowUserList()
+    {
+        _showUserList = !_showUserList;
+        StateHasChanged();
+    }
+
+    protected void ToggleSongBook(Guid songbookId)
+    {
+        if (Model.User.preferences.openSongBooks.Contains(songbookId)) {
+            Model.User.preferences.openSongBooks = Model.User.preferences.openSongBooks.Where(x => x != songbookId).ToList();
+        } else {
+            Model.User.preferences.openSongBooks.Add(songbookId);
+        }
+        StateHasChanged();
+    }
+
+    protected async Task UpdateSongSaveRequired(song song)
+    {
+        // When this happens this indicates that we are in an empty set list.
+        // This updated song needs to be pushed to all clients via SignalR.
+        if (Model.SetList.activeItemPart.HasValue) {
+            await SetActiveElement(Model.SetList.activeItemPart.Value);
+        }
+
+        if (Model.Song.id == song.id && Model.Song.songBookId == song.songBookId) {
+            Model.Song.saveRequired = true;
+        }
+
+        var songbook = Helpers.GetSongBook(song.songBookId);
+        if (songbook != null) {
+            var songInSongbook = songbook.songs.FirstOrDefault(x => x.id == song.id);
+            if (songInSongbook != null) {
+                songInSongbook.saveRequired = true;
+            }
+        }
+
+        foreach (var item in Model.SetList.items) {
+            if (item.item != null && item.type == setListItemType.song) {
+                if (song.id == Model.Song.id && song.songBookId == Model.Song.songBookId) {
+                    song.content = Model.Song.content;
+                    song.parts = Tools.SongParts(song);
+                }
+            }
+        }
+
+        song.saveRequired = true;
+        UpdateSongbooksSaveRequired();
+    }
+
+    protected void UpdateSongbooksSaveRequired()
+    {
+        // Any songbooks that have unsaved songs should be marked a SaveRequired.
+        foreach (var songbook in Model.SongBooks) {
+            songbook.saveRequired = songbook.songs.Any(x => x.saveRequired.HasValue && x.saveRequired.Value == true);
+        }
+    }
+
+    protected List<user> UsersToShow
+    {
+        get {
+            var output = Model.Users.Where(x => x.id != Guid.Empty && (x.enabled == true || _activeUsersOnly == false)).OrderBy(x => x.name).ToList();
+            return output;
+        }
+    }
+}

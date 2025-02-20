@@ -1,0 +1,505 @@
+﻿@inject BlazorDataModel Model
+@inject Radzen.DialogService DialogService
+@implements IDisposable
+
+<style>
+    @((MarkupString)_css)
+</style>
+
+@{
+    var uniqueId0 = _uniqueId + "-0";
+    var uniqueId1 = _uniqueId + "-1";
+}
+
+<div class="prevent-select projection-wrapper @Helpers.AspectRatioToCssClass(AspectRatio)">
+    <div id="@(_uniqueId + "-background-0")" style="@Helpers.BackgroundStyle(_styles[0])" class="background-wrapper @_backgroundsFade[0]">
+        @switch (_backgroundType[0]) {
+            case backgroundType.image:
+                if (_background[0].StartsWith("http")) {
+                    <img src="@_background[0]" />
+                } else {
+                    <img src="./Background/@_background[0]" />
+                }
+                break;
+
+
+            case backgroundType.slideshow:
+                <img src="@_background[0]" />
+                break;
+
+            case backgroundType.video:
+                <video autoplay muted playsinline loop onloadedmetadata="this.muted=true" preload="auto" oncanplay="this.play()"
+                        class="video-background"
+                        src="./Backgrounds/@_background[0]" type="@Helpers.MimeType(_background[0])" />
+                break;
+        }
+    </div>
+    <div id="@(_uniqueId + "-background-1")" style="@Helpers.BackgroundStyle(_styles[1])" class="background-wrapper @_backgroundsFade[1]">
+        @switch (_backgroundType[1]) {
+            case backgroundType.image:
+                if (_background[1].StartsWith("http")) {
+                    <img src="@_background[1]" />
+                } else {
+                    <img src="./Background/@_background[1]" />
+                }
+                break;
+
+            case backgroundType.slideshow:
+                <img src="@_background[1]" />
+                break;
+
+            case backgroundType.video:
+                <video autoplay muted playsinline loop onloadedmetadata="this.muted=true" preload="auto" oncanplay="this.play()"
+                        class="video-background"
+                        src="./Background/@_background[1]" type="@Helpers.MimeType(_background[1])" />
+                break;
+        }
+    </div>
+
+    <div id="@uniqueId0" class="projection-lyrics-wrapper main-screen-preview @uniqueId0 @_fadeClass[0] @Helpers.AspectRatioToCssClass(AspectRatio)">
+        <ProjectorRender
+            ActiveItemPart="@_activeItemPart[0]"
+            ObjectToRender="_objectArray[0]"
+            ObjectType="@_objectType[0]"
+            ItemStyle="_styles[0]"
+            UniqueId="@uniqueId0" />
+    </div>
+
+    <div id="@uniqueId1" class="projection-lyrics-wrapper main-screen-preview @uniqueId1 @_fadeClass[1] @Helpers.AspectRatioToCssClass(AspectRatio)">
+        <ProjectorRender
+            ActiveItemPart="@_activeItemPart[1]"
+            ObjectToRender="_objectArray[1]"
+            ObjectType="@_objectType[1]"
+            ItemStyle="_styles[1]"
+            UniqueId="@uniqueId1" />
+    </div>
+
+    @if (Model.MessageItems.screenMessage.active && !String.IsNullOrWhiteSpace(Model.MessageItems.screenMessage.text)) {
+        var msg = Model.MessageItems.screenMessage.text.Replace(Environment.NewLine, "<br />");
+        var style = !String.IsNullOrWhiteSpace(Model.MessageItems.screenMessage.style) ? Model.MessageItems.screenMessage.style : "red";
+
+        if (!String.IsNullOrWhiteSpace(msg)) {
+            <div class="screen-message @style">
+                <span class="screen-message-text">@((MarkupString)msg)</span>
+            </div>
+        }
+    }
+</div>
+
+@code {
+    [Parameter] public int? ActiveItemPart { get; set; }
+    [Parameter] public string AspectRatio { get; set; } = "16:9";
+    [Parameter] public string? Id { get; set; }
+    [Parameter] public double Scale { get; set; } = 1.0;
+
+    protected int _activeBackground = 1;
+    protected int _activeObject = 1;
+    protected int?[] _activeItemPart = new int?[] { null, null };
+    protected Guid[] _activeItem = new Guid[] { Guid.Empty, Guid.Empty };
+    protected string[] _background = new string[] { "", "" };
+    protected string[] _backgroundsFade = new string[] { "hide-screen-content", "hide-screen-content" };
+    protected string[] _backgroundType = new string[] { "", "" };
+    protected string _css = String.Empty;
+    protected string[] _fadeClass = new string[] { "hide-screen-content", "hide-screen-content" };
+    protected bool _loaded = false;
+    //protected message _message = new message();
+    protected Guid? _newActiveItem = Guid.Empty;
+    protected int? _newActiveItemPart = null;
+    protected viewStyle? _newItemStyle = null;
+    protected int? _newTransitionSpeed = null;
+    protected object[] _objectArray = new object[] { 1, 2 };
+    protected string[] _objectType = new string[] { "", "" };
+    protected int[] _transitionSpeed = new int[] { 0, 0 };
+    protected bool[] _useStyle = new bool[] { true, true };
+    protected viewStyle[] _styles = new viewStyle[] { new viewStyle(), new viewStyle() };
+
+    protected viewStyle _videoStyle = new viewStyle();
+
+    // Instead of rendering the set list we will either render the PreviewSong, which indicates this is just for an editor,
+    // or will will only render supported item types when the SignalR message is received.
+    // This way, other items that don't affect the screen can be active in the set list, but not affect this view.
+    // For example, an Audio file might be played, but that shouldn't affect this view.
+    // We will only check the model if this interface loads without a PreviewSong and before a SignalR message is received.
+    // So, the active item from the Model will only be used on initialization.
+
+    protected string _uniqueId = String.Empty;
+    
+    public void Dispose() { 
+        Model.OnSignalRUpdate -= SignalRUpdate;
+        Model.OnSignalRSetList -= ProcessSignalRSetList;
+    }
+
+    protected override async Task OnAfterRenderAsync(bool firstRender)
+    {
+        if (Model.Loaded && !_loaded) {
+            _loaded = true;
+            RenderCSS(0);
+
+            // On the initial load we won't have received any SignalR messages yet.
+            // So, we need to get the cached version of the set list to show the
+            // current active item on initial load.
+            await Helpers.LoadCachedMessages();
+            await Helpers.LoadCachedSetList();
+
+            var activeItem = Model.SetList.items.FirstOrDefault(x => x.id == Model.SetList.activeItem);
+            if (activeItem != null) {
+                _newActiveItemPart = Model.SetList.activeItemPart;
+                await RenderSetListItem(activeItem);
+            }
+        }
+    }
+
+    protected override void OnInitialized()
+    {
+        _newActiveItemPart = ActiveItemPart;
+
+        _uniqueId = !String.IsNullOrWhiteSpace(Id) ? Id : "element-" + Guid.NewGuid().ToString().Replace("-", "").ToLower();
+
+        // The default style for all slides will be the projection style.
+        var s0 = Helpers.DuplicateObject<viewStyle>(Model.Settings.projectionStyle);
+        var s1 = Helpers.DuplicateObject<viewStyle>(Model.Settings.projectionStyle);
+
+        _styles[0] = s0 != null ? s0 : new viewStyle();
+        _styles[1] = s1 != null ? s1 : new viewStyle();
+
+        _videoStyle = new viewStyle {
+            backgroundType = backgroundType.color,
+            background = "#000000",
+                lyricsStyle = new textStyle {
+                verticalAlign = "top",
+                textAlign = "center",
+            },
+        };
+
+        if (!Model.Subscribers_OnChange.Contains(_uniqueId)) {
+            Model.Subscribers_OnChange.Add(_uniqueId);
+            Model.OnChange += OnDataModelUpdated;
+        }
+
+        if (!Model.Subscribers_OnSignalRUpdate.Contains(_uniqueId)) {
+            Model.Subscribers_OnSignalRUpdate.Add(_uniqueId);
+            Model.OnSignalRUpdate += SignalRUpdate;
+        }
+
+        if (!Model.Subscribers_OnSignalRSetList.Contains(_uniqueId)) {
+            Model.Subscribers_OnSignalRSetList.Add(_uniqueId);
+            Model.OnSignalRSetList += ProcessSignalRSetList;
+        }
+    }
+
+    protected void OnDataModelUpdated()
+    {
+        StateHasChanged();
+    }
+
+    protected void BlankScreen()
+    {
+        _fadeClass[_activeObject] = "hide-screen-content";
+        _backgroundsFade[_activeBackground] = "hide-screen-content";
+        StateHasChanged();
+    }
+
+    protected void HideText()
+    {
+        _fadeClass[_activeObject] = "hide-screen-content";
+        StateHasChanged();
+    }
+
+    protected void UnblankScreen()
+    {
+        if (!Model.HideText) {
+            _fadeClass[_activeObject] = "fade-in";
+        }
+        _backgroundsFade[_activeBackground] = "fade-in";
+        StateHasChanged();
+    }
+
+    protected void UnhideText()
+    {
+        if (!Model.BlankScreen) {
+            _fadeClass[_activeObject] = "fade-in";
+        }
+        StateHasChanged();
+    }
+
+    protected async void ProcessSignalRSetList(setList setlist)
+    {
+        await Helpers.ConsoleLog("ProjectorView.ProcessSignalRSetList", setlist);
+
+        _newActiveItemPart = setlist.activeItemPart;
+        _newActiveItem = setlist.activeItem;
+        _newItemStyle = null;
+
+        await Helpers.ClearVideoPlayers();
+
+        StateHasChanged();
+
+        var activeItem = setlist.items.FirstOrDefault(x => x.id == _newActiveItem);
+        if (activeItem != null) {
+            await RenderSetListItem(activeItem);
+        }
+    }
+
+    public void Redraw()
+    {
+        RenderCSS(_transitionSpeed[_activeObject]);
+        StateHasChanged();
+    }
+
+    protected void RenderCSS(int? TransitionSpeed)
+    {
+        var screenMessageCSS = new System.Text.StringBuilder();
+        if (Model.Settings.messageStyleScreen != null) {
+            screenMessageCSS.AppendLine(".screen-message-text {");
+            screenMessageCSS.AppendLine("  font-family:\"" + Model.Settings.messageStyleScreen.fontFamily + "\";");
+            screenMessageCSS.AppendLine("  font-size:" + (Model.Settings.messageStyleScreen.fontSize * Model.FontBaseMultiplier * Scale) + "vw;");
+            screenMessageCSS.AppendLine("}");
+        }
+
+
+        _css =
+            screenMessageCSS + 
+            Environment.NewLine +
+            Environment.NewLine +
+            Helpers.TransitionCSS(_styles[_activeObject], TransitionSpeed) +
+            Environment.NewLine +
+            Environment.NewLine +
+            Helpers.FontStyleToCSS(_styles[0], _uniqueId + "-0", Scale) +
+            Environment.NewLine +
+            Environment.NewLine +
+            Helpers.FontStyleToCSS(_styles[1], _uniqueId + "-1", Scale);
+    }
+
+    protected async Task RenderSetListItem(setListItem activeItem)
+    {
+        object? objectToRender = null;
+        string objectType = String.Empty;
+        bool useStyle = true;
+
+        var activeVideoItemId = _uniqueId + "-" + (1 - _activeObject).ToString();
+
+        _newTransitionSpeed = Model.Settings.transitionSpeed;
+
+        switch (activeItem.type) {
+            case setListItemType.audio:
+            case setListItemType.unknown:
+                // These types don't render in this view.
+                break;
+
+            case setListItemType.clock:
+                var clock = Tools.SetListItemAsClock(activeItem);
+                if (clock != null) {
+                    _newItemStyle = clock.style;
+                    _newTransitionSpeed = clock.transitionSpeed;
+                }
+                objectToRender = activeItem.item;
+                objectType = activeItem.type;
+                break;
+
+            case setListItemType.countdown:
+                var countdown = Tools.SetListItemAsCountdown(activeItem);
+                if (countdown != null) {
+                    _newItemStyle = countdown.style;
+                    _newTransitionSpeed = countdown.transitionSpeed;
+                }
+                objectToRender = activeItem.item;
+                objectType = activeItem.type;
+                break;
+                
+            case setListItemType.image:
+                useStyle = false;
+                objectToRender = activeItem.item;
+                objectType = activeItem.type;
+                var image = Tools.SetListItemAsImage(activeItem);
+                if (image != null) {
+                    _newTransitionSpeed = image.transitionSpeed;
+                }
+                break;
+                
+            case setListItemType.slideshow:
+                var slideshow = Tools.SetListItemAsSlideshow(activeItem);
+                if (slideshow != null) {
+                    objectToRender = activeItem.item;
+                    objectType = activeItem.type;
+                    _newTransitionSpeed = slideshow.transitionSpeed;
+                }
+                break;
+
+            case setListItemType.song:
+                objectToRender = activeItem.item;
+                objectType = activeItem.type;
+                _newItemStyle = Helpers.DuplicateObject<viewStyle>(Model.Settings.projectionStyle);
+                break;
+
+            case setListItemType.video:
+                useStyle = false;
+                objectToRender = activeItem.item;
+                objectType = activeItem.type;
+                _newItemStyle = _videoStyle;
+
+                var video = Tools.SetListItemAsVideo(activeItem);
+                if (video != null) {
+                    _newTransitionSpeed = video.transitionSpeed;
+                    var videoUrl = Helpers.MediaUrl("Videos", video.filename);
+                    await Helpers.PlayVideo(activeVideoItemId, video.volume);
+                }
+                break;
+
+            case setListItemType.youTube:
+                useStyle = false;
+                objectToRender = activeItem.item;
+                objectType = activeItem.type;
+                _newItemStyle = _videoStyle;
+
+                var youTube = Tools.SetListItemAsYouTube(activeItem);
+                if (youTube != null) {
+                    _newTransitionSpeed = youTube.transitionSpeed;
+                    await Helpers.PlayYouTubeVideo(activeVideoItemId, youTube.videoId, youTube.muteOnScreens, youTube.volume);
+                }
+                break;
+        }
+
+        UpdateProjectorView(objectToRender, objectType, useStyle, _newItemStyle, _newTransitionSpeed);
+    }
+
+    protected async void SignalRUpdate(signalRUpdate update)
+    {
+        double playbackTime = 0;
+
+        var activeVideoItemId = _uniqueId + "-" + _activeObject.ToString();
+
+        string message = Helpers.StringLower(update.message);
+
+        switch (update.updateType) {
+            case signalRUpdateType.admin:
+                switch(message) {
+                    case "reload-settings":
+                        Redraw();
+                        break;
+                }
+                break;
+
+            case signalRUpdateType.blankScreen:
+                BlankScreen();
+                break;
+
+            case signalRUpdateType.hideText:
+                HideText();
+                break;
+
+            case signalRUpdateType.unblankScreen:
+                UnblankScreen();
+                break;
+
+            case signalRUpdateType.unhideText:
+                UnhideText();
+                break;
+
+            case signalRUpdateType.videoPlayerPlabackTime:
+                playbackTime = Tools.Double(update.message);
+                await Helpers.PlayVideoUpdatePlaybackTime(activeVideoItemId, playbackTime);
+                break;
+
+            case signalRUpdateType.videoPlayerState:
+                await Helpers.PlayVideoSetPlaybackState(activeVideoItemId, update.message);
+                break;
+
+            case signalRUpdateType.youTubePlayState:
+                await Helpers.PlayYouTubeVideoSetPlaybackState(activeVideoItemId, update.message);
+                break;
+
+            case signalRUpdateType.youTubePlaybackTime:
+                playbackTime = Tools.Double(update.message);
+                await Helpers.PlayYouTubeVideoUpdatePlayTimeForPlayer(activeVideoItemId, playbackTime);
+                break;
+        }
+    }
+
+    protected void UpdateProjectorView(
+        object? obj,
+        string objectType = "",
+        bool useStyle = false,
+        viewStyle? newItemStyle = null,
+        int? newTransitionSpeed = null
+    ) {
+        if (obj != null) {
+            // Only trigger an update if this is a new object.
+            var json1 = Helpers.SerializeObject(obj);
+            var json2 = Helpers.SerializeObject(_objectArray[_activeObject]);
+
+            if (objectType == setListItemType.countdown ||
+                json1 != json2 ||
+                _activeItemPart[_activeObject] != _newActiveItemPart
+            ) {
+                var inactiveObject = _activeObject;
+
+                _activeObject = 1 - _activeObject;
+                _objectArray[_activeObject] = obj;
+                _objectType[_activeObject] = objectType;
+                _useStyle[_activeObject] = useStyle;
+
+                if (Model.BlankScreen || Model.HideText) {
+                    _fadeClass[_activeObject] = "hide-screen-content";
+                    _fadeClass[inactiveObject] = "hide-screen-content";
+                } else {
+                    _fadeClass[_activeObject] = "fade-in";
+                    _fadeClass[inactiveObject] = "fade-out";
+                }
+
+                _activeItemPart[_activeObject] = _newActiveItemPart;
+                _transitionSpeed[_activeObject] = _newTransitionSpeed.HasValue ? _newTransitionSpeed.Value : 0;
+
+                var style = new viewStyle();
+                if (useStyle) {
+                    if (newItemStyle != null) {
+                        style = newItemStyle;
+                    } else {
+                        var dupStyle = Helpers.DuplicateObject<viewStyle>(Model.Settings.projectionStyle);
+                        if (dupStyle != null) {
+                            style = dupStyle;
+                        }
+                    }
+                }
+                _styles[_activeObject] = style;
+
+                RenderCSS(_transitionSpeed[_activeObject]);
+
+                // Slideshows and images set there images as the background instead of slide content to support crossfades.
+                if (objectType == setListItemType.slideshow) {
+                    // The image will be used on the background to get a transition.
+                    var slideshow = (slideshowItem)obj;
+                    style.backgroundType = backgroundType.slideshow;
+                    var slideshowImage = String.Empty;
+
+                    if (slideshow.images != null && _newActiveItemPart.HasValue) {
+                        slideshowImage += slideshow.images[_newActiveItemPart.Value];
+                    }
+
+                    style.background = Helpers.SlideShowUrl(slideshow.folder, slideshowImage);
+                } else if (objectType == setListItemType.image) {
+                    // The image will be used on the background to get a transition.
+                    var image = (imageItem)obj;
+                    style.backgroundType = backgroundType.image;
+                    style.background = Helpers.MediaUrl("Images", image.filename);
+                }
+
+                // Backgrounds only get updated when the background style changes.
+                if (style.background != _background[_activeBackground] || style.backgroundType != _backgroundType[_activeBackground]) {
+                    _activeBackground = 1 - _activeBackground;
+                    _background[_activeBackground] = Helpers.StringValue(style.background);
+                    _backgroundType[_activeBackground] = Helpers.StringValue(style.backgroundType);
+
+                    if (Model.BlankScreen) {
+                        _backgroundsFade[_activeBackground] = "hide-screen-content";
+                        _backgroundsFade[1 - _activeBackground] = "hide-screen-content";
+                    } else {
+                        _backgroundsFade[_activeBackground] = "fade-in";
+                        _backgroundsFade[1 - _activeBackground] = "fade-out";
+                    }
+                }
+
+                StateHasChanged();
+            }
+        }
+    }
+}

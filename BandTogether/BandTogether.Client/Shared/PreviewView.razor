@@ -1,0 +1,81 @@
+﻿@inject BlazorDataModel Model
+@inject Radzen.DialogService DialogService
+@implements IDisposable
+
+<style>
+    @((MarkupString)CSS)
+</style>
+
+<div class="preview-area @Helpers.PreviewSizeToString(PreviewSize) @Helpers.AspectRatioToCssClass(Model.Settings.projectionModeAspectRatio)">
+    <div class="prevent-select projection-wrapper @Helpers.AspectRatioToCssClass(AspectRatio)">
+        <div id="@(_uniqueId + "-background-0")" style="@Helpers.BackgroundStyle(Style)" class="background-wrapper">
+            @switch (Style.backgroundType) {
+                case backgroundType.image:
+                    <img src="./Background/@Style.background" />
+                    break;
+
+                case backgroundType.video:
+                    <video autoplay muted playsinline loop onloadedmetadata="this.muted=true" preload="auto" oncanplay="this.play()"
+                           class="video-background"
+                           src="./Background/@Style.background" type="@Helpers.MimeType(Style.background)" />
+                    break;
+            }
+        </div>
+
+        <div id="@_uniqueId" class="projection-lyrics-wrapper main-screen-preview @_fadeClass @_uniqueId @Helpers.AspectRatioToCssClass(AspectRatio)">
+            <ProjectorRender
+                    ActiveItemPart="@ActiveItemPart"
+                    ObjectToRender="ObjectToRender"
+                    ObjectType="@ObjectType"
+                    ItemStyle="Style"
+                    UniqueId="@_uniqueId" />
+        </div>
+    </div>
+</div>
+
+@code {
+    [Parameter] public int? ActiveItemPart { get; set; }
+    [Parameter] public string AspectRatio { get; set; } = "16:9";
+    [Parameter] public object? ObjectToRender { get; set; }
+    [Parameter] public string ObjectType { get; set; } = "";
+    [Parameter] public string PreviewId { get; set; } = "";
+    [Parameter] public previewSize PreviewSize { get; set; } = previewSize.medium;
+    [Parameter] public viewStyle Style { get; set; } = new viewStyle();
+    [Parameter] public int? TransitionSpeed { get; set; }
+
+    protected string _fadeClass = "fade-in";
+    protected int _lastTransitionSpeed = 0;
+    protected string _uniqueId = "";
+
+    public void Dispose(){
+    }
+
+    protected override void OnInitialized()
+    {
+        _uniqueId = !String.IsNullOrWhiteSpace(PreviewId) ? PreviewId : "element-" + Guid.NewGuid().ToString().Replace("-", "").ToLower();
+        _lastTransitionSpeed = Helpers.IntValue(TransitionSpeed);
+    }
+
+    protected override async Task OnParametersSetAsync()
+    {
+        if (TransitionSpeed != _lastTransitionSpeed) {
+            _lastTransitionSpeed = Helpers.IntValue(TransitionSpeed);
+
+            await Helpers.RemoveClass(_uniqueId, "fade-in");
+            await System.Threading.Tasks.Task.Delay(200);
+            await Helpers.AddClass(_uniqueId, "fade-in");
+        }
+    }
+
+    protected string CSS
+    {
+        get {
+            string output =
+                Helpers.TransitionCSS(Style, TransitionSpeed) +
+                Environment.NewLine + Environment.NewLine +
+                Helpers.FontStyleToCSS(Style, _uniqueId, Helpers.PreviewScale(Helpers.PreviewSizeToString(PreviewSize)));
+
+            return output;
+        }
+    }
+}

@@ -1,0 +1,727 @@
+﻿@inject IDataAccess data
+@{
+    string appVersion = data.Version;
+}
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta name="app:server" content="@System.Environment.MachineName" />
+    <meta name="app:version" content="@data.Version" />
+    <meta name="app:released" content="@data.Released" />
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <link rel="icon" type="image/png" href="favicon.png" />
+    <base href="/" />
+    <link rel="stylesheet" href="_content/Radzen.Blazor/css/material-base.css" />
+    <link rel="stylesheet" href="_content/Blazor.ContextMenu/blazorContextMenu.min.css" />
+    <link rel="stylesheet" href="_content/MudBlazor/MudBlazor.min.css" />
+    <link rel="stylesheet" href="@Assets["lib/fontawesome/css/fontawesome.css"]" />
+    <link rel="stylesheet" href="@Assets["lib/fontawesome/css/brands.css"]" />
+    <link rel="stylesheet" href="@Assets["lib/fontawesome/css/regular.css"]" />
+    <link rel="stylesheet" href="@Assets["lib/fontawesome/css/solid.css"]" />
+    <link rel="stylesheet" href="@Assets["lib/bootstrap/css/bootstrap.min.css"]" />
+    <link rel="stylesheet" href="_content/Toolbelt.Blazor.SplitContainer/Toolbelt.Blazor.SplitContainer.bundle.scp.css" />
+    <link rel="stylesheet" href="@Assets["css/app.css"]" />
+    <ImportMap />
+    <HeadOutlet @rendermode="new InteractiveWebAssemblyRenderMode(prerender: false)" />
+</head>
+
+<body id="body-element" data-bs-theme="" class="loading">
+    <Routes @rendermode="new InteractiveWebAssemblyRenderMode(prerender: false)" />
+    <script src="@("_content/Radzen.Blazor/Radzen.Blazor.js?v=" + (typeof(Radzen.Colors).Assembly.GetName().Version))"></script>
+    <script src="@("_content/Blazor.ContextMenu/blazorContextMenu.min.js?v=" + appVersion)"></script>
+    <script src="@("_content/MudBlazor/MudBlazor.min.js?v=" + appVersion)"></script>
+    <script src="@("_content/BlazorSortableList/SortableList.razor.js?v=" + appVersion)"></script>
+
+    <script src="@Assets["lib/jquery/jquery-3.7.0.min.js"]"></script>
+    <script src="@Assets["lib/bootstrap/js/bootstrap.bundle.min.js"]"></script>
+    <script src="@Assets["lib/sortablejs/sortable.min.js"]"></script>
+    <script src="@("_content/BlazorMonaco/jsInterop.js?v=" + appVersion)"></script>
+    <script src="@("_content/BlazorMonaco/lib/monaco-editor/min/vs/loader.js?v=" + appVersion)"></script>
+    <script src="@("_content/BlazorMonaco/lib/monaco-editor/min/vs/editor/editor.main.js?v=" + appVersion)"></script>
+    <script src="https://www.youtube.com/iframe_api"></script>
+
+    <script src="_framework/blazor.web.js"></script>
+
+    <script type="text/javascript">
+        var dotNetHelper;
+        var audioPlayer;
+        var iframe;
+        var videoPlayer;
+        var videoPlayers = [];
+        var youTubePlayer = {};
+        var youTubePlayerReady = false;
+        var youTubePlayerStartupTimer = false;
+        var youTubePlayerTimer;
+
+        if (!Element.prototype.fadeIn) {
+            HTMLElement.prototype.fadeIn = function(duration = 300, display = "block") {
+                const keyframes = [{ opacity: 0 }, { opacity: 1 }];
+                return new Promise(resolve => {
+                    // See if this was faded out with our code and if an original-display was set.
+                    var originalDisplay = this.getAttribute("original-display");
+                    if (originalDisplay != undefined && originalDisplay != null && originalDisplay != "") {
+                        this.removeAttribute("original-display");
+                        display = originalDisplay;
+                    }
+
+                    if (display == undefined || display == null || display == "") {
+                        display = "block";
+                    }
+
+                    this.style.display = display;
+                    const animation = this.animate(keyframes, duration);
+                    animation.onfinish = () => {
+                        this.opacity = 1;
+                        resolve();
+                    }
+                });
+            };
+        }
+
+        if (!Element.prototype.fadeOut) {
+            HTMLElement.prototype.fadeOut = function(duration = 300) {
+                const keyframes = [{ opacity: 1 }, { opacity: 0 }];
+                return new Promise(resolve => {
+                    // Store the current element display.
+                    var display = this.style.display;
+                    if (display != undefined && display != null && display != "") {
+                        this.setAttribute("original-display", display);
+                    }
+
+                    const animation = this.animate(keyframes, duration);
+                    animation.onfinish = () => {
+                        this.opacity = 0;
+                        this.style.display = "none";
+                        resolve();
+                    }
+                });
+            };
+        }
+
+        $(function () {
+            SetPreferredColorScheme("");
+            SetupKeyboardEventHandler();
+            //SetupMonacoCustomTheme();
+        });
+
+        function AddClass(elementId, className) {
+            $("#" + elementId).addClass(className);
+        }
+
+        function ClearVideoPlayers() {
+            clearInterval(youTubePlayerTimer);
+            clearInterval(youTubePlayerStartupTimer);
+            youTubePlayerTimer = null;
+            youTubePlayerStartupTimer = null;
+            for (var key in youTubePlayer) {
+                var player = youTubePlayer[key];
+                if (player != undefined && player != null) {
+                    player.destroy();
+                }
+            }
+            youTubePlayer = {};
+
+            if (videoPlayers.length > 0) {
+                for (var i = 0; i < videoPlayers.length; i++) {
+                    var elementId = videoPlayers[i];
+                    var player = document.getElementById(elementId);
+
+                    if (player != undefined && player != null) {
+                        var playing = !player.paused && !player.ended && player.readyState > 2;
+                        if (playing) {
+                            player.pause();
+                        }
+                    }
+                }
+            }
+
+            videoPlayers = [];
+        }
+
+        function ConsoleLog(message, objects) {
+            if (objects != undefined && objects != null) {
+                if (message != undefined && message != null && message != "") {
+                    console.log(message, objects);
+                } else {
+                    console.log(objects);
+                }
+            } else if (message != undefined && message != null && message != "") {
+                console.log(message);
+            }
+        }
+
+        function CookieRead(cname) {
+            let name = cname + "=";
+            let decodedCookie = decodeURIComponent(document.cookie);
+            let ca = decodedCookie.split(';');
+
+            for (let i = 0; i < ca.length; i++) {
+                let c = ca[i];
+
+                while (c.charAt(0) == ' ') {
+                    c = c.substring(1);
+                }
+
+                if (c.indexOf(name) == 0) {
+                    return c.substring(name.length, c.length);
+                }
+            }
+
+            return "";
+        }
+
+        function CookieWrite(name, value, days) {
+            var expires;
+
+            if (days == undefined || days == null || days < 1) {
+                days = 14;
+            }
+
+            if (days) {
+                var date = new Date();
+                date.setTime(date.getTime() + (days * 24 * 60 * 60 * 1000));
+                expires = "; expires=" + date.toGMTString();
+            } else {
+                expires = "";
+            }
+
+            document.cookie = name + "=" + value + expires + "; path=/";
+        }
+
+        function CopyToClipboard(value) {
+            navigator.clipboard.writeText(value);
+        }
+
+        function DelayedFocus(element) {
+            setTimeout(() => DelayedFocusInternal(element, 0), 0);
+        }
+
+        function DelayedFocusInternal(element, safety) {
+            if (safety > 20) { return; }
+            safety++;
+
+            if ($("#" + element).is(":visible") == true) {
+                // See if the element is a <div>. If so, find the first child that is an input.
+                if ($("#" + element).is("div") || $("#" + element).is("table")) {
+                    var input = $("#" + element).find('input,textarea,select').filter(":visible:first");
+                    if (input != null) {
+                        input.trigger("focus");
+                    }
+                } else {
+                    $("#" + element).trigger("focus");
+                }
+            } else {
+                setTimeout(() => DelayedFocusInternal(element, safety), 20);
+            }
+        }
+
+        function DelayedSelect(element) {
+            setTimeout(() => DelayedSelectInternal(element, 0), 0);
+        }
+
+        function DelayedSelectInternal(element, safety) {
+            if (safety > 20) { return; }
+            safety++;
+
+            if ($("#" + element).is(":visible") == true) {
+                $("#" + element).trigger("select");
+            } else {
+                setTimeout(() => DelayedSelectInternal(element, safety), 20);
+            }
+        }
+
+        async function DownloadFileFromStream(fileName, contentStreamReference) {
+            const arrayBuffer = await contentStreamReference.arrayBuffer();
+            const blob = new Blob([arrayBuffer]);
+            const url = URL.createObjectURL(blob);
+            const anchorElement = document.createElement('a');
+            anchorElement.href = url;
+            anchorElement.download = fileName ?? '';
+            anchorElement.click();
+            anchorElement.remove();
+            URL.revokeObjectURL(url);
+        }
+
+        function FadeElementIn(elementId, duration, display) {
+            var el = document.getElementById(elementId);
+            if (el != undefined && el != null) {
+                el.fadeIn(duration, display);
+            }
+        }
+
+        function FadeElementOut(elementId, duration) {
+            var el = document.getElementById(elementId);
+            if (el != undefined && el != null) {
+                el.fadeOut(duration);
+            }
+        }
+
+        function HideMenu() {
+            let bsOffcanvasUserMenu = bootstrap.Offcanvas.getInstance("#offcanvasUserMenu");
+            if (bsOffcanvasUserMenu != undefined && bsOffcanvasUserMenu != null && bsOffcanvasUserMenu._isShown) {
+                bsOffcanvasUserMenu.hide();
+            }
+
+            let bsOffcanvasQuickActionMenu = bootstrap.Offcanvas.getInstance("#offcanvasQuickAction");
+            if (bsOffcanvasQuickActionMenu != undefined && bsOffcanvasQuickActionMenu != null && bsOffcanvasQuickActionMenu._isShown) {
+                bsOffcanvasQuickActionMenu.hide();
+            }
+        }
+
+        function HighlightElementByClass(c) {
+            $("." + c).off("click");
+            $("." + c).on("click", function () {
+                RemoveElementHighlightByClass(c);
+            });
+            $("." + c).addClass("highlight");
+
+            $("." + c).fadeOut(200)
+                .fadeIn(200)
+                .fadeOut(200)
+                .fadeIn(200)
+                .fadeOut(200)
+                .fadeIn(200);
+        }
+
+        function InsertAtCursor(field, value) {
+            var $txt = jQuery("#" + field);
+            var caretPos = $txt[0].selectionStart;
+            var textAreaTxt = $txt.val();
+            $txt.val(textAreaTxt.substring(0, caretPos) + value + textAreaTxt.substring(caretPos));
+        }
+
+        function Loaded() {
+            $("#body-element").removeClass("loading");
+        }
+
+        function NavigateTo(url) {
+            window.location.href = url;
+        }
+
+        function onYouTubeIframeAPIReady() {
+            youTubePlayerReady = true;
+        }
+
+        function PlayAudioFile(file, volume) {
+            audioPlayer = document.getElementById("audio-player");
+            audioPlayer.src = file;
+            audioPlayer.volume = volume;
+            audioPlayer.play();
+
+            audioPlayer.removeEventListener("ended", PlayAudioFileComplete);
+            audioPlayer.addEventListener("ended", PlayAudioFileComplete);
+
+            //audioPlayer.removeEventListener("timeupdate", PlayAudioFileUpdatePlaybackTime);
+            //audioPlayer.addEventListener("timeupdate", PlayAudioFileUpdatePlaybackTime);
+        }
+
+        function PlayAudioFileComplete() {
+            //console.log("PlayAudioFileComplete");
+            audioPlayer.currentTime = 0;
+            dotNetHelper.invokeMethod("OnAudioPlaybackEnded");
+        }
+
+        function PlayAudioFileSetTime(time) {
+            audioPlayer.currentTime = time;
+        }
+
+        function PlayAudioFileStop() {
+            audioPlayer.pause();
+            audioPlayer.currentTime = 0;
+            dotNetHelper.invokeMethod("OnAudioPlaybackEnded");
+        }
+
+        function PlayAudioFileTogglePlayPause() {
+            if (audioPlayer.paused) {
+                audioPlayer.play();
+                dotNetHelper.invokeMethod("OnAudioPlaybackPaused", false);
+            } else {
+                audioPlayer.pause();
+                dotNetHelper.invokeMethod("OnAudioPlaybackPaused", true);
+            }
+        }
+
+        function PlayVideo(elementId, volume) {
+            if (videoPlayers.indexOf(elementId) == -1) {
+                videoPlayers.push(elementId);
+            }
+
+            var visible = $("#" + elementId).is(":visible");
+
+            if (!visible) {
+                setTimeout(() => PlayVideo(elementId), 100);
+                return;
+            }
+
+            if (elementId == "video-player-main") {
+                // This is the main video player, so bind to the playback controls.a
+                videoPlayer = document.getElementById("video-player-main");
+
+                videoPlayer.removeEventListener("play", null);
+                videoPlayer.removeEventListener("pause", null);
+                videoPlayer.removeEventListener("timeupdate", null);
+
+                //videoPlayer.addEventListener("click", () => dotNetHelper.invokeMethod("OnVideoPlayerClick"));
+                videoPlayer.addEventListener("play", () => {
+                    dotNetHelper.invokeMethodAsync("OnVideoPlaybackStateChange", "play");
+                });
+
+                videoPlayer.addEventListener("pause", () => {
+                    dotNetHelper.invokeMethodAsync("OnVideoPlaybackStateChange", "pause");
+                
+                });
+
+                videoPlayer.addEventListener("timeupdate", () => {
+                    // To keep things in sync, only send the updates to other browsers if the video is playing.
+                    var playing = !videoPlayer.paused && !videoPlayer.ended && videoPlayer.readyState > 2;
+                    if (playing) {
+                        dotNetHelper.invokeMethodAsync("OnVideoPlaybackTimeUpdate", videoPlayer.currentTime);
+                    }
+                });
+
+                videoPlayer.volume = volume;
+                videoPlayer.play();
+            }
+        }
+
+        function PlayVideoSetPlaybackState(elementId, state) {
+            var player = document.getElementById(elementId);
+            if (player != undefined && player != null) {
+                var playing = !player.paused && !player.ended && player.readyState > 2;
+
+                if (state == "play") {
+                    if (!playing) {
+                        player.play();
+                    }
+                } else if (state == "pause") {
+                    if (playing){
+                        player.pause();
+                    }
+                }
+
+                //console.log("JS PlayVideoSetPlaybackState", elementId, state);
+            }
+        }
+
+        function PlayVideoUpdatePlaybackTime(elementId, playbackTime) {
+            var player = document.getElementById(elementId);
+            if (player != undefined && player != null) {
+                //console.log("PlayVideoUpdatePlaybackTime", elementId, playbackTime);
+
+                var playing = !player.paused && !player.ended && player.readyState > 2;
+
+                if (!playing) {
+                    player.play();
+                }
+
+                var currentTime = player.currentTime;
+                var diff = Math.abs(playbackTime - currentTime);
+
+                if (diff > .3) {
+                    player.currentTime = playbackTime + 0.15;
+                }
+            } else {
+                //console.log("Player NULL", elementId);
+            }
+        }
+
+        function PlayYouTubeVideo(elementId, videoId, mute, volume) {
+            //console.log("PlayYouTubeVideo", elementId, videoId, mute, volume);
+            var mainPlayer = elementId == "youtube-player-main";
+
+            var el = document.getElementById(elementId);
+            var elementExists = el != undefined && el != null;
+
+            if (youTubePlayerReady == false || !elementExists) {
+                if (youTubePlayerStartupTimer == null) {
+                    youTubePlayerStartupTimer = setInterval(() => PlayYouTubeVideo(elementId, videoId, mute, volume), 1000);
+                }
+                return;
+            } else {
+                clearInterval(youTubePlayerStartupTimer);
+                youTubePlayerStartupTimer = null;
+            }
+
+            // If the player had previously existed remove it.
+            if (youTubePlayer[elementId] != undefined && youTubePlayer[elementId] != null ) {
+                youTubePlayer[elementId].destroy();
+            }
+
+            //console.log("Creating YouTube Player", elementId, "Main Player?", mainPlayer);
+
+            youTubePlayer[elementId] = new YT.Player(elementId, {
+                fs: 0,
+                videoId: videoId,
+                playerVars: {
+                    //'autoplay': mainPlayer ? 1 : 0,
+                    'autoplay': 1,
+                    'playsinline': 1,
+                    'controls': mainPlayer ? 1 : 0,
+                    'disablekb': mainPlayer ? 1 : 0,
+                    'enablejsapi': mainPlayer ? 1 : 0,
+                    'fs': 0,
+                    'iv_load_policy': 3,
+                    'loop': 0,
+                    'mute': mute,
+                    'origin': window.location.href,
+                    'playsinline': 0,
+                    'rel': 0
+                },
+                events: {
+                    'onReady': (event) => { 
+                        event.target.setVolume(volume);
+                        //event.target.playVideo(); 
+                        //console.log("Player Ready", event.target);
+                    },
+                    'onStateChange': (event) => {
+                        if (mainPlayer) {
+                            dotNetHelper.invokeMethodAsync("OnYouTubePlayerStateChange", event.data);
+
+                            if (mainPlayer) {
+                                if (event.data = YT.PlayerState.PLAYING) {
+                                    youTubePlayerTimer = setInterval(PlayYouTubeVideoUpdatePlayTime, 200);
+                                } else {
+                                    clearInterval(youTubePlayerTimer);
+                                }
+                            }
+                        }
+                    }
+                }
+            });
+
+            //console.log("Player Created?", youTubePlayer[elementId]);
+
+            // Initially hide the player so only the thumbnail image is visible except for the main player.
+            if (!mainPlayer) {
+                $("#" + elementId).addClass("youtube-player-hidden");
+            }
+        }
+
+        function PlayYouTubeVideoSetPlaybackState(elementId, state) {
+            //console.log("PlayYouTubeVideoSetPlaybackState", elementId, state);
+            var mainPlayer = elementId == "youtube-player-main";
+
+            var player = youTubePlayer[elementId];
+
+            if (player == undefined || player == null) {
+                //console.log("PlayYouTubeVideoSetPlaybackState: Player " + elementId + " Not Found", youTubePlayer);
+            } else {
+                $("#" + elementId).removeClass("youtube-player-hidden");
+
+                if (state == "play") {
+                    if (player.playVideo != undefined && player.playVideo != null) {
+                        player.playVideo();
+                    } else {
+                        //console.log("Can't play - player.playVideo is null");
+                    }
+                } else if (state == "pause") {
+                    if (player.pauseVideo != undefined && player.pauseVideo != null) {
+                        player.pauseVideo();
+                    }
+                }
+            }
+        }
+
+        function PlayYouTubeVideoUpdatePlayTime() {
+            var player = youTubePlayer["youtube-player-main"];
+
+            if (player != undefined && player != null) {
+                dotNetHelper.invokeMethodAsync("OnYouTubePlayerUpdatePlayTime", player.getCurrentTime());
+            }
+        }
+
+        function PlayYouTubeVideoUpdatePlayTimeForPlayer(elementId, playbackTime) {
+            var mainPlayer = elementId == "youtube-player-main";
+            // First, make sure this player is playing.
+            //PlayYouTubeVideoSetPlaybackState(ElementId, "play");
+
+            var player = youTubePlayer[elementId];
+            if (player != undefined && player != null) {
+                if (player.getCurrentTime != undefined && player.getCurrentTime != null) {
+                    var playerTime = player.getCurrentTime();
+
+                    var diff = Math.abs(playbackTime - playerTime);
+
+                    //console.log("DIFF", diff);
+
+                    if (diff > .3) {
+                        player.seekTo(playbackTime + .15);
+                    }
+                } else {
+                    // Player needs to be started.
+                    //console.log("Player needs to be started.", elementId);
+                    if (player.playVideo != undefined && player.playVideo != null) {
+                        //console.log("player.playVideo is undefined or null");
+                        player.playVideo();
+                    } else {
+                        //console.log("Calling PlayYouTubeVideoSetPlaybackState to play");
+                        PlayYouTubeVideoSetPlaybackState(elementId, "play");
+                    }
+                }
+            } else {
+                //console.log("Player NULL", elementId, youTubePlayer);
+            }
+        }
+
+        function ReloadCurrentPage() {
+            window.location.href = window.location.href;
+        }
+
+        function RemoveClass(elementId, className) {
+            $("#" + elementId).removeClass(className);
+        }
+
+        function RemoveElementHighlightByClass(c) {
+            $("." + c).off("click");
+            $("." + c).removeClass("highlight");
+        }
+
+        function ResetPadding() {
+            var h = window.innerHeight || document.documentElement.clientHeight || document.body.clientHeight;
+            if (h > 90) {
+                var zoomableArea = document.getElementById("zoomable-area");
+                if (zoomableArea != undefined && zoomableArea != null) {
+                    console.log("zoomableArea", zoomableArea.offsetHeight);
+
+                    document.getElementById("after-song-padding").style.height = (h + zoomableArea.offsetHeight - 90).toString() + "px";
+                }
+            }
+        }
+
+        function ScrollElementToCenter(element, parent) 
+        {
+            var el = document.getElementById(element);
+            if (el != undefined && el != null) {
+                el.scrollIntoView({ behavior: "auto", block: "center", inline: "center" });
+            }
+        }
+
+        function ScrollToElement(element) {
+            document.getElementById(element).scrollIntoView(true);
+        }
+
+        function ScrollToTop() {
+            window.scrollTo(0, 0);
+        }
+
+        function SetDotNetHelper(value) {
+            dotNetHelper = value;
+        }
+
+        function SetElementHeight(element, height) {
+            document.getElementById(element).style.height = height;
+        }
+
+        function SetPreferredColorScheme(preferred) {
+            if (preferred == undefined || preferred == null) {
+                preferred = "";
+            }
+
+            if (preferred == "") {
+                var colorScheme = getComputedStyle(document.body, ':after').content;
+                var preferred = colorScheme.indexOf("dark") > -1 ? "dark" : "light";
+            }
+
+            var setTheme = "";
+            var setClass = "";
+            var setMonacoTheme = "vs";
+
+            if (preferred == "dark") {
+                setTheme = "dark";
+                setClass = "dark";
+                setMonacoTheme = "vs-dark";
+            } else if (preferred == "light") {
+                setTheme = "";
+                setClass = "light";
+            } else {
+                setTheme = preferred;
+                setClass = preferred;
+            }
+
+            // Only update if this has changed.
+            if ($("#body-element").hasClass(setClass)) {
+                // Already up-to-date
+            } else {
+                $("#body-element").attr("data-bs-theme", setTheme);
+                $("#body-element").removeClass();
+                $("#body-element").addClass(setClass);
+            }
+
+            if (typeof(monaco) == 'object'){
+                monaco.editor.setTheme(setMonacoTheme);
+            }
+        }
+
+        function SetupKeyboardEventHandler() {
+            document.addEventListener('keyup', (event) => {
+                if (dotNetHelper != null) {
+                    var key = event.key;
+                    var code = event.code;
+                    var ctrlKey = event.ctrlKey;
+                    var shiftKey = event.shiftKey;
+                    var altKey = event.altKey;
+                    var metaKey = event.metaKey;
+
+                    dotNetHelper.invokeMethod("OnKeyUp", key, code, ctrlKey, shiftKey, altKey, metaKey);
+                }
+            }, false);
+        }
+
+        function SetupMonacoCustomTheme() {
+            if (typeof(monaco) == 'object') {
+                //console.log("SetupMonacoCustomTheme");
+
+                monaco.languages.register({ id: "chordpro" });
+
+                monaco.languages.setMonarchTokensProvider("chordpro", {
+                    tokenizer: {
+                        root: [
+                            [/\[![a-zA-Z 0-9:]+\]/, "note"],
+                            [/\[[a-zA-Z 0-9:]+\]/, "chord"],
+                        ],
+                    },
+                });
+
+                monaco.editor.defineTheme("chordpro", {
+                    base: "vs",
+                    inherit: false,
+                    rules: [
+                        { token: "chord", foreground: "#0000FF", fontStyle: "bold", background: "#000000" },
+                        { token: "note", foreground: "#FF0000", fontStyle: "bold", background: "#000000"  },
+                    ],
+                    colors: {
+                        //"editor.foreground": "#000000",
+                    },
+                },{
+                    base: "vs-dark",
+                    inherit: false,
+                    rules: [
+                        { token: "chord", foreground: "#5555FF", fontStyle: "bold", background: "#000000" },
+                        { token: "note", foreground: "#FF0000", fontStyle: "bold", background: "#000000"  },
+                    ],
+                    colors: {
+                        "editor.foreground": "#FFFFFF",
+                    },
+                });
+            }
+        }
+
+        function ShowQuickActionMenu() {
+            HideMenu();
+
+            const bsOffcanvasQuickActionMenu = new bootstrap.Offcanvas("#offcanvasQuickAction");
+            if (bsOffcanvasQuickActionMenu != undefined && bsOffcanvasQuickActionMenu != null) {
+                bsOffcanvasQuickActionMenu.show();
+            }
+        }
+
+        function SetElementValue(id, value) {
+            $("#" + id).val(value);
+        }
+    </script>
+</body>
+
+</html>
+

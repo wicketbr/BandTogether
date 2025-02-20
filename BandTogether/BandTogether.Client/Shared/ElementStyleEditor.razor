@@ -1,0 +1,283 @@
+﻿@inject BlazorDataModel Model
+@implements IDisposable
+
+<ul class="nav nav-tabs">
+    <li class="nav-item">
+        <a class="nav-link @(String.IsNullOrWhiteSpace(Model.User.preferences.settingsTabFormat) ? "active" : "")"
+            href="javascript:void('0');"
+            @onclick="@(() => SetTabFormat(""))">
+            @Text.Lyrics
+            <button type="button" class="btn btn-outline-secondary btn-xs" @onclick="ResetDefaultsLyrics" disabled="@(!String.IsNullOrWhiteSpace(Model.User.preferences.settingsTabFormat))">
+                @Text.Defaults
+            </button>
+        </a>
+    </li>
+
+    <li class="nav-item">
+        <a class="nav-link @(Model.User.preferences.settingsTabFormat == "header" ? "active" : "")"
+            href="javascript:void('0');"
+            @onclick="@(() => SetTabFormat("header"))">
+            @Text.Header
+            <button type="button" class="btn btn-outline-secondary btn-xs" @onclick="ResetDefaultsHeader" disabled="@(Model.User.preferences.settingsTabFormat != "header")">
+                @Text.Defaults
+            </button>
+        </a>
+    </li>
+
+    <li class="nav-item">
+        <a class="nav-link @(Model.User.preferences.settingsTabFormat == "footer" ? "active" : "")"
+            href="javascript:void('0');"
+            @onclick="@(() => SetTabFormat("footer"))">
+            @Text.Footer
+            <button type="button" class="btn btn-outline-secondary btn-xs" @onclick="ResetDefaultsFooter" disabled="@(Model.User.preferences.settingsTabFormat != "footer")">
+                @Text.Defaults
+            </button>
+        </a>
+    </li>
+
+    <li class="nav-item">
+        <a class="nav-link @(Model.User.preferences.settingsTabFormat == "background" ? "active" : "")"
+            href="javascript:void('0');"
+            @onclick="@(() => SetTabFormat("background"))">
+            @Text.Background
+            <button type="button" class="btn btn-outline-secondary btn-xs" @onclick="ResetDefaultsBackground" disabled="@(Model.User.preferences.settingsTabFormat != "background")">
+                @Text.Defaults
+            </button>
+        </a>
+    </li>
+</ul>
+
+<div class="tab-content tab-content-projection mb-2">
+    <div class="tab-pane @(String.IsNullOrWhiteSpace(Model.User.preferences.settingsTabFormat) ? "active" : "")">
+        <div class="mb-2">
+            <StyleEditor @bind-Value="Value.lyricsStyle" 
+                    ShowSongOptions="true" />
+        </div>
+
+        <div class="row">
+            <div class="col col-6 mb-2">
+                <div class="form-check form-switch">
+                    <input type="checkbox" id="style-showPreviousLyrics" role="switch" class="form-check-input" @bind="Value.showPreviousLyrics" @bind:after="ValuesChanged" />
+                    <label for="style-showPreviousLyrics" class="form-check-label small">
+                        @Text.ShowPreviousLyrics
+                    </label>
+                </div>
+            </div>
+
+            <div class="col col-6 mb-2">
+                <div class="form-check form-switch">
+                    <input type="checkbox" id="style-showUpcomingLyrics" role="switch" class="form-check-input" @bind="Value.showUpcomingLyrics" @bind:after="ValuesChanged" />
+                    <label for="style-showUpcomingLyrics" class="form-check-label small">
+                        @Text.ShowUpcomingLyrics
+                    </label>
+                </div>
+            </div>
+        </div>
+                
+        @if (Helpers.BooleanValue(Value.showPreviousLyrics) || Helpers.BooleanValue(Value.showUpcomingLyrics)) {
+            <div class="row">
+                @if (Helpers.BooleanValue(Value.showPreviousLyrics)) {
+                    <div class="col col-3 mb-2">
+                        <label for="style-previousLyricsOpacity" class="small">@Text.Opacity (@Value.previousLyricsOpacity)</label>
+                        <input type="range" class="form-range" id="style-previousLyricsOpacity" min="0" max="1" step=".01" @bind="Value.previousLyricsOpacity" @bind:after="ValuesChanged" />
+                    </div>
+                    <div class="col col-3 mb-2">
+                        <label for="style-previousLyricsOpacityStep" class="small">@Text.OpacityStep (@Value.previousLyricsOpacityStep)</label>
+                        <input type="range" class="form-range" id="style-previousLyricsOpacityStep" min="0" max=".2" step=".01" @bind="Value.previousLyricsOpacityStep" @bind:after="ValuesChanged" />
+                        <div class="note">@Text.OpacityStepInfo</div>
+                    </div>
+                } else {
+                    <div class="col col-6 mb-2"></div>
+                }
+
+                @if (Helpers.BooleanValue(Value.showUpcomingLyrics)) {
+                    <div class="col col-3 mb-2">
+                        <label for="style-upcomingLyricsOpacity" class="small">@Text.Opacity (@Value.upcomingLyricsOpacity)</label>
+                        <input type="range" class="form-range" id="style-upcomingLyricsOpacity" min="0" max="1" step=".01" @bind="Value.upcomingLyricsOpacity" @bind:after="ValuesChanged" />
+                    </div>
+                    <div class="col col-3 mb-2">
+                        <label for="style-upcomingLyricsOpacityStep" class="small">@Text.OpacityStep (@Value.upcomingLyricsOpacityStep)</label>
+                        <input type="range" class="form-range" id="style-upcomingLyricsOpacityStep" min="0" max=".2" step=".01" @bind="Value.upcomingLyricsOpacityStep" @bind:after="ValuesChanged" />
+                        <div class="note">@Text.OpacityStepInfo</div>
+                    </div>
+                } else {
+                    <div class="col col-6 mb-2"></div>
+                }
+            </div>
+        }
+
+        <div class="mb-2">
+            <label for="setting-TransitionSpeed" class="small">@Text.TransitionSpeed (@TransitionSpeed)</label>
+            <input type="range" class="form-range" id="setting-TransitionSpeed"
+                @bind="TransitionSpeed" @bind:after="ValuesChanged"
+                    min="0" max="@Model.MaxTransitionDuration" step="1" />
+        </div>
+    </div>
+
+    <div class="tab-pane @(Model.User.preferences.settingsTabFormat == "header" ? "active" : "")">
+        <div class="row">
+            <div class="col col-4 mb-2">
+                <label for="setting-HeaderDisplay" class="small">@Text.HeaderDisplay</label>
+            <select id="setting-HeaderDisplay" class="form-select" @bind="Value.headerDisplay" @bind:after="ValuesChanged">
+                    <option value="">@Text.None</option>
+                    <option value="all">@Text.DisplayOnAllSlides</option>
+                    <option value="first">@Text.DisplayOnFirstSlide</option>
+                    <option value="last">@Text.DisplayOnLastSlide</option>
+                    <option value="firstandlast">@Text.DisplayOnFirstAndLastSlides</option>
+                </select>
+            </div>
+
+            @if (!String.IsNullOrWhiteSpace(Value.headerDisplay)) {
+                <div class="col col-4 mb-2">
+                    <label for="settings-HeaderFormat" class="small">@Text.HeaderFormat</label>
+                    <span class="note">
+                        <span>@Text.OptionalFormatFields</span>: @OptionalFormatFields
+                    </span>
+                    <input type="text" class="form-control" id="settings-HeaderFormat" @bind="Value.headerFormat" @bind:after="ValuesChanged" />
+                </div>
+
+                <div class="col col-4 mb-2">
+                    <label for="settings-HeaderOffset" class="small">@Text.Offset (@Value.headerOffset)</label>
+                <input type="range" id="settings-HeaderOffset" class="form-range" min="-20" max="100" step=".01" @bind="Value.headerOffset" @bind:after="ValuesChanged" />
+                </div>
+            }
+        </div>
+
+        @if (!String.IsNullOrWhiteSpace(Value.headerDisplay)) {
+            <StyleEditor @bind-Value="Value.headerStyle" />
+        }
+    </div>
+
+    <div class="tab-pane @(Model.User.preferences.settingsTabFormat == "footer" ? "active" : "")">
+        <div class="row">
+            <div class="col col-4 mb-2">
+                <label for="setting-FooterDisplay" class="small">@Text.FooterDisplay</label>
+                <select id="setting-FooterDisplay" class="form-select" @bind="Value.footerDisplay" @bind:after="ValuesChanged">
+                    <option value="">@Text.None</option>
+                    <option value="all">@Text.DisplayOnAllSlides</option>
+                    <option value="first">@Text.DisplayOnFirstSlide</option>
+                    <option value="last">@Text.DisplayOnLastSlide</option>
+                    <option value="firstandlast">@Text.DisplayOnFirstAndLastSlides</option>
+                </select>
+            </div>
+
+            @if (!String.IsNullOrWhiteSpace(Value.footerDisplay)) {
+                <div class="col col-4 mb-2">
+                    <label for="settings-FooterFormat" class="small">@Text.FooterFormat</label>
+                    <span class="note">
+                        <span>@Text.OptionalFormatFields</span>: @OptionalFormatFields
+                    </span>
+                    <input type="text" class="form-control" id="settings-FooterFormat" @bind="Value.footerFormat" @bind:after="ValuesChanged" />
+                </div>
+
+                <div class="col col-4 mb-2">
+                    <label for="settings-FooterOffset" class="small">@Text.Offset (@Value.footerOffset)</label>
+                    <input type="range" id="settings-FooterOffset" class="form-range" min="-20" max="100" step=".01" @bind="Value.footerOffset" @bind:after="ValuesChanged" />
+                </div>
+
+            }
+        </div>
+
+        @if (!String.IsNullOrWhiteSpace(Value.footerDisplay)) {
+            <StyleEditor @bind-Value="Value.footerStyle" />
+        }
+    </div>
+
+    <div class="tab-pane @(Model.User.preferences.settingsTabFormat == "background" ? "active" : "")">
+        <BackgroundEditor @bind-Value="Value" />
+    </div>
+</div>
+
+<div class="center-preview">
+    <div>
+        <label for="settings-PreviewSize" class="small">@Text.PreviewSize</label>
+        <select class="fixed-200 form-select form-select-sm" id="settings-PreviewSize" @bind="Model.User.preferences.settingsPreviewSize">
+            <option value="xs">@Text.PreviewXSmall</option>
+            <option value="s">@Text.PreviewSmall</option>
+            <option value="m">@Text.PreviewMedium</option>
+            <option value="l">@Text.PreviewLarge</option>
+            <option value="xl">@Text.PreviewXLarge</option>
+        </select>
+    </div>
+
+    <div class="preview-area @Model.User.preferences.settingsPreviewSize @Helpers.AspectRatioToCssClass(Model.Settings.projectionModeAspectRatio)">
+        <PreviewView 
+            ActiveItemPart="0"
+            ObjectToRender="ObjectToRender"
+            ObjectType="@setListItemType.song"
+            PreviewId="settings-preview"
+            PreviewSize="@Helpers.PreviewSizeFromString(Model.User.preferences.settingsPreviewSize)"
+            Style="Value"
+            TransitionSpeed="TransitionSpeed"
+            />
+    </div>
+</div>
+
+@code {
+    [Parameter] public Object ObjectToRender { get; set; } = null!;
+    [Parameter] public bool ShowSongOptions { get; set; }
+    [Parameter] public int? TransitionSpeed { get; set; }
+    [Parameter] public EventCallback<int?> TransitionSpeedChanged { get; set; }
+    [Parameter] public viewStyle Value { get; set; } = new viewStyle();
+    [Parameter] public EventCallback<viewStyle> ValueChanged { get; set; }
+
+    protected appSettings _defaultSettings = new appSettings();
+    protected viewStyle _defaultStyle = new viewStyle();
+
+    public void Dispose() { }
+
+    protected string OptionalFormatFields {
+        get {
+            var output = "{title}, {artist}, {copyright}";
+            if (Model.Settings.churchMode) {
+                output += ", {church_ccli}, {song_ccli}";
+            }
+            return output;
+        }
+    }
+
+    protected void ResetDefaultsBackground()
+    {
+        Value.background = _defaultStyle.background;
+        Value.backgroundType = _defaultStyle.backgroundType;
+        ValuesChanged();
+    }
+
+    protected void ResetDefaultsFooter()
+    {
+        Value.footerDisplay = _defaultStyle.footerDisplay;
+        Value.footerFormat = _defaultStyle.footerFormat;
+        Value.footerOffset = _defaultStyle.footerOffset;
+        Value.footerStyle = _defaultStyle.footerStyle;
+        ValuesChanged();
+    }
+
+    protected void ResetDefaultsHeader()
+    {
+        Value.headerDisplay = _defaultStyle.headerDisplay;
+        Value.headerFormat = _defaultStyle.headerFormat;
+        Value.headerOffset = _defaultStyle.headerOffset;
+        Value.headerStyle = _defaultStyle.headerStyle;
+        ValuesChanged();
+    }
+
+    protected void ResetDefaultsLyrics()
+    {
+        Value.lyricsStyle = _defaultStyle.lyricsStyle;
+        TransitionSpeed = _defaultSettings.transitionSpeed;
+        ValuesChanged();
+    }
+
+    protected void SetTabFormat(string tab)
+    {
+        Model.User.preferences.settingsTabFormat = tab;
+        StateHasChanged();
+    }
+
+    protected void ValuesChanged()
+    {
+        ValueChanged.InvokeAsync(Value);
+        TransitionSpeedChanged.InvokeAsync(TransitionSpeed);
+        StateHasChanged();
+    }
+}

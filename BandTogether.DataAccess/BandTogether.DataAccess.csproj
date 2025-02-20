@@ -1,0 +1,19 @@
+﻿<Project Sdk="Microsoft.NET.Sdk">
+
+  <PropertyGroup>
+    <TargetFramework>net9.0</TargetFramework>
+    <ImplicitUsings>enable</ImplicitUsings>
+    <Nullable>enable</Nullable>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <PackageReference Include="MarkdownDeep.NET.Core" Version="1.5.0.4" />
+    <PackageReference Include="MSOffice.Interop.PowerPoint" Version="15.0.3" />
+    <PackageReference Include="SkiaSharp" Version="3.116.1" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <ProjectReference Include="..\BandTogether.DataObjects\BandTogether.DataObjects.csproj" />
+  </ItemGroup>
+
+</Project>
