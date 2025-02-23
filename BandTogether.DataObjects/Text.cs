@@ -61,6 +61,8 @@ public static class Text
     public static string ConfirmDeleteSongInfo { get; set; } = "Are you sure you want to delete the song {0}? The song will be removed from the song book and the song book will be saved with any other pending changes being saved as well.";
     public static string ConfirmDeleteSongbook { get; set; } = "Are you sure you want to delete this song book?";
     public static string ConfirmDeleteSongbookInfo { get; set; } = "If you delete the song book the data file will be kept in the folder but renamed so it no longer appears in the app.";
+    public static string ConvertChordsOverTextToChordpro { get; set; } = "Convert Chords Over Text to Chordpro";
+    public static string ConvertChordsOverTextToChordproInfo { get; set; } = "Type or paste your song part below that is in the format with chords above the text. The text will be converted to the Chordpro format and inserted into the song editor.";
     public static string CopySongToSongbook { get; set; } = "Copy Song to Song Book";
     public static string CopyToClipboard { get; set; } = "Copy to Clipboard";
     public static string CopyToSongbook { get; set; } = "Copy to Song Book";

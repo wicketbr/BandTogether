@@ -375,6 +375,14 @@ public partial class DataController : ControllerBase
     }
 
     [HttpPost]
+    [Route("~/api/SetCachedSetList")]
+    public ActionResult<booleanResponse> SetCachedSetList(setList setlist)
+    {
+        GlobalSettings.CachedSetList = setlist;
+        return Ok(new booleanResponse { result = true });
+    }
+
+    [HttpPost]
     [Route("~/api/SetUserCapoPosition/")]
     public async Task<ActionResult<booleanResponse>> SetUserCapoPosition(songPreferences pref)
     {

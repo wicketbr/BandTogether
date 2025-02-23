@@ -1463,3 +1463,7 @@ body.dark .blazor-context-menu {
 #focuser:focus-visible {
     outline-width:0;
 }
+
+#convert-chords-to-chordpro {
+    height:400px;
+}

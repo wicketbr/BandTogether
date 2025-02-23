@@ -637,11 +637,6 @@ public static class Helpers
         await jsRuntime.InvokeVoidAsync("FadeElementOut", elementId, duration);
     }
 
-    public static async Task Focuser()
-    {
-        await jsRuntime.InvokeVoidAsync("Focuser");
-    }
-
     public static string FontStyleToCSS(viewStyle style, string wrapperClass, double Scale = 1.0)
     {
         var output = new StringBuilder();
@@ -2119,8 +2114,10 @@ public static class Helpers
         var setList = await GetOrPost<setList>("api/GetSetList", new simplePost { singleItem = filename });
         if (setList != null) {
             Model.SetList = ReloadSetListItemsFromJson(setList);
-            Model.SetList = setList;
             Model.Settings.lastSetList = filename;
+
+            await GetOrPost<booleanResponse>("api/SetCachedSetList", Model.SetList);
+
             await SaveSettings();
         }
     }
@@ -2822,6 +2819,8 @@ public static class Helpers
             // Only load the set list from the loader if it's not already loaded
             if (Model.SetList.items.Count == 0) {
                 Model.SetList = ReloadSetListItemsFromJson(loader.setList);
+
+                await GetOrPost<booleanResponse>("api/SetCachedSetList", Model.SetList);
             }
 
             if (Model.User.id == Guid.Empty) {
@@ -2867,7 +2866,7 @@ public static class Helpers
                                 var audio = DeserializeObject<audioItem>(item.itemJson);
                                 if (audio != null) {
                                     item.item = audio;
-                                    item.itemJson = null;
+                                    //item.itemJson = null;
                                 }
                                 break;
 
@@ -2875,7 +2874,7 @@ public static class Helpers
                                 var clock = DeserializeObject<clockItem>(item.itemJson);
                                 if (clock != null) {
                                     item.item = clock;
-                                    item.itemJson = null;
+                                    //item.itemJson = null;
                                 }
                                 break;
 
@@ -2883,7 +2882,7 @@ public static class Helpers
                                 var countdown = DeserializeObject<countdownItem>(item.itemJson);
                                 if (countdown != null) {
                                     item.item = countdown;
-                                    item.itemJson = null;
+                                    //item.itemJson = null;
                                 }
                                 break;
 
@@ -2891,7 +2890,7 @@ public static class Helpers
                                 var image = DeserializeObject<imageItem>(item.itemJson);
                                 if (image != null) {
                                     item.item = image;
-                                    item.itemJson = null;
+                                    //item.itemJson = null;
                                 }
                                 break;
 
@@ -2899,7 +2898,7 @@ public static class Helpers
                                 var slideshow = DeserializeObject<slideshowItem>(item.itemJson);
                                 if (slideshow != null) {
                                     item.item = slideshow;
-                                    item.itemJson = null;
+                                    //item.itemJson = null;
                                 }
                                 break;
 
@@ -2909,10 +2908,10 @@ public static class Helpers
                                     // Songs only store the song id and songbook id, so we need to get the song if we don't already have the parts.
                                     if (song.parts == null || song.parts.Count == 0) {
                                         item.item = GetSong(song.id, song.songBookId);
-                                        item.itemJson = null;
+                                        //item.itemJson = null;
                                     } else {
                                         item.item = song;
-                                        item.itemJson = null;
+                                        //item.itemJson = null;
                                     }
                                 }
                                 break;
@@ -2921,7 +2920,7 @@ public static class Helpers
                                 var video = DeserializeObject<videoItem>(item.itemJson);
                                 if (video != null) {
                                     item.item = video;
-                                    item.itemJson = null;
+                                    //item.itemJson = null;
                                 }
                                 break;
 
@@ -2929,7 +2928,7 @@ public static class Helpers
                                 var youtube = DeserializeObject<youTubeItem>(item.itemJson);
                                 if (youtube != null) {
                                     item.item = youtube;
-                                    item.itemJson = null;
+                                    //item.itemJson = null;
                                 }
                                 break;
 
@@ -3387,6 +3386,16 @@ public static class Helpers
         }
 
         return output;
+    }
+
+    public static async Task SetActivePageSection(string section)
+    {
+        await jsRuntime.InvokeVoidAsync("SetActivePageSection", section);
+    }
+
+    public static async Task SetEditMode(bool editMode)
+    {
+        await jsRuntime.InvokeVoidAsync("SetEditMode", editMode);
     }
 
     /// <summary>

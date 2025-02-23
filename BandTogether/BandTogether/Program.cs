@@ -132,6 +132,12 @@ namespace BandTogether
                 ipAddress = ipAddresses[0];
             }
 
+            string computerName = System.Environment.MachineName;
+            if (!String.IsNullOrWhiteSpace(computerName)) {
+                // Use this instead of the ipAddress
+                ipAddress = computerName;
+            }
+
             foreach (var url in urls) {
                 var showUrl = url;
                 if (!String.IsNullOrWhiteSpace(showUrl)) {

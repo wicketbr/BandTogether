@@ -1,4 +1,5 @@
 ﻿@page "/"
+@implements IDisposable
 @using Toolbelt.Blazor.Splitter.V2
 @using BlazorSortableList
 @inject BlazorDataModel Model
@@ -310,7 +311,7 @@
 
                     <FirstPane>
                         <div class="prevent-select pane-content @(_activePageSection == "setlist" ? "active" : "")" @onclick="@(() => SetActivePageSection("setlist"))">
-                            <div class="pane-title" id="focuser" tabindex="0">
+                            <div class="pane-title" tabindex="0">
                             @if (!String.IsNullOrWhiteSpace(Model.SetList.name)) {
                                 <span class="title">
                                     @Model.SetList.name
@@ -957,7 +958,7 @@
                                                             </td>
                                                             <td>
                                                                 @if (Model.ActiveItem != null) {
-                                                                    <select class="form-select form-select-sm" id="edit-song-Transpose" @bind="Model.ActiveItem.transpose" @bind:after="SongModified">
+                                                                    <select class="form-select form-select-sm" id="edit-song-Transpose" @bind="Model.ActiveItem.transpose" @bind:after="SetListChanged">
                                                                         <option></option>
                                                                         @foreach (var keyOption in Helpers.SongKeys) {
                                                                             <option value="@keyOption.key" selected="@(keyOption.key == Model.ActiveItem.transpose)">@keyOption.label</option>
@@ -979,18 +980,34 @@
                                                 </table>
 
                                                 var chordsInSong = Model.ChordsInSong;
-                                                if (chordsInSong.Any()) {
-                                                    <div class="chords-in-song mb-2">
-                                                        <span class="text">@((MarkupString)(Text.ChordsInSong + ": " ))</span>
-                                                        @foreach(var chord in chordsInSong) {
+                                                <div class="chords-in-song mb-2">
+                                                    <span class="text">@((MarkupString)(Text.ChordsInSong + ": " ))</span>
+                                                    @if (chordsInSong.Any()) {
+                                                        foreach (var chord in chordsInSong) {
                                                             <span class="insert-chord" @onclick="@(() => EditorInsertChord(chord))">@chord</span>
                                                         }
-                                                    </div>
-                                                }
+                                                    } else {
+                                                        @Text.None
+                                                    }
+
+                                                        <button type="button" class="ms-2 btn btn-xs btn-dark" @onclick="ConvertChordsOverTextToChordpro">
+                                                        @Text.ConvertChordsOverTextToChordpro
+                                                    </button>
+                                                </div>
                                             } else {
                                                 // View Mode
+                                                // If this is a song in the setlist being transposed then get the new key.
+                                                var songKey = Helpers.StringValue(Model.Song.key);
+                                                song? activeSong = null;
+                                                if (Model.ActiveItem != null) {
+                                                    activeSong = Tools.SetListItemAsSong(Model.ActiveItem);
+                                                    if (activeSong != null && !String.IsNullOrWhiteSpace(Model.ActiveItem.transpose)) {
+                                                        songKey = Model.ActiveItem.transpose;
+                                                    }
+                                                }
+                                                
 
-                                                var title = Model.Song.title;
+                                                var title = Helpers.StringValue(Model.Song.title);
                                                 if (!String.IsNullOrWhiteSpace(Model.Song.artist)) {
                                                     title += " - " + Model.Song.artist;
                                                 }
@@ -1010,7 +1027,7 @@
                                                             }
                                                             
                                                             <div>
-                                                                @((MarkupString)Helpers.RenderSongElement(Model.Song, part.Item, Model.SongKey))
+                                                                @((MarkupString)Helpers.RenderSongElement(Model.Song, part.Item, songKey))
                                                             </div>
                                                         </div>
                                                     }
@@ -1129,6 +1146,7 @@
     protected DateTime _doubleClickingSong = DateTime.Now;
     protected Guid _doubleClickingSongId = Guid.Empty;
     protected string _editMessage = "";
+    protected bool _loaded = false;
     protected string _newUserName = "";
     protected string _pageName = "home";
     protected selectedSong _selectedSong = new selectedSong();
@@ -1147,28 +1165,36 @@
     protected bool _initialLoad = false;
     protected ProjectorView _preview = null!;
 
+    public void Dispose() {
+        Model.OnChange -= OnDataModelUpdated;
+        Model.OnKeyboardEvent -= OnKeyboardEvent;
+        Model.OnSignalRSetList -= ProcessSignalRSetList;
+        Model.OnSignalRUpdate -= ProcessSignalRUpdate;
+        _timer_Editor.Dispose();
+    }
+
     protected override async Task OnAfterRenderAsync(bool firstRender)
     {
         if (firstRender) {
             await SetActivePageSection("setlist");
         }
+
+        if (Model.Loaded && !_loaded) {
+            _loaded = true;
+            await Helpers.SetEditMode(Model.User.preferences.editMode);
+        }
     }
 
     protected override void OnInitialized()
     {
-        if (!Model.Subscribers_OnAudioPlaybackEnded.Contains(_pageName)) {
-            Model.Subscribers_OnAudioPlaybackEnded.Add(_pageName);
-            Model.OnAudioPlaybackEnded += OnAudioPlaybackEnded;
-        }
-
         if (!Model.Subscribers_OnChange.Contains(_pageName)) {
             Model.Subscribers_OnChange.Add(_pageName);
             Model.OnChange += OnDataModelUpdated;
         }
 
-        if (!Model.Subscribers_OnKeyUp.Contains(_pageName)) {
-            Model.Subscribers_OnKeyUp.Add(_pageName);
-            Model.OnKeyUp += OnKeyUp;
+        if (!Model.Subscribers_OnKeyboardEvent.Contains(_pageName)) {
+            Model.Subscribers_OnKeyboardEvent.Add(_pageName);
+            Model.OnKeyboardEvent += OnKeyboardEvent;
         }
 
         if (!Model.Subscribers_OnSignalRSetList.Contains(_pageName)) {
@@ -1189,13 +1215,6 @@
         _timer_Editor.AutoReset = false;
     }
 
-    protected void OnAudioPlaybackEnded()
-    {
-        if (Model.View == _pageName) {
-
-        }
-    }
-
     protected async void OnDataModelUpdated()
     {
         if (Model.View == _pageName) {
@@ -1212,8 +1231,10 @@
         }
     }
 
-    protected async void OnKeyUp(keyboardEvent keyboardEvent)
+    protected async void OnKeyboardEvent(keyboardEvent keyboardEvent)
     {
+        Console.WriteLine("In Home OnKeyboardEvent");
+
         if (Model.DialogOpen) {
             return;
         }
@@ -1249,19 +1270,20 @@
                         break;
 
                     case "tab":
-                        await SetActivePageSection("setlist-element", true);
+                        await SetActivePageSection("setlist-element");
                         break;
                 }
                 break;
 
             case "setlist-element":
+                var activeItemPartCount = Model.ActiveItemPartCount;
+
                 if (!editMode) {
                     switch(Helpers.StringLower(keyboardEvent.key)) {
                         case "arrowdown":
                         case "arrowright":
                         case "pagedown":
-                            if (activePart < Model.ActiveItemPartCount - 1)
-                            {
+                            if (activePart < activeItemPartCount - 1) {
                                 await MoveForward();
                             } else {
                                 await MoveNext();
@@ -1279,7 +1301,7 @@
                             break;
                         
                         case "tab":
-                            await SetActivePageSection("setlist", true);
+                            await SetActivePageSection("setlist");
                             break;
                     }
                 } else if (keyboardEvent.ctrlKey || keyboardEvent.metaKey || keyboardEvent.altKey) {
@@ -1287,8 +1309,7 @@
                     switch(Helpers.StringLower(keyboardEvent.key)) {
                         case "arrowdown":
                         case "arrowright":
-                            if (activePart < Model.ActiveItemPartCount - 1)
-                            {
+                            if (activePart < activeItemPartCount - 1) {
                                 await MoveForward();
                             } else {
                                 await MoveNext();
@@ -1564,7 +1585,30 @@
     protected async Task ContextMenuShow(string menu, MouseEventArgs e)
     {
          await contextMenuService.ShowMenu(menu, (int)e.ClientX, (int)e.ClientY);
+    }
 
+    protected async Task ConvertChordsOverTextToChordpro()
+    {
+        Delegate onInput = async(string input) => {
+            if (!String.IsNullOrWhiteSpace(input)) {
+                var insert = Tools.ConvertChordsAboveLyricsToChordpro(input);
+
+                await InsertIntoEditor(insert);
+            }
+        };
+
+        await Helpers.GetInput(
+            onInput,
+            FreeBlazor.GetInput.InputType.Textarea,
+            Text.ConvertChordsOverTextToChordpro,
+            "convert-chords-to-chordpro",
+            "",
+            Text.ConvertChordsOverTextToChordproInfo,
+            "form-control",
+            null,
+            "",
+            true
+        );
     }
 
     protected string CurrentThemeIcon {
@@ -1577,7 +1621,7 @@
     protected void DeleteSetListItem(setListItem item)
     {
         Model.SetList.items.Remove(item);
-        Model.SetList.saveRequired = true;
+        SetListChanged();
         StateHasChanged();
     }
 
@@ -1701,11 +1745,7 @@
     protected async Task EditorCursorPosition(BlazorMonaco.Editor.CursorPositionChangedEvent e)
     {
         await System.Threading.Tasks.Task.Delay(0);
-        // if (e != null && e.Position != null) {
-        //     Console.WriteLine("Position: Line=" + e.Position.LineNumber + ", Column=" + e.Position.Column);
-        // }
 
-        // Find the song element at this line.
         _editorLine = e.Position.LineNumber;
         _editorColumn = e.Position.Column;
         _editorPosition = e.Position;
@@ -1722,36 +1762,7 @@
 
     protected async Task EditorInsertChord(string chord) 
     {
-        var selection = await _editor.GetSelection();
-
-        var edits = new List<BlazorMonaco.Editor.IdentifiedSingleEditOperation>();
-        edits.Add(new BlazorMonaco.Editor.IdentifiedSingleEditOperation {
-            ForceMoveMarkers = false,
-            Range = selection,
-            Text = "[" + chord + "]",
-        });
-
-        var selectionList = new List<BlazorMonaco.Selection> {
-            new BlazorMonaco.Selection {
-                StartLineNumber = selection.StartLineNumber,
-                EndLineNumber = selection.StartLineNumber,
-                StartColumn = selection.StartColumn,
-                EndColumn = selection.StartColumn,
-                PositionColumn = selection.StartColumn,
-                PositionLineNumber = selection.StartLineNumber,
-                SelectionStartColumn = selection.StartColumn,
-                SelectionStartLineNumber = selection.StartLineNumber,
-            },
-        };
-
-        await _editor.ExecuteEdits("insert-field", edits, selectionList);
-        await _editor.Focus();
-
-        Model.Song.content = await _editor.GetValue();
-
-        await UpdateSongSaveRequired(Model.Song);
-
-        await EditorUpdatedApplyStyles();
+        await InsertIntoEditor("[" + chord + "]");
     }
 
     protected void EditorUpdated(BlazorMonaco.Editor.ModelContentChangedEvent e)
@@ -1908,6 +1919,42 @@
         };
 
         await Helpers.Import(onImportComplete, Text.ImportSong, setListItemType.song, Text.ImportSongInfo, true, new List<string> { ".txt" });
+    }
+
+    protected async Task InsertIntoEditor(string insert)
+    {
+        var selection = await _editor.GetSelection();
+
+        var edits = new List<BlazorMonaco.Editor.IdentifiedSingleEditOperation>();
+        edits.Add(new BlazorMonaco.Editor.IdentifiedSingleEditOperation {
+                ForceMoveMarkers = false,
+                Range = selection,
+                Text = insert,
+            });
+
+
+        var selectionList = new List<BlazorMonaco.Selection> {
+            new BlazorMonaco.Selection {
+                StartLineNumber = selection.StartLineNumber,
+                EndLineNumber = selection.StartLineNumber,
+                StartColumn = selection.StartColumn,
+                EndColumn = selection.StartColumn,
+                PositionColumn = selection.StartColumn,
+                PositionLineNumber = selection.StartLineNumber,
+                SelectionStartColumn = selection.StartColumn,
+                SelectionStartLineNumber = selection.StartLineNumber,
+            },
+        };
+
+        await _editor.ExecuteEdits("insert-into-editor", edits, selectionList);
+        await _editor.Focus();
+
+        Model.Song.content = await _editor.GetValue();
+
+        await UpdateSongSaveRequired(Model.Song);
+
+        await EditorUpdatedApplyStyles();
+
     }
 
     protected async Task Logout() 
@@ -2183,8 +2230,11 @@
                     editorUpdateRequired = true;
 
                     // Set the focus to the active part.
-                    var part = Model.SongParts.FirstOrDefault(x => x.startLine <= _editorLine && x.endLine >= _editorLine);
+                    //var part = Model.SongParts.FirstOrDefault(x => x.startLine <= _editorLine && x.endLine >= _editorLine);
+                    var part = Model.SongParts.FirstOrDefault(x => x.index == setlist.activeItemPart);
+
                     if (part != null) {
+                        Console.WriteLine("Scrolling to part: " + part.startLine);
                         await _editor.RevealLineInCenter(part.startLine, BlazorMonaco.Editor.ScrollType.Immediate);
                     }
                 } else {
@@ -2482,6 +2532,7 @@
                             await Helpers.PlayAudioFile(audioItem.filename, audioItem.volume);
                         }
                         setFocusToSetlistElement = true;
+                        Model.SetList.activeItem = item.id;
                     }
                     break;
 
@@ -2566,35 +2617,13 @@
 
             await Model.SendSignalRSetListUpdate(setlist);
         }
-
-        // Model.SetList.ActiveItemPart = index;
-        // Model.TriggerUpdate();
     }
 
-    protected async Task SetActivePageSection(string section, bool setFocus = false)
+    protected async Task SetActivePageSection(string section)
     {
-        Console.WriteLine("SetActivePageSection: '" + section + "'");
         _activePageSection = section;
+        await Helpers.SetActivePageSection(section);
         StateHasChanged();
-
-        // switch(section) {
-        //     case "setlist":
-        //         break;
-
-        //     case "setlist-element":
-        //         break;
-
-        //     default:
-        //         break;
-        // }
-
-        if (setFocus) {
-            await Helpers.Focuser();
-        }
-        
-        // Helpers.SetTimeout(async () => {
-        //     await Helpers.Focuser();
-        // }, 500);
     }
 
     protected void SetLanguage(Language language)
@@ -2602,6 +2631,10 @@
         Helpers.LoadAndUpdateLanguage(language);
         Model.User.preferences.cultureCode = Helpers.StringValue(language.cultureCode);
         StateHasChanged();
+    }
+
+    protected void SetListChanged() {
+        Model.SetList.saveRequired = true;
     }
 
     protected async void SetListContextMenuOnClick(ItemClickEventArgs e) {
@@ -2643,7 +2676,7 @@
             items.Add(itemToMove);
         }
 
-        Model.SetList.saveRequired = true;
+        SetListChanged();
         StateHasChanged();
     }
 
@@ -2849,7 +2882,7 @@
             item = song,
             type = setListItemType.song,
         });
-        Model.SetList.saveRequired = true;
+        SetListChanged();
         StateHasChanged();
     }
 
@@ -2875,6 +2908,7 @@
     {
         Model.User.preferences.editMode = !Model.User.preferences.editMode;
 
+        await Helpers.SetEditMode(Model.User.preferences.editMode);
         await EditorUpdateValues();
         EditorUpdateOptions();
 

@@ -63,6 +63,8 @@ public class Language
     public string confirmDeleteSongInfo { get; set; } = "";
     public string confirmDeleteSongbook { get; set; } = "";
     public string confirmDeleteSongbookInfo { get; set; } = "";
+    public string convertChordsOverTextToChordpro { get; set; } = "";
+    public string convertChordsOverTextToChordproInfo { get; set; } = "";
     public string copySongToSongbook { get; set; } = "";
     public string copyToClipboard { get; set; } = "";
     public string copyToSongbook { get; set; } = "";

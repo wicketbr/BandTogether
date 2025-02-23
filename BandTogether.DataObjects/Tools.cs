@@ -701,6 +701,83 @@ public static class Tools
 	    return output;
     }
 
+    public static string ConvertChordsAboveLyricsToChordpro(string? input)
+    {
+        var output = new System.Text.StringBuilder();
+
+        if (!String.IsNullOrWhiteSpace(input)) {
+            var lines = input.Trim().Split(new string[] { Environment.NewLine }, StringSplitOptions.None).ToList();
+
+            for (int x = 0; x < lines.Count; x++) {
+                // If this is an empty line then just add an empty line to the output.
+                if (String.IsNullOrWhiteSpace(lines[x])) {
+                    output.AppendLine("");
+                } else {
+                    var chordLine = lines[x];
+
+                    if (x < lines.Count - 1) {
+                        var lyricsLine = lines[x + 1];
+                        //chordLine.Dump("ChordLine");
+                        //lyricsLine.Dump("LyricsLine");
+
+                        // Make sure both lines are the same length
+                        if (chordLine.Length > lyricsLine.Length) {
+                            lyricsLine += new String(' ', chordLine.Length - lyricsLine.Length);
+                        } else if (lyricsLine.Length > chordLine.Length) {
+                            chordLine += new String(' ', lyricsLine.Length - chordLine.Length);
+                        }
+
+                        string currentChord = String.Empty;
+                        string currentLyric = String.Empty;
+                        string lineOut = String.Empty;
+                        string currentChordCharacter = String.Empty;
+                        string currentLyricCharacter = String.Empty;
+
+                        for (int i = 0; i < chordLine.Length; i++) {
+                            currentChordCharacter = chordLine.Substring(i, 1);
+                            currentLyricCharacter = lyricsLine.Substring(i, 1);
+
+                            if (currentChordCharacter != " ") {
+                                // In a chord.
+                                currentLyric += currentLyricCharacter;
+                                currentChord += currentChordCharacter;
+                            } else {
+                                // Not in a chord.
+                                // If we have a previous chord add it to the output now
+                                if (!String.IsNullOrEmpty(currentChord)) {
+                                    lineOut += "[" + currentChord + "]";
+                                    currentChord = String.Empty;
+
+                                    // If we have previous lyrics add them
+                                    if (!String.IsNullOrEmpty(currentLyric)) {
+                                        lineOut += currentLyric;
+                                        currentLyric = String.Empty;
+                                    }
+                                }
+                                lineOut += currentLyricCharacter;
+                            }
+                        }
+
+                        // Now we are done with this line, so add any remaining items to the output
+                        if (!String.IsNullOrEmpty(currentChord)) {
+                            lineOut += "[" + currentChord + "]";
+                        }
+                        if (!String.IsNullOrEmpty(currentLyric)) {
+                            lineOut += currentLyric;
+                        }
+                        if (!String.IsNullOrEmpty(lineOut)) {
+                            output.AppendLine(lineOut.TrimEnd());
+                        }
+
+                        x++;
+                    }
+                }
+            }
+        }
+
+        return output.ToString();
+    }
+
     public static double Double(string? input)
     {
         double output = 0;

@@ -29,33 +29,34 @@
                     </button>
                 </div>
 
-                <button type="button" class="btn btn-sm @(Model.User.preferences.hideChords ? "btn-danger" : "btn-success")"
+                <button type="button" class="me-1 btn btn-sm @(Model.User.preferences.hideChords ? "btn-danger" : "btn-success")"
                         @onclick="ToggleChords">
                     @Text.Chords
                 </button>
 
-                <button type="button"
-                        class="btn btn-sm btn-secondary dropdown-toggle"
-                        data-toggle="dropdown"
-                        role="button"
-                        id="dropdownMenuButtonCapo"
-                        data-bs-toggle="dropdown"
-                        aria-expanded="false">
-                    <span>No Capo</span>
-                </button>
-
-                <ul class="dropdown-menu dopdown-menu-capo" aria-labelledby="dropdownMenuButtonCapo">
-                    @for (int x = 0; x <= 12; x++) {
-                        int capoValue = x;
-                        <li>
-                            <a href="javascript:void('0');"
-                                    class="dropdown-item @(capoValue == Capo ? "active" : "")"
-                                    @onclick="@(() => CapoChanged(capoValue))">
-                                @((MarkupString)CapoLabel(capoValue))
-                            </a>
-                        </li>
-                    }
-                </ul>
+                @if (!Model.User.preferences.hideChords) {
+                    <button type="button"
+                            class="btn btn-sm btn-secondary dropdown-toggle"
+                            data-toggle="dropdown"
+                            role="button"
+                            id="dropdownMenuButtonCapo"
+                            data-bs-toggle="dropdown"
+                            aria-expanded="false">
+                        @((MarkupString)CapoText(Capo))
+                    </button>
+                    <ul class="dropdown-menu dopdown-menu-capo" aria-labelledby="dropdownMenuButtonCapo">
+                        @for (int x = 0; x <= 12; x++) {
+                            int capoValue = x;
+                            <li>
+                                <a href="javascript:void('0');"
+                                   class="dropdown-item @(capoValue == Capo ? "active" : "")"
+                                   @onclick="@(() => CapoChanged(capoValue))">
+                                    @((MarkupString)CapoLabel(capoValue))
+                                </a>
+                            </li>
+                        }
+                    </ul>
+                }
 
                 <button type="button" class="btn btn-sm @(Model.User.preferences.autoFollow? "btn-success" : "btn-danger")"
                         @onclick="ToggleAutoFollow">
@@ -100,15 +101,12 @@
                     string matrixKey = String.Empty;
 
                     if (Capo == 12) {
-                        matrixKey = Helpers.StringValue(_song.key);
+                        matrixKey = Helpers.StringValue(SongKeyTransposed);
                         Helpers.ShowChordsAsNashvilleNumbers = true;
                     } else {
-                        matrixKey = Helpers.TransposeKey(_song.key, 12 - Capo);
+                        matrixKey = Helpers.TransposeKey(SongKeyTransposed, 12 - Capo);
                         Helpers.ShowChordsAsNashvilleNumbers = false;
                     }
-
-                    bool minor = matrixKey.Contains("m") || matrixKey.Contains("minor");
-                    string keyLabel = matrixKey + (minor ? "m" : "");
 
                     <div class="song-title">@_song.title</div>
 
@@ -117,8 +115,14 @@
                     }
 
                     <div id="zoomable-area">
-                        @if (!String.IsNullOrWhiteSpace(_song.key)) {
-                            <div class="song-key">@Text.SongKey @keyLabel</div>
+                        @if (!Model.User.preferences.hideChords) {
+                            if (!String.IsNullOrWhiteSpace(SongKeyTransposed)) {
+                                <div class="song-key">@Text.SongKey @SongKeyTransposed</div>
+                            }
+
+                            if (Capo > 0 && Capo < 12) {
+                                <div class="song-capo">@Text.Capo @Helpers.NumberToRomanNumerals(Capo)</div>
+                            }
                         }
 
                         @if (_song.parts != null && _song.parts.Any()) {
@@ -126,7 +130,7 @@
                             Helpers.UsingNashvilleNumbering = Helpers.SongUsesNashvilleNumberingSystem(_song);
                             Helpers.ShowChordsAsNashvilleNumbers = Capo == 12;
 
-                            NashvilleNumbering.Init(matrixKey, minor ? "minor" : "major");
+                            NashvilleNumbering.Init(matrixKey, Minor ? "minor" : "major");
 
                             foreach (var part in _song.parts.Index()) {
                                 var elementId = "tablet-song-part-" + part.Index.ToString();
@@ -216,25 +220,6 @@
         }
 
         Model.View = _pageName;
-
-        // We are going to use our own local copy of the set list.
-        // That way, if we are not auto-following the model updates won't affect our view.
-        if (Model.SetList.items.Count == 0) {
-            await Helpers.LoadCachedMessages();
-            await Helpers.LoadCachedSetList();
-        }
-        _setList = Model.SetList;
-
-        if (_setList.items.Any()) {
-            var selectedItem = _setList.items.FirstOrDefault(x => x.id == _setList.activeItem);
-            if (selectedItem != null) {
-                var song = Tools.SetListItemAsSong(selectedItem);
-                if (song != null) {
-                    _song = song;
-                    
-                }
-            }
-        }
     }
 
     protected override async Task OnAfterRenderAsync(bool firstRender)
@@ -243,8 +228,49 @@
             await Helpers.ResetPadding();
         }
 
-        if (Model.Loaded && _loaded) {
+        if (Model.Loaded && !_loaded) {
             _loaded = true;
+
+            // We are going to use our own local copy of the set list.
+            // That way, if we are not auto-following the model updates won't affect our view.
+            if (Model.SetList.items.Count == 0) {
+                await Helpers.LoadCachedMessages();
+                await Helpers.LoadCachedSetList();
+            }
+            _setList = Model.SetList;
+
+            if (_setList.items.Any()) {
+                var selectedItem = _setList.items.FirstOrDefault(x => x.id == _setList.activeItem);
+
+                if (selectedItem == null) {
+                    // Just show the first song in the list.
+                    selectedItem = _setList.items.FirstOrDefault(x => x.type == setListItemType.song);
+                }
+
+                if (selectedItem != null) {
+                    var song = Tools.SetListItemAsSong(selectedItem);
+                    if (song != null) {
+                        if (song.parts == null || song.parts.Count == 0) {
+                            song = Helpers.GetSong(song.id, song.songBookId);
+                            if (song != null) {
+                                song.parts = Tools.SongParts(song);
+                            }
+                        }
+
+                        if (song != null) {
+                            _song = song;
+
+                            _activeItem = selectedItem.id;
+                            _activeItemPart = 0;
+                            _selectedItem = selectedItem.id;
+
+                            Model.Song = song;
+                            await Helpers.ResetPadding();
+                        }
+                    }
+                }
+            }
+
             RenderCSS();
         }
     }
@@ -273,6 +299,27 @@
         }
     }
 
+    protected void CapoChanged(int capo)
+    {
+        if (_song != null && _song.id != Guid.Empty) {
+            var pref = Model.User.preferences.songPreferences.FirstOrDefault(x => x.songId == _song.id);
+            if (pref != null) {
+                pref.capo = capo;
+                pref.title = Helpers.StringValue(_song.title);
+            } else {
+                Model.User.preferences.songPreferences.Add(new songPreferences {
+                        songBookId = _song.songBookId,
+                        songId = _song.id,
+                        capo = capo,
+                        title = Helpers.StringValue(_song.title),
+                        userId = Model.User.id,
+                    });
+            }
+
+            StateHasChanged();
+        }
+    }
+
     protected string CapoLabel(int capo)
     {
         if (capo == 0){
@@ -282,8 +329,8 @@
         } else {
             string output = "<div class=\"capo-label\">" + Text.Capo + " <strong>" + Helpers.NumberToRomanNumerals(capo) + "</strong></div>"; ;
 
-            if (!String.IsNullOrWhiteSpace(_song?.key)) {
-                var newKey = Helpers.TransposeKey(_song?.key, 12 - capo);
+            if (!String.IsNullOrWhiteSpace(SongKeyTransposed)) {
+                var newKey = Helpers.TransposeKey(SongKeyTransposed, 12 - capo);
 
                 if (!String.IsNullOrWhiteSpace(newKey)) {
                     output += " to play in <strong>" + newKey + "</strong>";
@@ -294,25 +341,26 @@
         }
     }
 
-    protected void CapoChanged(int capo)
+    protected string CapoText(int capo)
     {
-        if (_song != null && _song.id != Guid.Empty) {
-            var pref = Model.User.preferences.songPreferences.FirstOrDefault(x => x.songId == _song.id);
-            if (pref != null) {
-                pref.capo = capo;
-                pref.title = Helpers.StringValue(_song.title);
-            } else {
-                Model.User.preferences.songPreferences.Add(new songPreferences {
-                    songBookId = _song.songBookId,
-                    songId = _song.id,
-                    capo = capo,
-                    title = Helpers.StringValue(_song.title),
-                    userId = Model.User.id,
-                });
-            }
+        string output = String.Empty;
 
-            StateHasChanged();
+        if (capo == 0) {
+            output = Text.NoCapo;
+        } else if (capo == 12) {
+            output = Text.NashvilleNumbers;
+        } else {
+            output = Helpers.NumberToRomanNumerals(capo);
+
+            if (!String.IsNullOrWhiteSpace(_song?.key)) {
+                var newKey = Helpers.TransposeKey(_song?.key, 12 - capo);
+                if (!String.IsNullOrWhiteSpace(newKey)) {
+                    output += " to play in " + newKey;
+                }
+            }
         }
+
+        return output;
     }
 
     protected string CurrentThemeIcon {
@@ -334,6 +382,16 @@
         await Helpers.ClearLocalStorageItem("UserId");
         Model.User = new user();
         StateHasChanged();
+    }
+
+    protected bool Minor {
+        get {
+            if (SongKeyTransposed.Contains("m") || SongKeyTransposed.Contains("minor")) {
+                return true;
+            }
+
+            return false;
+        }
     }
 
     protected async void ProcessSignalRSetList(setList setList)
@@ -380,6 +438,36 @@
         Model.User = user;
     }
 
+    protected string SongOriginalKey {
+        get {
+            string output = String.Empty;
+
+            if (_song != null && !String.IsNullOrWhiteSpace(_song.key)) {
+                output = _song.key;
+            }
+
+            return output;
+        }
+    }
+
+    protected string SongKeyTransposed {
+        get {
+            string output = String.Empty;
+
+            if (_song != null && !String.IsNullOrWhiteSpace(_song.key)) {
+                output = _song.key;
+            }
+
+            // See if this is being transposed.
+            var setListItem = _setList.items.FirstOrDefault(x => x.id == _activeItem);
+            if (setListItem != null && !String.IsNullOrWhiteSpace(setListItem.transpose)) {
+                output= setListItem.transpose;
+            }
+
+            return output;
+        }
+    }
+
     protected async Task ToggleAutoFollow(){
         Model.User.preferences.autoFollow = !Model.User.preferences.autoFollow;
         StateHasChanged();
@@ -407,6 +495,7 @@
                 case setListItemType.song:
                     var song = Tools.SetListItemAsSong(selectedItem);
                     if (song != null) {
+                        Model.Song = song;
                         _song = song;
                         StateHasChanged();
 

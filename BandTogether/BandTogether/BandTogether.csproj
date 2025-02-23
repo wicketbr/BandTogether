@@ -6,6 +6,8 @@
     <ImplicitUsings>enable</ImplicitUsings>
 	<SatelliteResourceLanguages>en</SatelliteResourceLanguages>
 	<ApplicationIcon>favicon.ico</ApplicationIcon>
+	<SignAssembly>False</SignAssembly>
+	<AssemblyOriginatorKeyFile></AssemblyOriginatorKeyFile>
   </PropertyGroup>
 
   <PropertyGroup Condition=" '$(Configuration)' == 'Release' ">

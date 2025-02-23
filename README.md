@@ -40,6 +40,10 @@ In most cases the app will be able to detect the IP address and will display
 that information in the console with a link that can be opened by pressing
 CTRL+click.
 
+NOTE: The embeded YouTube player may not work when using the local IP address if you
+are using a non-routable IP address (eg: 192.168.x.x). In those cases you should use the
+hostname of the computer running the app instead of the IP address.
+
 You can point to an alertnate location for your data by modifying the shortcut used to
 start the application executable and adding -f PATH to the end of the command line.
 For example, if you have all your data in C:\MyBandData you would add -f C:\MyBandData.

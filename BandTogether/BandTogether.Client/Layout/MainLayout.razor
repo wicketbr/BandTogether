@@ -231,9 +231,11 @@
     }
 
     [JSInvokable]
-    public void OnKeyUp(string key, string code, bool ctrlKey, bool shiftKey, bool altKey, bool metaKey)
+    public void OnKeyboardEvent(string key, string code, bool ctrlKey, bool shiftKey, bool altKey, bool metaKey)
     {
-        Model.OnKeyUpProcessor(new keyboardEvent { 
+        Console.WriteLine("In MailLayout OnKeyboardEvent");
+
+        Model.OnKeyboardEventProcessor(new keyboardEvent { 
             key = key,
             code = code,
             ctrlKey = ctrlKey,

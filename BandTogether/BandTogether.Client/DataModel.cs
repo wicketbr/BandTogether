@@ -85,7 +85,7 @@ public class BlazorDataModel
     private List<string> _Subscribers_OnAudioPlaybackEnded = new List<string>();
     private List<string> _Subscribers_OnChange = new List<string>();
     private List<string> _Subscribers_OnDotNetHelperHandler = new List<string>();
-    private List<string> _Subscribers_OnKeyUp = new List<string>();
+    private List<string> _Subscribers_OnKeyboardEvent = new List<string>();
     private List<string> _Subscribers_OnSignalRMessage = new List<string>();
     private List<string> _Subscribers_OnSignalRSetList = new List<string>();
     private List<string> _Subscribers_OnSignalRUpdate = new List<string>();
@@ -108,8 +108,6 @@ public class BlazorDataModel
 
             if (_SetList.items.Any() && _SetList.activeItem.HasValue) {
                 output = _SetList.items.FirstOrDefault(x => x.id == _SetList.activeItem.Value);
-            } else if (_Song.id != Guid.Empty) {
-                //output = _Song;
             }
 
             return output;
@@ -124,18 +122,13 @@ public class BlazorDataModel
 
             if (item != null ) {
                 switch (item.type) {
+                    case setListItemType.audio:
+                    case setListItemType.clock:
                     case setListItemType.countdown:
                     case setListItemType.image:
                     case setListItemType.video:
                     case setListItemType.youTube:
                         output = 0;
-                        break;
-
-                    case setListItemType.song:
-                        var song = Tools.SetListItemAsSong(item);
-                        if (song != null && song.parts != null) {
-                            output = song.parts.Count;
-                        }
                         break;
 
                     case setListItemType.slideshow:
@@ -145,6 +138,12 @@ public class BlazorDataModel
                         }
                         break;
 
+                    case setListItemType.song:
+                        var song = Tools.SetListItemAsSong(item);
+                        if (song != null && song.parts != null) {
+                            output = song.parts.Count;
+                        }
+                        break;
                 }
             }
 
@@ -870,12 +869,12 @@ public class BlazorDataModel
     }
 
     /// <summary>
-    /// The handler that receives OnKeyUp events from javascript and alerts any subcribers of the OnKeyUp event in the model.
+    /// The handler that receives keyboard events from javascript and alerts any subcribers of the OnKeyboardEvent event in the model.
     /// </summary>
     /// <param name="keyboard"></param>
-    public void OnKeyUpProcessor(keyboardEvent keyboard)
+    public void OnKeyboardEventProcessor(keyboardEvent keyboard)
     {
-        OnKeyUp?.Invoke(keyboard);
+        OnKeyboardEvent?.Invoke(keyboard);
     }
 
     /// <summary>
@@ -1188,11 +1187,11 @@ public class BlazorDataModel
         }
     }
 
-    public List<string> Subscribers_OnKeyUp {
-        get { return _Subscribers_OnKeyUp; }
+    public List<string> Subscribers_OnKeyboardEvent {
+        get { return _Subscribers_OnKeyboardEvent; }
         set {
-            if (!ObjectsAreEqual(_Subscribers_OnKeyUp, value)) {
-                _Subscribers_OnKeyUp = value;
+            if (!ObjectsAreEqual(_Subscribers_OnKeyboardEvent, value)) {
+                _Subscribers_OnKeyboardEvent = value;
                 _ModelUpdated = DateTime.UtcNow;
                 NotifyDataChanged();
             }
@@ -1390,7 +1389,7 @@ public class BlazorDataModel
     /// <summary>
     /// An event that can be subscribed to for keyboard events.
     /// </summary>
-    public event Action<keyboardEvent>? OnKeyUp;
+    public event Action<keyboardEvent>? OnKeyboardEvent;
 
     /// <summary>
     /// An event that can be subscribe to for SignalR message updates.

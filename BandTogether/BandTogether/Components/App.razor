@@ -46,7 +46,9 @@
 
     <script type="text/javascript">
         var dotNetHelper;
+        var activePageSection = "";
         var audioPlayer;
+        var editMode = false;
         var iframe;
         var videoPlayer;
         var videoPlayers = [];
@@ -258,13 +260,6 @@
             }
         }
 
-        function Focuser() {
-            var el = document.getElementById("focuser");
-            if (el != undefined && el != null) {
-                el.focus();
-            }
-        }
-
         function HideMenu() {
             let bsOffcanvasUserMenu = bootstrap.Offcanvas.getInstance("#offcanvasUserMenu");
             if (bsOffcanvasUserMenu != undefined && bsOffcanvasUserMenu != null && bsOffcanvasUserMenu._isShown) {
@@ -313,19 +308,20 @@
 
         function PlayAudioFile(file, volume) {
             audioPlayer = document.getElementById("audio-player");
-            audioPlayer.src = file;
-            audioPlayer.volume = volume;
-            audioPlayer.play();
 
-            audioPlayer.removeEventListener("ended", PlayAudioFileComplete);
-            audioPlayer.addEventListener("ended", PlayAudioFileComplete);
+            if (audioPlayer != undefined && audioPlayer != null) {
+                audioPlayer.src = file;
+                audioPlayer.volume = volume;
+                audioPlayer.play();
 
-            //audioPlayer.removeEventListener("timeupdate", PlayAudioFileUpdatePlaybackTime);
-            //audioPlayer.addEventListener("timeupdate", PlayAudioFileUpdatePlaybackTime);
+                audioPlayer.removeEventListener("ended", PlayAudioFileComplete);
+                audioPlayer.addEventListener("ended", PlayAudioFileComplete);
+
+                audioPlayer.blur();
+            }
         }
 
         function PlayAudioFileComplete() {
-            //console.log("PlayAudioFileComplete");
             audioPlayer.currentTime = 0;
             dotNetHelper.invokeMethod("OnAudioPlaybackEnded");
         }
@@ -366,30 +362,32 @@
                 // This is the main video player, so bind to the playback controls.a
                 videoPlayer = document.getElementById("video-player-main");
 
-                videoPlayer.removeEventListener("play", null);
-                videoPlayer.removeEventListener("pause", null);
-                videoPlayer.removeEventListener("timeupdate", null);
+                if (videoPlayer != undefined && videoPlayer != null) {
+                    videoPlayer.removeEventListener("play", null);
+                    videoPlayer.removeEventListener("pause", null);
+                    videoPlayer.removeEventListener("timeupdate", null);
 
-                //videoPlayer.addEventListener("click", () => dotNetHelper.invokeMethod("OnVideoPlayerClick"));
-                videoPlayer.addEventListener("play", () => {
-                    dotNetHelper.invokeMethodAsync("OnVideoPlaybackStateChange", "play");
-                });
+                    //videoPlayer.addEventListener("click", () => dotNetHelper.invokeMethod("OnVideoPlayerClick"));
+                    videoPlayer.addEventListener("play", () => {
+                        dotNetHelper.invokeMethodAsync("OnVideoPlaybackStateChange", "play");
+                    });
 
-                videoPlayer.addEventListener("pause", () => {
-                    dotNetHelper.invokeMethodAsync("OnVideoPlaybackStateChange", "pause");
-                
-                });
+                    videoPlayer.addEventListener("pause", () => {
+                        dotNetHelper.invokeMethodAsync("OnVideoPlaybackStateChange", "pause");
 
-                videoPlayer.addEventListener("timeupdate", () => {
-                    // To keep things in sync, only send the updates to other browsers if the video is playing.
-                    var playing = !videoPlayer.paused && !videoPlayer.ended && videoPlayer.readyState > 2;
-                    if (playing) {
-                        dotNetHelper.invokeMethodAsync("OnVideoPlaybackTimeUpdate", videoPlayer.currentTime);
-                    }
-                });
+                    });
 
-                videoPlayer.volume = volume;
-                videoPlayer.play();
+                    videoPlayer.addEventListener("timeupdate", () => {
+                        // To keep things in sync, only send the updates to other browsers if the video is playing.
+                        var playing = !videoPlayer.paused && !videoPlayer.ended && videoPlayer.readyState > 2;
+                        if (playing) {
+                            dotNetHelper.invokeMethodAsync("OnVideoPlaybackTimeUpdate", videoPlayer.currentTime);
+                        }
+                    });
+
+                    videoPlayer.volume = volume;
+                    videoPlayer.play();
+                }
             }
         }
 
@@ -467,7 +465,7 @@
                     'playsinline': 1,
                     'controls': mainPlayer ? 1 : 0,
                     'disablekb': mainPlayer ? 1 : 0,
-                    'enablejsapi': mainPlayer ? 1 : 0,
+                    'enablejsapi': 1,
                     'fs': 0,
                     'iv_load_policy': 3,
                     'loop': 0,
@@ -592,7 +590,10 @@
                 if (zoomableArea != undefined && zoomableArea != null) {
                     console.log("zoomableArea", zoomableArea.offsetHeight);
 
-                    document.getElementById("after-song-padding").style.height = (h + zoomableArea.offsetHeight - 90).toString() + "px";
+                    var afterSongPadding = document.getElementById("after-song-padding");
+                    if (afterSongPadding != undefined && afterSongPadding != null) {
+                        afterSongPadding.style.height = (h + zoomableArea.offsetHeight - 90).toString() + "px"
+                    }
                 }
             }
         }
@@ -606,19 +607,33 @@
         }
 
         function ScrollToElement(element) {
-            document.getElementById(element).scrollIntoView(true);
+            var el = document.getElementById(element);
+            if (el != undefined && el != null) {
+                el.scrollIntoView(true);
+            }
         }
 
         function ScrollToTop() {
             window.scrollTo(0, 0);
         }
 
+        function SetActivePageSection(value) {
+            activePageSection = value;
+        }
+
         function SetDotNetHelper(value) {
             dotNetHelper = value;
         }
 
+        function SetEditMode(value) {
+            editMode = value;
+        }
+
         function SetElementHeight(element, height) {
-            document.getElementById(element).style.height = height;
+            var el = document.getElementById(element);
+            if (el != undefined && el != null) {
+                el.style.height = height;
+            }
         }
 
         function SetPreferredColorScheme(preferred) {
@@ -661,19 +676,66 @@
             }
         }
 
-        function SetupKeyboardEventHandler() {
-            document.addEventListener('keyup', (event) => {
-                if (dotNetHelper != null) {
-                    var key = event.key;
-                    var code = event.code;
-                    var ctrlKey = event.ctrlKey;
-                    var shiftKey = event.shiftKey;
-                    var altKey = event.altKey;
-                    var metaKey = event.metaKey;
+        function OnKeyDown(event) {
+                var sendKeyup = false;
 
-                    dotNetHelper.invokeMethod("OnKeyUp", key, code, ctrlKey, shiftKey, altKey, metaKey);
+                switch(activePageSection) {
+                    case "setlist":
+                        switch(event.key) {
+                            case "ArrowDown":
+                            case "ArrowUp":
+                            case "Enter":
+                            case "Tab":
+                                sendKeyup = true;
+                                break;
+                        }
+                        break;
+
+                    case "setlist-element":
+                        if (editMode == false) {
+                            switch(event.key) {
+                                case "ArrowDown":
+                                case "ArrowLeft":
+                                case "ArrowRight":
+                                case "ArrowUp":
+                                case "PageDown":
+                                case "PageUp":
+                                case "Tab":
+                                    sendKeyup = true;
+                                    break;
+                            }
+                        } else if (event.ctrlKey || event.metaKey || event.altKey) {
+                            switch(event.key) {
+                                case "ArrowDown":
+                                case "ArrowLeft":
+                                case "ArrowRight":
+                                case "ArrowUp":
+                                    sendKeyup = true;
+                                    break;
+                            }
+                        }
+
+                        break;
                 }
-            }, false);
+
+                if (sendKeyup) {
+                    event.preventDefault();
+
+                    if (dotNetHelper != null) {
+                        var key = event.key;
+                        var code = event.code;
+                        var ctrlKey = event.ctrlKey;
+                        var shiftKey = event.shiftKey;
+                        var altKey = event.altKey;
+                        var metaKey = event.metaKey;
+
+                        dotNetHelper.invokeMethod("OnKeyboardEvent", key, code, ctrlKey, shiftKey, altKey, metaKey);
+                    }
+                }
+        }
+
+        function SetupKeyboardEventHandler() {
+            document.addEventListener('keydown', OnKeyDown, false);
         }
 
         function SetupMonacoCustomTheme() {
