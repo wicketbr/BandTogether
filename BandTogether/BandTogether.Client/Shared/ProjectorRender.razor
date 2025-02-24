@@ -27,24 +27,8 @@
             break;
 
         case setListItemType.image:
-            @* var img = (imageItem)ObjectToRender;
-            if (img != null && !String.IsNullOrWhiteSpace(img.filename)) {
-                <img class="slideshow-image" src="@Helpers.MediaUrl("Images", img.filename)" />
-            } *@
-            break;
-
         case setListItemType.slideshow:
             // Now being rendered as a background image.
-            @*var slideshow = (slideshowItem)ObjectToRender;
-            if (slideshow != null && slideshow.images != null &&
-                Model.SetList.activeItemPart != null &&
-                slideshow.images.Count > Model.SetList.activeItemPart) {
-                var image = slideshow.images[(int)Model.SetList.activeItemPart];
-
-                if (!String.IsNullOrEmpty(image)) {
-                    <img class="slideshow-image" src="@Helpers.SlideShowUrl(slideshow.folder, image)" />
-                }
-            }*@
             break;
 
         case setListItemType.song:
@@ -59,7 +43,7 @@
             if (song != null && ActiveItemPart != null) {
                 int activeItemPart = ActiveItemPart.Value;
 
-                var parts = Tools.SongParts(song);
+                var parts = Tools.SongParts(song.content);
                 if (parts != null && parts.Count() > ActiveItemPart) {
                     if (!String.IsNullOrWhiteSpace(ItemStyle.headerDisplay) && !String.IsNullOrWhiteSpace(ItemStyle.headerFormat)) {
                         bool showHeader = false;

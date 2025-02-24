@@ -36,7 +36,7 @@ public static class NashvilleNumbering
         }
     }
 
-    public static string ConvertChordToNashvilleNumber(string chord, string key = "")
+    public static string ConvertChordToNashvilleNumber(string chord, string? key = "")
     {
         if (!String.IsNullOrWhiteSpace(key)) {
             SetKey(key);
@@ -180,7 +180,7 @@ public static class NashvilleNumbering
         return output;
     }
 
-    public static string FormatChord(string chord, string key = "", bool bassPart = false)
+    public static string FormatChord(string chord, string? key = "", bool bassPart = false)
     {
         if (!String.IsNullOrWhiteSpace(key)) {
             SetKey(key);

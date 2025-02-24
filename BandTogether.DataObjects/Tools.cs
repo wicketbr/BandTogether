@@ -971,7 +971,7 @@ public static class Tools
         // The song may not contain the parse items yet.
         if (output != null) {
             if (output.parts == null || output.parts.Count == 0) {
-                output.parts = SongParts(output);
+                output.parts = SongParts(output.content);
             }
         }
 
@@ -1134,13 +1134,13 @@ public static class Tools
     //    return output;
     //}
 
-    public static List<songPart> SongParts(song song)
+    public static List<songPart> SongParts(string? songContent)
     {
         var output = new List<songPart>();
 
-        if (!String.IsNullOrWhiteSpace(song.content)) {
+        if (!String.IsNullOrWhiteSpace(songContent)) {
             // Split the text into lines.
-            var lines = song.content.Trim().Split(new string[] { Environment.NewLine }, StringSplitOptions.None).ToList();
+            var lines = songContent.Trim().Split(new string[] { Environment.NewLine }, StringSplitOptions.None).ToList();
 
             var songLines = new List<songLine>();
             foreach (var line in lines.Index()) {

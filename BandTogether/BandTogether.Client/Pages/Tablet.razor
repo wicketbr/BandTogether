@@ -128,7 +128,6 @@
                         @if (_song.parts != null && _song.parts.Any()) {
                             Helpers.UsingDoReMi = Helpers.SongUsesDoReMiSystem(_song);
                             Helpers.UsingNashvilleNumbering = Helpers.SongUsesNashvilleNumberingSystem(_song);
-                            Helpers.ShowChordsAsNashvilleNumbers = Capo == 12;
 
                             NashvilleNumbering.Init(matrixKey, Minor ? "minor" : "major");
 
@@ -142,7 +141,11 @@
                                         <div class="song-element">@part.Item.label</div>
                                     }
                                     <div>
-                                        @((MarkupString)Helpers.RenderSongElement(_song, part.Item, matrixKey))
+                                        @if (Helpers.ShowChordsAsNashvilleNumbers) {
+                                            @((MarkupString)Helpers.RenderSongElement(_song, part.Item, _song.key))
+                                        } else {
+                                            @((MarkupString)Helpers.RenderSongElement(_song, part.Item, matrixKey))
+                                        }
                                     </div>
                                 </div>
                             }
@@ -253,7 +256,7 @@
                         if (song.parts == null || song.parts.Count == 0) {
                             song = Helpers.GetSong(song.id, song.songBookId);
                             if (song != null) {
-                                song.parts = Tools.SongParts(song);
+                                song.parts = Tools.SongParts(song.content);
                             }
                         }
 

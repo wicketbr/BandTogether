@@ -958,7 +958,7 @@
                                                             </td>
                                                             <td>
                                                                 @if (Model.ActiveItem != null) {
-                                                                    <select class="form-select form-select-sm" id="edit-song-Transpose" @bind="Model.ActiveItem.transpose" @bind:after="SetListChanged">
+                                                                    <select class="form-select form-select-sm" id="edit-song-Transpose" @bind="Model.ActiveItem.transpose" @bind:after="SongTransposeChanged">
                                                                         <option></option>
                                                                         @foreach (var keyOption in Helpers.SongKeys) {
                                                                             <option value="@keyOption.key" selected="@(keyOption.key == Model.ActiveItem.transpose)">@keyOption.label</option>
@@ -1236,6 +1236,7 @@
         Console.WriteLine("In Home OnKeyboardEvent");
 
         if (Model.DialogOpen) {
+            Console.WriteLine("Dialog Open, returning");
             return;
         }
 
@@ -1843,28 +1844,13 @@
             var content = await _editor.GetValue();
 
             if (content != Model.Song.content) {
+                var songParts = Tools.SongParts(content);
+
                 Model.Song.content = content;
-                Model.Song.parts = Tools.SongParts(Model.Song); 
-                
+                Model.Song.parts = songParts;
+
                 await UpdateSongSaveRequired(Model.Song);
-
                 await EditorUpdatedApplyStyles();
-
-                // If this song is in the set list then update all instances there as well.
-                //bool updatedSongsInSonglist = false;
-                // foreach(var item in Model.SetList.items) {
-                //     if (item.item != null && item.type == setListItemType.song) {
-                //         var song = (song)item.item;
-                //         if (song.id == Model.Song.id && song.songBookId == Model.Song.songBookId) {
-                //             song.content = Model.Song.content;
-                //             //updatedSongsInSonglist = true;
-                //         }
-                //     }
-                // }
-
-                // if (updatedSongsInSonglist) {
-                //     await Model.SendSignalRSetListUpdate(Model.SetList);
-                // }
 
                 StateHasChanged();
             }
@@ -1879,8 +1865,6 @@
         await EditorUpdatedApplyStyles();
 
         await _editor.SetPosition(positionBeforeUpdate, "");
-
-        //await ResizeEditor();
     }
 
     protected void EditorUpdateOptions()
@@ -2736,6 +2720,7 @@
                 Model.SetList.activeItemPart = 0;
 
                 await SetActiveElement(0);
+
                 await EditorUpdateValues();
                 EditorUpdateOptions();
             }
@@ -2886,6 +2871,13 @@
         StateHasChanged();
     }
 
+    protected async Task SongTransposeChanged() {
+        SetListChanged();
+
+        // Also need to trigger an update to anyone viewing this song.
+        await UpdateSongSaveRequired(Model.Song);
+    }
+
     protected async Task ToggleBlankScreen() {
         if (Model.BlankScreen) {
             await Model.SendSignalRUpdate(new signalRUpdate {
@@ -2909,6 +2901,7 @@
         Model.User.preferences.editMode = !Model.User.preferences.editMode;
 
         await Helpers.SetEditMode(Model.User.preferences.editMode);
+
         await EditorUpdateValues();
         EditorUpdateOptions();
 
@@ -2951,31 +2944,33 @@
 
     protected async Task UpdateSongSaveRequired(song song)
     {
-        // When this happens this indicates that we are in an empty set list.
-        // This updated song needs to be pushed to all clients via SignalR.
-        if (Model.SetList.activeItemPart.HasValue) {
-            await SetActiveElement(Model.SetList.activeItemPart.Value);
-        }
-
         if (Model.Song.id == song.id && Model.Song.songBookId == song.songBookId) {
             Model.Song.saveRequired = true;
         }
+
+        var songParts = Tools.SongParts(song.content);
 
         var songbook = Helpers.GetSongBook(song.songBookId);
         if (songbook != null) {
             var songInSongbook = songbook.songs.FirstOrDefault(x => x.id == song.id);
             if (songInSongbook != null) {
                 songInSongbook.saveRequired = true;
+                songInSongbook.content = song.content;
+                songInSongbook.parts = songParts;
             }
         }
 
-        foreach (var item in Model.SetList.items) {
-            if (item.item != null && item.type == setListItemType.song) {
-                if (song.id == Model.Song.id && song.songBookId == Model.Song.songBookId) {
-                    song.content = Model.Song.content;
-                    song.parts = Tools.SongParts(song);
-                }
+        foreach (var item in Model.SetList.items.Where(x => x.type == setListItemType.song)) {
+            var itemSong = Tools.SetListItemAsSong(item);
+            if (itemSong != null && itemSong.id == song.id && itemSong.songBookId == song.songBookId) {
+                itemSong.content = Model.Song.content;
+                itemSong.parts = songParts;
+                item.itemJson = Helpers.SerializeObject(itemSong);
             }
+        }
+
+        if (Model.SetList.activeItemPart.HasValue) {
+            await SetActiveElement(Model.SetList.activeItemPart.Value);
         }
 
         song.saveRequired = true;

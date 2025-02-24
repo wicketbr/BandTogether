@@ -224,8 +224,6 @@
 
     protected async void ProcessSignalRSetList(setList setlist)
     {
-        await Helpers.ConsoleLog("ProjectorView.ProcessSignalRSetList", setlist);
-
         _newActiveItemPart = setlist.activeItemPart;
         _newActiveItem = setlist.activeItem;
         _newItemStyle = null;

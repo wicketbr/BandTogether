@@ -1431,7 +1431,7 @@ label.small {
     position:absolute;
     bottom:5px;
     right:8px;
-    padding:0 .2em;
+    padding:0 1em;
     color:#fff;
     text-align:right;
 }
@@ -1466,4 +1466,10 @@ body.dark .blazor-context-menu {
 
 #convert-chords-to-chordpro {
     height:400px;
+}
+
+.previous-lyrics,
+.upcoming-lyrics {
+    white-space:nowrap;
+    overflow:hidden;
 }

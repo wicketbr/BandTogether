@@ -1140,7 +1140,7 @@ public class BlazorDataModel
 
     public List<songPart> SongParts {
         get {
-            var output = Tools.SongParts(_Song);
+            var output = Tools.SongParts(_Song.content);
             return output;
         }
     }

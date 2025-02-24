@@ -2203,7 +2203,9 @@ public static class Helpers
             var lines = Tools.SplitTextIntoLines(lyrics); // lyrics.Split(new string[] { Environment.NewLine },StringSplitOptions.None).ToList();
 
             foreach(var line in lines) {
-                output += "<div class=\"view-lyrics-line\">" + line + "</div>";
+                if (!String.IsNullOrWhiteSpace(line)) {
+                    output += "<div class=\"view-lyrics-line\">" + line.Trim() + "</div>";
+                }
             }
         }
 
@@ -2980,7 +2982,7 @@ public static class Helpers
     /// <param name="matrixKey">The selected key to render.</param>
     /// <param name="bassPart">Indicates if this is the bass part of a chord.</param>
     /// <returns></returns>
-    public static string RenderChord(string? chord, string? originalKey, string matrixKey, bool bassPart = false)
+    public static string RenderChord(string? chord, string? originalKey, string? matrixKey, bool bassPart = false)
     {
         string output = "";
 
@@ -3043,7 +3045,7 @@ public static class Helpers
     /// <param name="text">The text to render.</param>
     /// <param name="newKey">The selected key.</param>
     /// <returns>The rendered element.</returns>
-    public static string RenderSongElement(song song, songPart part, string newKey)
+    public static string RenderSongElement(song song, songPart part, string? newKey)
     {
         string output = "";
 
@@ -3079,7 +3081,7 @@ public static class Helpers
     /// <param name="text">The text to render.</param>
     /// <param name="newKey">The selected key.</param>
     /// <returns>The rendered element line.</returns>
-    public static string RenderSongElementLine(song song, string? text, string newKey)
+    public static string RenderSongElementLine(song song, string? text, string? newKey)
     {
         StringBuilder output = new StringBuilder();
 
@@ -3670,7 +3672,7 @@ public static class Helpers
     /// <returns>True if this song is in the do-re-mi chord format.</returns>
     public static bool SongUsesDoReMiSystem(song song)
     {
-        var parts = Tools.SongParts(song);
+        var parts = Tools.SongParts(song.content);
 
         if (parts.Any()) {
             string lyrics = String.Empty;
@@ -3700,7 +3702,7 @@ public static class Helpers
     /// <returns>True if the song uses the Nashville Number chord format.</returns>
     public static bool SongUsesNashvilleNumberingSystem(song song)
     {
-        var parts = Tools.SongParts(song);
+        var parts = Tools.SongParts(song.content);
 
         if (parts.Any()) {
             string lyrics = String.Empty;
@@ -3915,7 +3917,7 @@ public static class Helpers
     /// <param name="OriginalKey">The original song key.</param>
     /// <param name="NewKey">The selected key.</param>
     /// <returns>The transposed chord.</returns>
-    public static string TransposeChord(string? Chord, string? OriginalKey, string NewKey)
+    public static string TransposeChord(string? Chord, string? OriginalKey, string? NewKey)
     {
         string output = "";
 
