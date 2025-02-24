@@ -37,8 +37,10 @@ namespace BandTogether
 
             var isDevelopment = builder.Environment.IsDevelopment();
             if (!isDevelopment) {
-                builder.WebHost.UseUrls("http://0.0.0.0:5000");
-                builder.WebHost.UseIISIntegration();
+                //builder.WebHost.UseUrls("http://0.0.0.0:5000");
+                //builder.WebHost.UseIISIntegration();
+                builder.WebHost.UseKestrelCore();
+
             } else {
                 builder.WebHost.UseKestrelCore();
             }
@@ -127,10 +129,12 @@ namespace BandTogether
             };
 
             string ipAddress = String.Empty;
-            var ipAddresses = IpTools.GetIpAddresses();
-            if (ipAddresses.Count == 1) {
-                ipAddress = ipAddresses[0];
-            }
+            try {
+                var ipAddresses = IpTools.GetIpAddresses();
+                if (ipAddresses.Count == 1) {
+                    ipAddress = ipAddresses[0];
+                }
+            } catch { }
 
             string computerName = System.Environment.MachineName;
             if (!String.IsNullOrWhiteSpace(computerName)) {

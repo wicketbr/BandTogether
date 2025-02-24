@@ -30,7 +30,7 @@ bands, churches, organizations that want to run media for a meeting, schools, et
 
 ## Getting Started with BandTogether
 
-### Install
+### Install - Windows
 
 Download and unzip the files to a location on a computer that will be used to run the app.
 Open the BandTogether.exe file, which launches a self-contained web server. The URL to the app
@@ -47,6 +47,18 @@ hostname of the computer running the app instead of the IP address.
 You can point to an alertnate location for your data by modifying the shortcut used to
 start the application executable and adding -f PATH to the end of the command line.
 For example, if you have all your data in C:\MyBandData you would add -f C:\MyBandData.
+
+### Install - Mac
+
+For Mac security you should place the files in a BandTogether folder inside the
+Applications folder. Start the application by issuing the following command from
+a console in the application folder. 
+
+dotnet BandTogether.dll
+
+Or, if you wish to point to a different location on Mac for the "Data" folder:
+
+dotnet BandTogether.dll -f /users/Name/Data (just an example, use your own desired path.)
 
 ## Contact
 
