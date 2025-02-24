@@ -98,6 +98,10 @@ If the folders don't exist and are being created then
 sample media items will be created in the Backgrounds, Images, and Slideshows folders
 and a sample set list will be created and will include samples of most set list item types.
 
+If you wish to force the URL that the app will run as you can modify the LaunchUrl
+setting in the appsettings.json file. If this is left empty the app will attempt to run
+on http://0.0.0.0:5000 for windows and http://localhost:5000 for Mac.
+
 ### Language
 
 All application language is stored in the Languages folder. The default language is en-US.json.

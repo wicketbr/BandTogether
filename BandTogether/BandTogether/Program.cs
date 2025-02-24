@@ -33,14 +33,25 @@ namespace BandTogether
                 }
             }
 
+            bool windows = System.Runtime.InteropServices.RuntimeInformation.IsOSPlatform(System.Runtime.InteropServices.OSPlatform.Windows);
+            bool mac = System.Runtime.InteropServices.RuntimeInformation.IsOSPlatform(System.Runtime.InteropServices.OSPlatform.OSX);
+            bool linus = System.Runtime.InteropServices.RuntimeInformation.IsOSPlatform(System.Runtime.InteropServices.OSPlatform.Linux);
+
             var builder = WebApplication.CreateBuilder(args);
+
+            // Get the launch Url from appsettings.json
+            var launchUrl = builder.Configuration.GetValue<string>("LaunchUrl");
 
             var isDevelopment = builder.Environment.IsDevelopment();
             if (!isDevelopment) {
-                //builder.WebHost.UseUrls("http://0.0.0.0:5000");
-                //builder.WebHost.UseIISIntegration();
-                builder.WebHost.UseKestrelCore();
+                if (!String.IsNullOrWhiteSpace(launchUrl)) {
+                    builder.WebHost.UseUrls(launchUrl);
+                } else if (windows) {
+                    builder.WebHost.UseUrls("http://0.0.0.0:5000");
+                    //builder.WebHost.UseIISIntegration();
+                }
 
+                builder.WebHost.UseKestrelCore();
             } else {
                 builder.WebHost.UseKestrelCore();
             }
