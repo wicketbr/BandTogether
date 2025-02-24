@@ -75,7 +75,6 @@ public class DataAccess : IDataAccess
     private string _folderUsers = "";
     private string _folderVideos = "";
 
-
     private static JsonSerializerOptions _jsonOptions = new JsonSerializerOptions {
         AllowTrailingCommas = true,
         DefaultIgnoreCondition = System.Text.Json.Serialization.JsonIgnoreCondition.WhenWritingNull,
@@ -111,8 +110,6 @@ public class DataAccess : IDataAccess
         "Verdana"
     };
 
-
-
     public DataAccess(string applicationPath, string basePath, IServiceProvider? serviceProvider = null)
     {
         _applicationPath = applicationPath;
@@ -145,22 +142,21 @@ public class DataAccess : IDataAccess
 
             if (!System.IO.Directory.Exists(_folderBackgrounds)) {
                 System.IO.Directory.CreateDirectory(_folderBackgrounds);
+                CreateDefaultBackground();
             }
 
             if (!System.IO.Directory.Exists(_folderImages)) {
                 System.IO.Directory.CreateDirectory(_folderImages);
+                CreateDefaultImage();
             }
 
             if (!System.IO.Directory.Exists(_folderLanguages)) {
                 System.IO.Directory.CreateDirectory(_folderLanguages);
             }
 
-            if (!System.IO.Directory.Exists(_folderSetLists)) {
-                System.IO.Directory.CreateDirectory(_folderSetLists);
-            }
-
             if (!System.IO.Directory.Exists(_folderSlideshows)) {
                 System.IO.Directory.CreateDirectory(_folderSlideshows);
+                CreateDefaultSlideshow();
             }
 
             if (!System.IO.Directory.Exists(_folderSongBooks)) {
@@ -174,6 +170,12 @@ public class DataAccess : IDataAccess
             if (!System.IO.Directory.Exists(_folderVideos)) {
                 System.IO.Directory.CreateDirectory(_folderVideos);
             }
+
+            if (!System.IO.Directory.Exists(_folderSetLists)) {
+                System.IO.Directory.CreateDirectory(_folderSetLists);
+                CreateDefaultSetList();
+            }
+
         }
 
         GlobalSettings.StartupComplete = true;
@@ -475,6 +477,195 @@ public class DataAccess : IDataAccess
         }
     }
 
+    private void CreateDefaultBackground()
+    {
+        var files = Directory.GetFiles(Path.Combine(_applicationPath, "wwwroot", "Sample Items", "Backgrounds"));
+        foreach (var file in files) {
+            System.IO.File.Copy(file, Path.Combine(_folderBackgrounds, System.IO.Path.GetFileName(file)));
+        }
+    }
+
+    private void CreateDefaultImage()
+    {
+        var files = Directory.GetFiles(Path.Combine(_applicationPath, "wwwroot", "Sample Items", "Images"));
+        foreach (var file in files) {
+            System.IO.File.Copy(file, Path.Combine(_folderImages, System.IO.Path.GetFileName(file)));
+        }
+    }
+
+    private void CreateDefaultSetList()
+    {
+        song? s = null;
+
+        var songbooks = GetSongBooks();
+        if (songbooks.Count > 0) {
+            var songbook = songbooks.First();
+            if (songbook != null && songbook.songs.Count > 0) {
+                s = songbook.songs.First();
+            }
+        }
+
+        var setlist = new setList {
+            name = "Sample Set List",
+            fileName = "Sample_Set_List",
+            items = new List<setListItem> {
+                new setListItem {
+                    id = Guid.NewGuid(),
+                    type = setListItemType.image,
+                    item = new imageItem {
+                        filename = "Welcome to the Show.jpg",
+                        name = "Welcome Slide",
+                        transitionSpeed = 500,
+                    },
+                },
+                new setListItem {
+                    id = Guid.NewGuid(),
+                    type = setListItemType.clock,
+                    item = new clockItem {
+                        showSeconds = true,
+                        style = new viewStyle {
+                            background = "Blurry Lights.jpg",
+                            backgroundType = backgroundType.image,
+                            lyricsStyle = new textStyle {
+                                fontColor = "#000",
+                                fontFamily = "Tahoma",
+                                fontSize = 140,
+                                fontBold = true,
+                                fontOutlineColor = "#fff",
+                                fontOutlineWidth = 200,
+                                fontShadow = true,
+                                fontShadowColor = "#000",
+                                fontShadowBlur = 60,
+                                fontShadowOffsetX = 15,
+                                fontShadowOffsetY = 15,
+                                opacity = 0.9,
+                                verticalAlign = "middle",
+                            },
+                        },
+                        transitionSpeed = 500,
+                    },
+                },
+                new setListItem {
+                    id = Guid.NewGuid(),
+                    type = setListItemType.countdown,
+                    item = new countdownItem {
+                        countdownType = "seconds",
+                        seconds = 10,
+                        style = new viewStyle {
+                            background = "Blurry Lights.jpg",
+                            backgroundType = backgroundType.image,
+                            lyricsStyle = new textStyle {
+                                fontBold = true,
+                                fontColor = "#000",
+                                fontFamily = "Tahoma",
+                                fontOutlineColor = "#fff",
+                                fontOutlineWidth = 200,
+                                fontShadow = true,
+                                fontShadowColor = "#000",
+                                fontShadowOffsetX = 15,
+                                fontShadowOffsetY = 15,
+                                fontShadowBlur = 60,
+                                fontSize = 250,
+                                verticalAlign = "middle",
+                            },
+                        },
+                        transitionSpeed = 500,
+                    },
+                },
+                new setListItem {
+                    id = Guid.NewGuid(),
+                    type = setListItemType.countdown,
+                    item = new countdownItem {
+                        countdownType = "time",
+                        toTime = new TimeOnly(9, 0),
+                        style = new viewStyle {
+                            background = "Blurry Lights.jpg",
+                            backgroundType = backgroundType.image,
+                            lyricsStyle = new textStyle {
+                                fontBold = true,
+                                fontColor = "#000",
+                                fontFamily = "Tahoma",
+                                fontOutlineColor = "#fff",
+                                fontOutlineWidth = 200,
+                                fontShadow = true,
+                                fontShadowColor = "#000",
+                                fontShadowOffsetX = 15,
+                                fontShadowOffsetY = 15,
+                                fontShadowBlur = 60,
+                                fontSize = 220,
+                                verticalAlign = "middle",
+                            },
+                        },
+                        transitionSpeed = 500,
+                    },
+                },
+                new setListItem {
+                     id = Guid.NewGuid(),
+                     type = setListItemType.slideshow,
+                     item = new slideshowItem {
+                        folder = "Sample Presentation",
+                        transitionSpeed = 1200,
+                     },
+                },
+            },
+        };
+
+        if (s != null) {
+            setlist.items.Add(new setListItem {
+                id = Guid.NewGuid(),
+                type = setListItemType.song,
+                item = new song {
+                    id = s.id,
+                    songBookId = s.songBookId,
+                },
+            });
+        }
+
+        setlist.items.Add(new setListItem {
+            id = Guid.NewGuid(),
+            type = setListItemType.youTube,
+            item = new youTubeItem {
+                name = "Test YouTube Video",
+                videoId = "dQw4w9WgXcQ",
+                muteInMainWindow = false,
+                muteOnScreens = true,
+                volume = 10,
+                transitionSpeed = 500,
+            },
+        });
+        
+        setlist.items.Add(new setListItem {
+            id = Guid.NewGuid(),
+            type = setListItemType.image,
+            item = new imageItem {
+                filename = "BandTogether.jpg",
+                name = "Closing Slide",
+                transitionSpeed = 500,
+            },
+        });
+
+        SaveSetList(setlist);
+    }
+
+    private void CreateDefaultSlideshow()
+    {
+        var samplePresentationFolder = Path.Combine(_applicationPath, "wwwroot", "Sample Items", "Sample Presentation");
+        if (System.IO.Directory.Exists(samplePresentationFolder)) {
+            var files = Directory.GetFiles(samplePresentationFolder);
+            if (files != null && files.Count() > 0) {
+                var outputFolder = Path.Combine(_folderSlideshows, "Sample Presentation");
+                if (!System.IO.Directory.Exists(outputFolder)) {
+                    System.IO.Directory.CreateDirectory(outputFolder);
+                }
+                foreach (var file in files) {
+                    var fileName = System.IO.Path.GetFileName(file);
+                    var output = Path.Combine(outputFolder, fileName);
+                    System.IO.File.Copy(file, output);
+                }
+            }
+        }
+    }
+
     public List<song> DefaultSongs
     {
         get {
@@ -657,6 +848,14 @@ public class DataAccess : IDataAccess
         extensions.AddRange(Tools.ExtensionsForVideos);
 
         var output = GetFilesByExtensions(_folderBackgrounds, extensions);
+
+        if (!output.Any()) {
+            CreateDefaultBackground();
+            output.Add("BandTogether.jpg");
+        }
+
+        CacheStore.SetCacheItem("backgrounds", output);
+
         return output;
     }
 
@@ -681,6 +880,7 @@ public class DataAccess : IDataAccess
             backgrounds = GetBackgrounds(),
             defaultSongs = DefaultSongs,
             fontWoffFiles = GetFontFiles(),
+            images = GetImages(),
             installedFonts = GetInstalledFonts(),
             languages = GetLanguages(),
             released = _released,
@@ -692,9 +892,13 @@ public class DataAccess : IDataAccess
             videos = GetVideos(),
         };
 
-        if (!String.IsNullOrWhiteSpace(output.settings.lastSetList)) {
+        if (!String.IsNullOrWhiteSpace(output.settings.lastSetList) && output.setListFilenames.Any(x => x.fileName == output.settings.lastSetList)) {
             // See if this still exists.
             output.setList = GetSetList(output.settings.lastSetList);
+        } else {
+            if (output.setListFilenames.Count == 1 && output.setListFilenames.First().fileName.ToLower() == "sample_set_list.json") {
+                output.setList = GetSetList("Sample_Set_List.json");
+            }
         }
 
         return output;
@@ -719,7 +923,13 @@ public class DataAccess : IDataAccess
         }
 
         var output = GetFilesByExtensions(_folderImages, Tools.ExtensionsForImages);
-        
+        if (!output.Any()) {
+            CreateDefaultImage();
+            output.Add("BandTogether.jpg");
+        }
+
+        CacheStore.SetCacheItem("images", output);
+
         return output;
     }
 
@@ -958,6 +1168,10 @@ public class DataAccess : IDataAccess
             if (settings != null) {
                 output = settings;
             }
+        } else {
+            // Create the default settings.
+            output.projectionStyle.background = "Blurry Lights.jpg";
+            output.projectionStyle.backgroundType = backgroundType.image;
         }
 
         if (output.availableFonts.Count == 0) {

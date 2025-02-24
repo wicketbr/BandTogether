@@ -1851,6 +1851,10 @@ public static class Helpers
         bool added = false;
         bool setListWasEmpty = Model.EmptySetList;
 
+        if (addItem.id == Guid.Empty) {
+            addItem.id = Guid.NewGuid();
+        }
+
         var items = new List<setListItem>();
 
         if (Model.SetList.selectedItem.HasValue) {

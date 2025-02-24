@@ -33,6 +33,7 @@ public class dataLoader
     public List<string> backgrounds { get; set; } = new List<string>();
     public List<song> defaultSongs { get; set; } = new List<song>();
     public List<string> fontWoffFiles { get; set; } = new List<string>();
+    public List<string> images { get; set; } = new List<string>();
     public List<string> installedFonts { get; set; } = new List<string>();
     public DateOnly released { get; set; }
     public List<Language> languages { get; set; } = new List<Language>();
