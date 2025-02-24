@@ -111,13 +111,19 @@ Or, you can update any text in the en-US.json file if you wish to change the wor
 
 ## The Interface
 
-The interface is divided into three main sections: the Set List, the Song Books, main Item View.
-Depending on whether or not you have Edit Mode toggled in the top menu you will see
+The interface is divided into the main sections: 
+
+- The Menu Bar at the Top of the Application
+- The Set List and Song Books items in a resizable split-pane on the left.
+- The main Item View area on the right, with an optional Preview area shown at the bottom.
+
+### The Menu Bar
+
+The first menu item is the Edit Mode toggle.
+Depending on whether or not you have Edit Mode toggled on in the top menu you will see
 different options in the interface. For example, the context menus that appear when
 right-clicking on the set list, a song book, or songs in a song book will differ
 depending on whether or not you are in Edit Mode.
-
-### The Menu Bar
 
 Next to the Edit Mode menu option is an option to show or hide the messages area.
 When shown, the messages interface will appear at the top of the item view area just
