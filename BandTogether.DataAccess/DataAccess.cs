@@ -61,7 +61,7 @@ public class DataAccess : IDataAccess
 {
     private string _applicationPath = "";
     private string _basePath = "";
-    private DateOnly _released = DateOnly.FromDateTime(Convert.ToDateTime("1/27/2025"));
+    private DateOnly _released = DateOnly.FromDateTime(Convert.ToDateTime("2/24/2025"));
     private IServiceProvider? _serviceProvider;
     private string _version = "1.0.0";
 
