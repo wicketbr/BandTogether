@@ -1,0 +1,5 @@
+Add support for sheet music.
+
+Add support for running the app in a Docker container.
+
+Give the presenter the ability to change user settings for them.

@@ -109,6 +109,90 @@ If you wish to make a translation for another language, simply make a copy of th
 and name it according to the language code you wish to use (eg: fr-FR.json for French).
 Or, you can update any text in the en-US.json file if you wish to change the wording.
 
+## The Interface
+
+The interface is divided into three main sections: the Set List, the Song Books, main Item View.
+Depending on whether or not you have Edit Mode toggled in the top menu you will see
+different options in the interface. For example, the context menus that appear when
+right-clicking on the set list, a song book, or songs in a song book will differ
+depending on whether or not you are in Edit Mode.
+
+### The Menu Bar
+
+Next to the Edit Mode menu option is an option to show or hide the messages area.
+When shown, the messages interface will appear at the top of the item view area just
+below the toolbar menu. This feature can be used to send messages to the main projection
+screen view or to any connected tablets using the tablet view. If an audio file is 
+playing from the set list the audio player controls will appear just above the messaging area.
+When an audio file is playing you can move on to other items in the set list and the
+audio will continue to play. Once the audio has completed the audio interface will disappear.
+You can close the audio player during playback by clicking the X in the upper right corner.
+
+The next two icons relate to blank the screen and hiding text. The Toggle Blank Screen menu
+option will blank the screen to black. The Toggle Hide Text menu option will hide all text
+on a slide but leave the background in place. This works for Clocks, Countdowns, and Songs.
+
+The Screen View menu option will open a new browser window with the screen view interface.
+This can be dragged onto a second monitor and then be run in full screen (usually by pressing F11.)
+You can open multiple screen views on different monitors, or even on completely different computers.
+For example, if your main projection computer running the software is connected to a projector
+or to multiple TVs mirroring a second screen, you could show on those screens from the
+projection computer. If you have TVs in another area that have a computer connected that can
+access the URL of the software, those TVs could also show the screen view interface.
+
+The Tablet View menu option is used for opening the interface meant for musicians on stage.
+This interface allows each musician to choose their own settings for light or dark mode,
+font size for the song chart, whether to show or hide chords, whether to view in the original
+key or to view in the Nashville Numbering System, and to add a capo to the song chart.
+When Auto-Follow is on then the chart will automatically scroll to stay in line with the
+current element of the song that is selected in the system controlling the set list.
+
+The Settings menu item brings up the interface for configuring the software. Here you can
+select whether or not to show non-standard keys for songs and transposing, enable or disable
+the projection features, and enable a Church Mode that will show CCLI information for use
+when showing songs in a church environment. You can also use the Projection tab if that
+feature is enabled to configure the style for fonts used for lyrics, headers, footers, as
+well as backgrounds used for song presentation on screen. The Messaging tab allows
+you to configure the font settings for both the screen and tablet messages.
+The Fonts tab allows you to select additional fonts installed on your system that you
+want to use in the software. By default, all standard web-safe fonts are included, as well
+as a few Google fonts stored as woff2 files in the wwwroot/fonts folder. You can add
+additional woff2 fonts to this folder and they will be loaded during the application startup
+and will then be available for use in the various style interfaces.
+
+The Show/Hide Chords menu option toggles chords on and off in the non-Edit Mode view when
+viewing a song in the main item view area.
+
+The next menu option turns the preview window on and off and allows you to select the 
+size for the preview window.
+
+The user menu option allows you to switch to a different user account, and to add additional users.
+
+The Theme menu option lets you switch between auto, light, or dark mode. In auto mode the
+software will use the system setting for light or dark mode.
+
+### Set Lists and Song Books
+
+You can drag songs from a song book to the set list area, or you can right-click on a song
+and select the Add to Set List option. Items in the set list can also be rearranged by dragging.
+By default, the previously-opened set list will be opened again the next time you open the software.
+
+Use the Plus icon above the set list to add a new item to the set list. Supported item types are:
+
+- Audio Files
+- A Clock
+- A Countdown Timer (both in seconds or to a specific time)
+- Images
+- Slideshows
+- Videos
+- YouTube Videos
+
+If you have PowerPoint installed on the computer running the software you can choose the
+option when creating a new Slideshow to create the slideshow images from a PowerPoint presentation.
+Due to the nature of how this software works, PowerPoint slideshows cannot be played directly,
+as the software is not doing any sort of video rendering on the screens. Instead, only images
+can be used at this point.
+
 ## Tech Notes
 
 In my testing I have found that the background videos do not perform well in all browsers.
