@@ -45,6 +45,13 @@
             <Item Id="@setListItemType.image" OnClick="@AddSetListItemMenuClicked">
                 <Icon Name="Image" /> @Text.AddImage
             </Item>
+
+            @if (Model.DataLoader.sheetMusic.Count > 0) {
+                <Item Id="@setListItemType.sheetmusic" OnClick="@AddSetListItemMenuClicked">
+                    <Icon Name="Sheetmusic" /> @Text.AddSheetMusic
+                </Item>
+            }
+
             <Item Id="@setListItemType.slideshow" OnClick="@AddSetListItemMenuClicked">
                 <Icon Name="Slideshow" /> @Text.AddSlideshow
             </Item>
@@ -63,6 +70,9 @@
             <Item Id="delete" OnClick="@SetListContextMenuOnClick">
                 <Icon Name="Delete" /> @Text.Delete
             </Item>
+            <Item Id="duplicate" OnClick="@SetListContextMenuOnClick">
+                <Icon Name="Duplicate" /> @Text.Duplicate
+            </Item>
         </ContextMenu>
 
         <ContextMenu Id="SetListContextMenuWithEdit" Animation="Animation.Grow">
@@ -74,6 +84,9 @@
             </Item>
             <Item Id="delete" OnClick="@SetListContextMenuOnClick">
                 <Icon Name="Delete" /> @Text.Delete
+            </Item>
+            <Item Id="duplicate" OnClick="@SetListContextMenuOnClick">
+                <Icon Name="Duplicate" /> @Text.Duplicate
             </Item>
         </ContextMenu>
 
@@ -484,6 +497,18 @@
                                                         }
                                                         break;
 
+                                                    case setListItemType.sheetmusic:
+                                                        var sheetmusic = Tools.SetListItemAsSheetMusic(item);
+                                                        if (sheetmusic != null) {
+                                                            <ContextMenuTrigger MenuId="SetListContextMenuWithEdit" Id="@item.id.ToString()">
+                                                                <span title="@Text.SheetMusic -  @sheetmusic.title">
+                                                                    <Icon Name="Sheetmusic" />
+                                                                    @sheetmusic.title
+                                                                </span>
+                                                            </ContextMenuTrigger>
+                                                        }
+                                                        break;
+
                                                     case setListItemType.slideshow:
                                                         var slideshow = Tools.SetListItemAsSlideshow(item);
                                                         if (slideshow != null) {
@@ -831,6 +856,18 @@
                                         if (img != null && !String.IsNullOrWhiteSpace(img.filename)) {
                                             <div class="mb-2">
                                                 <img class="slideshow-image" src="@Helpers.MediaUrl("Images", img.filename)" />
+                                            </div>
+                                        }
+                                        break;
+
+                                    case setListItemType.sheetmusic:
+                                        var sheetmusic = Tools.SetListItemAsSheetMusic(activeItem);
+                                        if (sheetmusic != null) {
+                                            <div class="mb-2 sheet-music-title">
+                                                @Text.SheetMusic - @sheetmusic.title
+                                            </div>
+                                            <div class="mb-2">
+                                                @Text.SheetMusicViewInfo
                                             </div>
                                         }
                                         break;
@@ -1233,10 +1270,7 @@
 
     protected async void OnKeyboardEvent(keyboardEvent keyboardEvent)
     {
-        Console.WriteLine("In Home OnKeyboardEvent");
-
         if (Model.DialogOpen) {
-            Console.WriteLine("Dialog Open, returning");
             return;
         }
 
@@ -1247,32 +1281,62 @@
         switch (Helpers.StringLower(_activePageSection)) {
             case "setlist":
                 var setListIndex = Model.ActiveSetListIndex;
+                var selectedSetListItem = Model.SetList.items.FirstOrDefault(x => x.id == Model.SetList.selectedItem);
 
-                switch(Helpers.StringLower(keyboardEvent.key)) {
-                    case "arrowdown":
-                        if (setListIndex < Model.SetList.items.Count - 1) {
-                            Model.SetList.selectedItem = Model.SetList.items[setListIndex + 1].id;
-                            StateHasChanged();
-                        }
-                        break;
+                if (keyboardEvent.ctrlKey || keyboardEvent.altKey || keyboardEvent.metaKey) {
+                    switch (Helpers.StringLower(keyboardEvent.key)) {
+                        case "c":
+                            if (selectedSetListItem != null) {
+                                await Helpers.SetLocalStorageItem("clipboard-setlistitem", selectedSetListItem);
+                            }
+                            break;
 
-                    case "arrowup":
-                        if (setListIndex > 0) {
-                            Model.SetList.selectedItem = Model.SetList.items[setListIndex - 1].id;
-                            StateHasChanged();
-                        }
-                        break;
+                        case "v":
+                            var clipboard = await Helpers.GetLocalStorageItem<setListItem>("clipboard-setlistitem");
+                            if (clipboard != null) {
+                                DuplicateSetListItem(clipboard);
+                            }
+                            break;
 
-                    case "enter":
-                        var selectedSetListItem = Model.SetList.items.FirstOrDefault(x => x.id == Model.SetList.selectedItem);
-                        if (selectedSetListItem != null) {
-                            await SelectSetListItem(selectedSetListItem, true);
-                        }
-                        break;
+                        case "x":
+                            if (selectedSetListItem != null) {
+                                await Helpers.SetLocalStorageItem("clipboard-setlistitem", selectedSetListItem);
+                                DeleteSetListItem(selectedSetListItem);
+                            }
+                            break;
+                    }
+                } else {
+                    switch (Helpers.StringLower(keyboardEvent.key)) {
+                        case "arrowdown":
+                            if (setListIndex < Model.SetList.items.Count - 1) {
+                                Model.SetList.selectedItem = Model.SetList.items[setListIndex + 1].id;
+                                StateHasChanged();
+                            }
+                            break;
 
-                    case "tab":
-                        await SetActivePageSection("setlist-element");
-                        break;
+                        case "arrowup":
+                            if (setListIndex > 0) {
+                                Model.SetList.selectedItem = Model.SetList.items[setListIndex - 1].id;
+                                StateHasChanged();
+                            }
+                            break;
+
+                        case "delete":
+                            if (selectedSetListItem != null) {
+                                DeleteSetListItem(selectedSetListItem);
+                            }
+                            break;
+
+                        case "enter":
+                            if (selectedSetListItem != null) {
+                                await SelectSetListItem(selectedSetListItem, true);
+                            }
+                            break;
+
+                        case "tab":
+                            await SetActivePageSection("setlist-element");
+                            break;
+                    }
                 }
                 break;
 
@@ -1396,6 +1460,14 @@
                     id = Guid.Empty,
                     type = setListItemType.image,
                     item = new imageItem(),
+                };
+                break;
+
+            case setListItemType.sheetmusic:
+                newSetListItem = new setListItem {
+                    id = Guid.Empty,
+                    type = setListItemType.sheetmusic,
+                    item = new sheetMusicItem(),
                 };
                 break;
 
@@ -1619,9 +1691,33 @@
         }
     }
 
+    protected string CurrentThemeLabel {
+        get {
+            string output = Helpers.CurrentThemeLabelForUser(Model.User);
+            return output;
+        }
+    }
+
     protected void DeleteSetListItem(setListItem item)
     {
+        var selectedIndex = Model.ActiveSetListIndex;
+
         Model.SetList.items.Remove(item);
+
+        if (Model.SetList.items.Count > 0) {
+            int newSelectedIndex = 0;
+            if (selectedIndex < Model.SetList.items.Count) {
+                newSelectedIndex = selectedIndex;
+            } else {
+                newSelectedIndex = Model.SetList.items.Count - 1;
+            }
+
+            var selectedItem = Model.SetList.items[newSelectedIndex];
+            if (selectedItem != null) {
+                Model.SetList.selectedItem = selectedItem.id;
+            }
+        }
+
         SetListChanged();
         StateHasChanged();
     }
@@ -1715,11 +1811,16 @@
         );
     }
 
-    protected string CurrentThemeLabel {
-        get {
-            string output = Helpers.CurrentThemeLabelForUser(Model.User);
-            return output;
-        }
+    protected void DuplicateSetListItem(setListItem item)
+    {
+        Helpers.InsertSetListItem(new setListItem {
+            id = Guid.NewGuid(),
+            type = item.type,
+            item = item.item,
+            itemJson = item.itemJson,
+            afterItemOption = item.afterItemOption,
+            transpose = item.transpose,
+        });
     }
 
     protected void EditMessage(string message, string messageClass = "success")
@@ -2218,7 +2319,6 @@
                     var part = Model.SongParts.FirstOrDefault(x => x.index == setlist.activeItemPart);
 
                     if (part != null) {
-                        Console.WriteLine("Scrolling to part: " + part.startLine);
                         await _editor.RevealLineInCenter(part.startLine, BlazorMonaco.Editor.ScrollType.Immediate);
                     }
                 } else {
@@ -2498,6 +2598,7 @@
                                 Model.SetList.activeItem = item.id;
 
                                 await SetActiveElement(setItemPart != null ? setItemPart.Value : 0);
+                                await Helpers.SetActiveItemTypeJSInterop(setListItemType.song);
                                 //Model.SetList.ActiveItemPart = 0;
                             }
                             setFocusToSetlistElement = true;
@@ -2533,6 +2634,7 @@
 
                             Model.SetList.activeItem = item.id;
                             await SetActiveElement(setItemPart != null ? setItemPart.Value : 0);
+                            await Helpers.SetActiveItemTypeJSInterop(setListItemType.slideshow);
                         }
                         setFocusToSetlistElement = true;
                     }
@@ -2546,6 +2648,7 @@
 
                         Model.SetList.activeItem = item.id;
                         await SetActiveElement(setItemPart != null ? setItemPart.Value : 0);
+                        await Helpers.SetActiveItemTypeJSInterop(setListItemType.youTube);
                         setFocusToSetlistElement = true;
                     }
                     break;
@@ -2554,6 +2657,7 @@
                     if (doubleClicked || setAsActiveItem) {
                         Model.SetList.activeItem = item.id;
                         await SetActiveElement(setItemPart != null ? setItemPart.Value : 0);
+                        await Helpers.SetActiveItemTypeJSInterop(Model.ActiveItemType);
                         setFocusToSetlistElement = true;
                     }
                     break;
@@ -2632,6 +2736,9 @@
                     switch (selectedAction) {
                         case "delete":
                             DeleteSetListItem(item);
+                            break;
+                        case "duplicate":
+                            DuplicateSetListItem(item);
                             break;
                         case "edit":
                             await Helpers.EditSetListItem(item);

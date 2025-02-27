@@ -177,7 +177,13 @@ The user menu option allows you to switch to a different user account, and to ad
 The Theme menu option lets you switch between auto, light, or dark mode. In auto mode the
 software will use the system setting for light or dark mode.
 
-### Set Lists and Song Books
+### Set List
+
+You can use the up and down arrows to move between items. Pressing Enter with an item
+selected will present that item and switch the focus to the view area.
+Pressing Delete will delete the currently-selected set list item.
+You can use the standard cut, copy, and paste shortcuts with set list items.
+Pressing the Tab key will switch the focus to the view area.
 
 You can drag songs from a song book to the set list area, or you can right-click on a song
 and select the Add to Set List option. Items in the set list can also be rearranged by dragging.
@@ -198,6 +204,12 @@ option when creating a new Slideshow to create the slideshow images from a Power
 Due to the nature of how this software works, PowerPoint slideshows cannot be played directly,
 as the software is not doing any sort of video rendering on the screens. Instead, only images
 can be used at this point.
+
+### View Area
+
+You can use the arrow keys or the page up/down keys to move between items in the view area.
+When in edit mode and editing a song you can switch parts by double-clicking on the part in the editor,
+or by pressing the CTRL key or OPTION key plus arrow up and down.
 
 ## Tech Notes
 

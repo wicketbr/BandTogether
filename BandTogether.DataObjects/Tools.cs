@@ -949,6 +949,17 @@ public static class Tools
     }
 
     /// <summary>
+    /// Returns a SetListItem as a SheetMusicItem or null.
+    /// </summary>
+    /// <param name="setlistItem">The SetListItem object.</param>
+    /// <returns>A nullable SheetMusicItem.</returns>
+    public static sheetMusicItem? SetListItemAsSheetMusic(setListItem setlistItem)
+    {
+        var output = SetListItemAsTypedItem<sheetMusicItem>(setlistItem);
+        return output;
+    }
+
+    /// <summary>
     /// Returns a SetListItem as a Slideshow or null if it's not a Slideshow.
     /// </summary>
     /// <param name="setlistItem">The SetListItem object.</param>
@@ -1045,6 +1056,10 @@ public static class Tools
 
             case setListItemType.image:
                 output = SetListItemAsImage(item);
+                break;
+
+            case setListItemType.sheetmusic:
+                output = SetListItemAsSheetMusic(item);
                 break;
 
             case setListItemType.slideshow:

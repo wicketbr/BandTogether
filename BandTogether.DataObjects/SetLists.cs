@@ -43,6 +43,7 @@ public static class setListItemType
     public const string clock = "clock";
     public const string countdown = "countdown";
     public const string image = "image";
+    public const string sheetmusic = "sheetmusic";
     public const string slideshow = "slideshow";
     public const string song = "song";
     public const string unblank = "unblank";

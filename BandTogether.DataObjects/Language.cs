@@ -18,6 +18,7 @@ public class Language
     public string addImage { get; set; } = "";
     public string addItem { get; set; } = "";
     public string addSetListItem { get; set; } = "";
+    public string addSheetMusic { get; set; } = "";
     public string addSlideshow { get; set; } = "";
     public string addSlideshowInfo { get; set; } = "";
     public string addSong { get; set; } = "";
@@ -87,6 +88,7 @@ public class Language
     public string displayOnFirstSlide { get; set; } = "";
     public string displayOnLastSlide { get; set; } = "";
     public string documentation { get; set; } = "";
+    public string duplicate { get; set; } = "";
     public string duplicateUsername { get; set; } = "";
     public string edit { get; set; } = "";
     public string editMode { get; set; } = "";
@@ -217,6 +219,8 @@ public class Language
     public string send { get; set; } = "";
     public string settings { get; set; } = "";
     public string settingsProjection { get; set; } = "";
+    public string sheetMusic { get; set; } = "";
+    public string sheetMusicViewInfo { get; set; } = "";
     public string settingsGeneral { get; set; } = "";
     public string setList { get; set; } = "";
     public string showChords { get; set; } = "";

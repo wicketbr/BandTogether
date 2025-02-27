@@ -63,6 +63,16 @@
             </div>
             break;
 
+        case setListItemType.sheetmusic:
+            <h2>@Text.SheetMusic</h2>
+
+            @foreach(var item in Model.DataLoader.sheetMusic) {
+                <div class="item-selection @(ItemAsSheetMusic.title == item.title ? "selected" : "")" @onclick="@(() => SetSheetMusicItem(item.title))">
+                    <Icon Name="SheetMusic" /> @item.title
+                </div>
+            }
+            break;
+
         case setListItemType.slideshow:
             <h2>@Text.Slideshow</h2>
 
@@ -277,6 +287,13 @@
         }
     }
 
+    protected sheetMusicItem ItemAsSheetMusic {
+        get {
+            var sheetmusic = Tools.SetListItemAsSheetMusic(_value);
+            return sheetmusic != null ? sheetmusic : new sheetMusicItem();
+        }
+    }
+
     protected slideshowItem ItemAsSlideshow {
         get
         {
@@ -403,6 +420,12 @@
             filename = image,
             name = ItemAsImage.name,
         };
+        await Save();
+    }
+
+    protected async Task SetSheetMusicItem(string title)
+    {
+        _value.item = new sheetMusicItem { title = title };
         await Save();
     }
 

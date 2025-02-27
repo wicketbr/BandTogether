@@ -96,6 +96,11 @@ public class imageItem
     public int? transitionSpeed { get; set; } = 500;
 }
 
+public class sheetMusicItem
+{
+    public string? title { get; set; }
+}
+
 public class slideshowItem
 {
     public string folder { get; set; } = "";

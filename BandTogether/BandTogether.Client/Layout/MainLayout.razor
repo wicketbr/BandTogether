@@ -351,14 +351,16 @@
         Model.Messages = Model.Messages.Where(x => x.Id != messageId).ToList();
     }
 
-    protected void DialogClosed(dynamic d)
+    protected async void DialogClosed(dynamic d)
     {
         Model.DialogOpen = false;
+        await Helpers.DialogOpenSetJSInterop(false);
     }
 
-    protected void DialogOpened(string s, Type type, Dictionary<string, object> d, Radzen.DialogOptions o)
+    protected async void DialogOpened(string s, Type type, Dictionary<string, object> d, Radzen.DialogOptions o)
     {
         Model.DialogOpen = true;
+        await Helpers.DialogOpenSetJSInterop(true);
     }
 
     public async ValueTask DisposeAsync()

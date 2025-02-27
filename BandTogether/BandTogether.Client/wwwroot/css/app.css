@@ -588,6 +588,7 @@ button.user-button {
 }
 
 .icon.music,
+.icon.sheetmusic,
 .icon.song,
 .icon.songbook,
 .icon.songbookopen {
@@ -1091,12 +1092,14 @@ body.dark .song-part-note {
 }
 
 .ar_4x3,
-.ar_4x3 img {
+.ar_4x3 img,
+.projection-wrapper.ar_4x3 .video-background{
     aspect-ratio: 4 / 3;
 }
 
 .ar_4x3_2,
-.ar_4x3_2 img {
+.ar_4x3_2 img,
+.projection-wrapper.ar_4x3_2 .video-background{
     aspect-ratio: 4 / 3.2;
 }
 
@@ -1107,12 +1110,14 @@ body.dark .song-part-note {
 }
 
 .ar_16x10,
-.ar_16x10 img {
+.ar_16x10 img,
+.projection-wrapper.ar_16x10 .video-background{
     aspect-ratio: 16 / 10;
 }
 
 .ar_16x8,
-.ar_16x8 img {
+.ar_16x8 img,
+.projection-wrapper.ar_16x8 .video-background{
     aspect-ratio: 16 / 8;
 }
 
@@ -1472,4 +1477,9 @@ body.dark .blazor-context-menu {
 .upcoming-lyrics {
     white-space:nowrap;
     overflow:hidden;
+}
+
+.sheet-music-title {
+    font-size:2em;
+    font-weight:bold;
 }

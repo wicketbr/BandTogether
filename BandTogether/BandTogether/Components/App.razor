@@ -46,8 +46,10 @@
 
     <script type="text/javascript">
         var dotNetHelper;
+        var activeItemType = "";
         var activePageSection = "";
         var audioPlayer;
+        var dialogOpen = false;
         var editMode = false;
         var iframe;
         var videoPlayer;
@@ -232,6 +234,10 @@
             } else {
                 setTimeout(() => DelayedSelectInternal(element, safety), 20);
             }
+        }
+
+        function DialogOpen(open) {
+            dialogOpen = open;
         }
 
         async function DownloadFileFromStream(fileName, contentStreamReference) {
@@ -677,22 +683,59 @@
         }
 
         function OnKeyDown(event) {
-                var sendKeyup = false;
+            if (dialogOpen) {
+                return;
+            }
 
-                switch(activePageSection) {
-                    case "setlist":
+            var sendKeyup = false;
+
+            switch(activePageSection) {
+                case "setlist":
+                    if (event.ctrlKey || event.metaKey || event.altKey) {
+                        switch (event.key) {
+                            case "c":
+                            case "v":
+                            case "x":
+                                sendKeyup = true;
+                                break;
+                        }
+                    } else {
                         switch(event.key) {
                             case "ArrowDown":
                             case "ArrowUp":
+                            case "Delete":
                             case "Enter":
                             case "Tab":
                                 sendKeyup = true;
                                 break;
                         }
-                        break;
+                    }
+                    break;
 
-                    case "setlist-element":
-                        if (editMode == false) {
+                case "setlist-element":
+                    if (editMode == false) {
+                        switch(event.key) {
+                            case "ArrowDown":
+                            case "ArrowLeft":
+                            case "ArrowRight":
+                            case "ArrowUp":
+                            case "PageDown":
+                            case "PageUp":
+                            case "Tab":
+                                sendKeyup = true;
+                                break;
+                        }
+                    } else {
+                        if (activeItemType == "song" && (event.ctrlKey || event.metaKey || event.altKey)) {
+                            switch(event.key) {
+                                case "ArrowDown":
+                                case "ArrowLeft":
+                                case "ArrowRight":
+                                case "ArrowUp":
+                                    sendKeyup = true;
+                                    break;
+                            }
+                        } else {
                             switch(event.key) {
                                 case "ArrowDown":
                                 case "ArrowLeft":
@@ -701,37 +744,32 @@
                                 case "PageDown":
                                 case "PageUp":
                                 case "Tab":
-                                    sendKeyup = true;
-                                    break;
-                            }
-                        } else if (event.ctrlKey || event.metaKey || event.altKey) {
-                            switch(event.key) {
-                                case "ArrowDown":
-                                case "ArrowLeft":
-                                case "ArrowRight":
-                                case "ArrowUp":
-                                    sendKeyup = true;
                                     break;
                             }
                         }
-
-                        break;
-                }
-
-                if (sendKeyup) {
-                    event.preventDefault();
-
-                    if (dotNetHelper != null) {
-                        var key = event.key;
-                        var code = event.code;
-                        var ctrlKey = event.ctrlKey;
-                        var shiftKey = event.shiftKey;
-                        var altKey = event.altKey;
-                        var metaKey = event.metaKey;
-
-                        dotNetHelper.invokeMethod("OnKeyboardEvent", key, code, ctrlKey, shiftKey, altKey, metaKey);
                     }
+
+                    break;
+            }
+
+            if (sendKeyup) {
+                event.preventDefault();
+                    
+                if (dotNetHelper != null) {
+                    var key = event.key;
+                    var code = event.code;
+                    var ctrlKey = event.ctrlKey;
+                    var shiftKey = event.shiftKey;
+                    var altKey = event.altKey;
+                    var metaKey = event.metaKey;
+
+                    dotNetHelper.invokeMethod("OnKeyboardEvent", key, code, ctrlKey, shiftKey, altKey, metaKey);
                 }
+            }
+        }
+
+        function SetActiveItemType(type) {
+            activeItemType = type;
         }
 
         function SetupKeyboardEventHandler() {

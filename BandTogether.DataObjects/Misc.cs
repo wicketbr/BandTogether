@@ -40,6 +40,7 @@ public class dataLoader
     public setList setList { get; set; } = new setList();
     public appSettings settings { get; set; } = new appSettings();
     public List<setListFile> setListFilenames { get; set; } = new List<setListFile>();
+    public List<sheetMusic> sheetMusic { get; set; } = new List<sheetMusic>();
     public List<songBook> songBooks { get; set; } = new List<songBook>();
     public List<user> users { get; set; } = new List<user>();
     public string version {  get; set; } = "";
@@ -90,6 +91,12 @@ public class screenMessage
     public string type { get; set; } = "";
     public string message { get; set; } = "";
     public string theme { get; set; } = "";
+}
+
+public class sheetMusic
+{
+    public string title { get; set; } = "";
+    public List<string> parts { get; set; } = new List<string>();
 }
 
 public class simplePost

@@ -16,6 +16,7 @@ public static class Text
     public static string AddImage { get; set; } = "Add an Image";
     public static string AddItem { get; set; } = "Add Item";
     public static string AddSetListItem { get; set; } = "Add Set List Item";
+    public static string AddSheetMusic { get; set; } = "Add Sheet Music";
     public static string AddSlideshow { get; set; } = "Add a Slideshow";
     public static string AddSlideshowInfo { get; set; } = "Slideshows are folder of images found in the Slideshows folder inside the data folder. You can add a new folder with your images there. Select the folder to use for the slideshow below. If you have PowerPoint installed you can attempt to upload your presentation below and have the slides generated automatically from the file.";
     public static string AddSong { get; set; } = "Add a Song";
@@ -85,6 +86,7 @@ public static class Text
     public static string DisplayOnFirstSlide { get; set; } = "Display on the First Slide Only";
     public static string DisplayOnLastSlide { get; set; } = "Display on the Last Slide Only";
     public static string Documentation { get; set; } = "Documentation";
+    public static string Duplicate { get; set; } = "Duplicate";
     public static string DuplicateUsername { get; set; } = "The username is already in use.";
     public static string Edit { get; set; } = "Edit";
     public static string EditMode { get; set; } = "Edit Mode";
@@ -217,6 +219,8 @@ public static class Text
     public static string Settings { get; set; } = "Settings";
     public static string SettingsGeneral { get; set; } = "General";
     public static string SettingsProjection { get; set; } = "Projection";
+    public static string SheetMusic { get; set; } = "Sheet Music";
+    public static string SheetMusicViewInfo { get; set; } = "Sheet music is displayed in the tablet view only, not on the screens or preview.";
     public static string ShowChords { get; set; } = "Show Chords";
     public static string ShowExport { get; set; } = "Show Export";
     public static string ShowFontPreviews { get; set; } = "Show Font Previews (WARNING: This can be slow if you have a lot of fonts installed.)";

@@ -34,6 +34,7 @@ public interface IDataAccess
     setList GetSetList(string filename);
     List<setListFile> GetSetListFilenames(bool UseCache = true);
     List<setList> GetSetLists();
+    List<sheetMusic> GetSheetMusic(bool UseCache = true);
     slideshowItem GetSlideshow(string folder);
     List<string> GetSlideshows(bool UseCache = true);
     List<songBook> GetSongBooks();
@@ -59,21 +60,22 @@ public interface IDataAccess
 
 public class DataAccess : IDataAccess
 {
-    private string _applicationPath = "";
-    private string _basePath = "";
-    private DateOnly _released = DateOnly.FromDateTime(Convert.ToDateTime("2/24/2025"));
+    private string _applicationPath = String.Empty;
+    private string _basePath = String.Empty;
+    private DateOnly _released = DateOnly.FromDateTime(Convert.ToDateTime("2/26/2025"));
     private IServiceProvider? _serviceProvider;
-    private string _version = "1.0.0";
+    private string _version = "1.0.1";
 
-    private string _folderAudio = "";
-    private string _folderBackgrounds = "";
-    private string _folderImages = "";
-    private string _folderLanguages = "";
-    private string _folderSetLists = "";
-    private string _folderSlideshows = "";
-    private string _folderSongBooks = "";
-    private string _folderUsers = "";
-    private string _folderVideos = "";
+    private string _folderAudio = String.Empty;
+    private string _folderBackgrounds = String.Empty;
+    private string _folderImages = String.Empty;
+    private string _folderLanguages = String.Empty;
+    private string _folderSetLists = String.Empty;
+    private string _folderSheetMusic = String.Empty;
+    private string _folderSlideshows = String.Empty;
+    private string _folderSongBooks = String.Empty;
+    private string _folderUsers = String.Empty;
+    private string _folderVideos = String.Empty;
 
     private static JsonSerializerOptions _jsonOptions = new JsonSerializerOptions {
         AllowTrailingCommas = true,
@@ -130,6 +132,7 @@ public class DataAccess : IDataAccess
         _folderImages = System.IO.Path.Combine(_basePath, "Images");
         _folderLanguages = System.IO.Path.Combine(_basePath, "Languages");
         _folderSetLists = System.IO.Path.Combine(_basePath, "SetLists");
+        _folderSheetMusic = System.IO.Path.Combine(_basePath, "SheetMusic");
         _folderSlideshows = System.IO.Path.Combine(_basePath, "Slideshows");
         _folderSongBooks = System.IO.Path.Combine(_basePath, "SongBooks");
         _folderUsers = System.IO.Path.Combine(_basePath, "Users");
@@ -152,6 +155,10 @@ public class DataAccess : IDataAccess
 
             if (!System.IO.Directory.Exists(_folderLanguages)) {
                 System.IO.Directory.CreateDirectory(_folderLanguages);
+            }
+
+            if (!System.IO.Directory.Exists(_folderSheetMusic)) {
+                System.IO.Directory.CreateDirectory(_folderSheetMusic);
             }
 
             if (!System.IO.Directory.Exists(_folderSlideshows)) {
@@ -886,6 +893,7 @@ public class DataAccess : IDataAccess
             released = _released,
             settings = GetSettings(),
             setListFilenames = GetSetListFilenames(),
+            sheetMusic = GetSheetMusic(),
             songBooks = GetSongBooks(),
             users = GetUsers(),
             version = _version,
@@ -1256,6 +1264,41 @@ public class DataAccess : IDataAccess
         }
 
         CacheStore.SetCacheItem("setlists", output);
+
+        return output;
+    }
+
+    public List<sheetMusic> GetSheetMusic(bool UseCache = true)
+    {
+        var output = new List<sheetMusic>();
+
+        if (UseCache) {
+            var cached = CacheStore.GetCachedItem<List<sheetMusic>>("sheetmusic");
+            if (cached != null && cached.Any()) {
+                return cached;
+            }
+        }
+
+        // Get all folders in the Sheet Music folder.
+        var folders = Directory.GetDirectories(_folderSheetMusic);
+        foreach (var folder in folders) {
+            // Get each file in the folder.
+            var files = Directory.GetFiles(folder, "*.pdf");
+            if (files.Count() > 0) {
+                var parts = new List<string>();
+
+                foreach(var file in files) {
+                    parts.Add(Tools.GetFileNameWithoutExtension(file));
+                }
+
+                output.Add(new sheetMusic {
+                    title = Tools.GetFileName(folder),
+                    parts = parts,
+                });
+            }
+        }
+
+        CacheStore.SetCacheItem("sheetmusic", output);
 
         return output;
     }

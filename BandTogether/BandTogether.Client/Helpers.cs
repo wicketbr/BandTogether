@@ -517,6 +517,11 @@ public static class Helpers
         return output;
     }
 
+    public static async Task DialogOpenSetJSInterop(bool open)
+    {
+        await jsRuntime.InvokeVoidAsync("DialogOpen", open);
+    }
+
     /// <summary>
     /// Performs the JS Interop function to download the contents of a file to the browser.
     /// </summary>
@@ -1689,7 +1694,7 @@ public static class Helpers
                 { "fa:fa-regular fa-circle-left",                new List<string> { "Back" }},
                 { "fa:fa-regular fa-circle-right",               new List<string> { "Continue" }},
                 { "fa:fa-regular fa-circle-xmark",               new List<string> { "Cancel", "Close", "CloseDialog", "Hide", "ZoomReset" }},
-                { "fa:fa-regular fa-copy",                       new List<string> { "Copy", "CopyToClipboard" }},
+                { "fa:fa-regular fa-copy",                       new List<string> { "Copy", "CopyToClipboard", "Duplicate" }},
                 { "fa:fa-regular fa-rectangle-list",             new List<string> { "NewSetList", "SetList" }},
                 { "fa:fa-regular fa-sun",                        new List<string> { "Theme", "ThemeLight" }},
                 { "fa:fa-solid fa-align-center",                 new List<string> { "AlignCenter" }},
@@ -1707,6 +1712,7 @@ public static class Helpers
                 { "fa:fa-solid fa-circle-info",                  new List<string> { "About", "Info" }},
                 { "fa:fa-solid fa-clock",                        new List<string> { "Clock" }},
                 { "fa:fa-solid fa-file-import",                  new List<string> { "Import" }},
+                { "fa:fa-solid fa-file-lines",                   new List<string> { "SheetMusic" }},
                 { "fa:fa-solid fa-file-medical",                 new List<string> { "AddToSetList" }},
                 { "fa:fa-solid fa-film",                         new List<string> { "Video" }},
                 { "fa:fa-solid fa-floppy-disk",                  new List<string> { "Save" }},
@@ -2900,6 +2906,13 @@ public static class Helpers
                                 }
                                 break;
 
+                            case setListItemType.sheetmusic:
+                                var sheetmusic = DeserializeObject<sheetMusicItem>(item.itemJson);
+                                if (sheetmusic != null) {
+                                    item.item = sheetmusic;
+                                }
+                                break;
+
                             case setListItemType.slideshow:
                                 var slideshow = DeserializeObject<slideshowItem>(item.itemJson);
                                 if (slideshow != null) {
@@ -3392,6 +3405,11 @@ public static class Helpers
         }
 
         return output;
+    }
+
+    public static async Task SetActiveItemTypeJSInterop(string type)
+    {
+        await jsRuntime.InvokeVoidAsync("SetActiveItemType", type);
     }
 
     public static async Task SetActivePageSection(string section)
