@@ -1,5 +1,7 @@
 # BandTogether
 
+![screenshot](https://github.com/wicketbr/Misc/blob/main/images/BandTogether/MainScreen.jpg?raw=true)
+
 ## History
 
 This program started as an application to store my music charts in one place
@@ -122,11 +124,15 @@ The interface is divided into the main sections:
 
 ### The Menu Bar
 
+![toolbar](https://github.com/wicketbr/Misc/blob/main/images/BandTogether/Toolbar.jpg?raw=true)
+
 The first menu item is the Edit Mode toggle.
 Depending on whether or not you have Edit Mode toggled on in the top menu you will see
 different options in the interface. For example, the context menus that appear when
 right-clicking on the set list, a song book, or songs in a song book will differ
 depending on whether or not you are in Edit Mode.
+
+![screenshot](https://github.com/wicketbr/Misc/blob/main/images/BandTogether/MainScreen-EditMode.jpg?raw=true)
 
 Next to the Edit Mode menu option is an option to show or hide the messages area.
 When shown, the messages interface will appear at the top of the item view area just
