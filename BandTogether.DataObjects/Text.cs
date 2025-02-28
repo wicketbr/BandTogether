@@ -220,6 +220,7 @@ public static class Text
     public static string SettingsGeneral { get; set; } = "General";
     public static string SettingsProjection { get; set; } = "Projection";
     public static string SheetMusic { get; set; } = "Sheet Music";
+    public static string SheetMusicSelectPart { get; set; } = "Select Part";
     public static string SheetMusicViewInfo { get; set; } = "Sheet music is displayed in the tablet view only, not on the screens or preview.";
     public static string ShowChords { get; set; } = "Show Chords";
     public static string ShowExport { get; set; } = "Show Export";

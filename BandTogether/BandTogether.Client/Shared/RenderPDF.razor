@@ -1,0 +1,19 @@
+﻿@implements IDisposable
+
+<div class="@Class" id="@Id"></div>
+
+@code {
+    [Parameter] public string? Class { get; set; }
+    [Parameter] public string Id { get; set; } = "render-pdf";
+    [Parameter] public string PdfUrl { get; set; } = "";
+
+    public void Dispose(){
+    }
+
+    protected override void OnParametersSet()
+    {
+        Helpers.SetTimeout(async() => {
+            await Helpers.RenderPDF(PdfUrl, Id);
+        }, 100);
+    }
+}

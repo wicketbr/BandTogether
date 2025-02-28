@@ -23,6 +23,7 @@ public class userPreferences
     public bool showExport { get; set; } = false;
     public bool showMessaging { get; set; } = false;
     public int slideshowThumbnailColumns { get; set; } = 4;
+    public List<sheetMusicPreference> sheetMusicPreferences { get; set; } = new List<sheetMusicPreference>();
     public List<songPreferences> songPreferences { get; set; } = new List<songPreferences>();
     public string? showPreview { get; set; } = "m";
     public string theme { get; set; } = "";

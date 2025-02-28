@@ -30,7 +30,7 @@ schools, etc. The major features are:
 - Songs can be transposed as needed in the set list on a per-item basis that doesn't
   affect the song stored in the song book.
 - Set lists can contains Songs, Audio Files, Images, Countdown Timers (both in seconds and
-  to countdown to a specific time), Slideshows, Videos, and YouTube Videos.
+  to countdown to a specific time), Sheet Music, Slideshows, Videos, and YouTube Videos.
 - A projection view can be used to show your media items and songs on the screen,
   including fully customizing the background, text, etc., for how songs are viewed.
 - The screen view app can be loaded into any browser window, so it can either be on the same computer
@@ -77,6 +77,9 @@ Or, if you wish to point to a different location on Mac for the "Data" folder:
 
 dotnet BandTogether.dll -f /path/to/data/folder
 
+The Mac version requires that you already have the .NET 9 runtime installed
+to issue the "dotnet" command to run the application.
+
 ### Install - Other Platforms
 
 The application can run on any platform that supports .NET 9.
@@ -90,12 +93,12 @@ You can do this using Visual Studio, Visual Studio Code, or the .NET CLI.
 When the application is first started it will create a Data folder in the same location
 as the application (unless you have specified another location using the -f command line parameter).
 In the Data folder folders will be created for storing items for
-Audio, Backgrounds, Images, Languages, SetLists, Slideshows, SongBooks, Users, and Videos.
+Audio, Backgrounds, Images, Languages, SetLists, SheetMusic, Slideshows, SongBooks, Users, and Videos.
 All application data is stored in JSON files, which are plain text files that can
 easily be edited with any text editor.
 
 If the folders don't exist and are being created then
-sample media items will be created in the Backgrounds, Images, and Slideshows folders
+sample media items will be created in the Backgrounds, Images, SheetMusic, and Slideshows folders
 and a sample set list will be created and will include samples of most set list item types.
 
 If you wish to force the URL that the app will run as you can modify the LaunchUrl
@@ -195,6 +198,7 @@ Use the Plus icon above the set list to add a new item to the set list. Supporte
 - A Clock
 - A Countdown Timer (both in seconds or to a specific time)
 - Images
+- Sheet Music
 - Slideshows
 - Videos
 - YouTube Videos
@@ -228,6 +232,11 @@ video on the main presentation computer and the video on the other screens may b
 slightly out of sync by a few milliseconds, but in most cases this is not noticeable.
 The desire was to make this application completely web-based without requiring any
 advanced graphics rendering or video processing to mirror that video on other screens.
+
+For the Sheet Music option the files should be in the PDF format, and your tablets need
+to have the ability to show a PDF file. Each song should have its own folder inside the
+SheetMusic folder, with individual folders for each instrument part. When users select
+a part for a song that will be remembered as part of their user preferences.
 
 ## Contact
 

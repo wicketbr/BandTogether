@@ -3055,6 +3055,11 @@ public static class Helpers
         return output;
     }
 
+    public static async Task RenderPDF(string path, string elementId)
+    {
+        await jsRuntime.InvokeVoidAsync("RenderPDF", path, elementId);
+    }
+
     /// <summary>
     /// Renders a song element.
     /// </summary>

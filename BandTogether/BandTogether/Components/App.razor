@@ -37,6 +37,7 @@
     <script src="@Assets["lib/jquery/jquery-3.7.0.min.js"]"></script>
     <script src="@Assets["lib/bootstrap/js/bootstrap.bundle.min.js"]"></script>
     <script src="@Assets["lib/sortablejs/sortable.min.js"]"></script>
+    <script src="@Assets["lib/pdfobject/pdfobject.js"]"></script>
     <script src="@("_content/BlazorMonaco/jsInterop.js?v=" + appVersion)"></script>
     <script src="@("_content/BlazorMonaco/lib/monaco-editor/min/vs/loader.js?v=" + appVersion)"></script>
     <script src="@("_content/BlazorMonaco/lib/monaco-editor/min/vs/editor/editor.main.js?v=" + appVersion)"></script>
@@ -587,6 +588,11 @@
         function RemoveElementHighlightByClass(c) {
             $("." + c).off("click");
             $("." + c).removeClass("highlight");
+        }
+
+        function RenderPDF(path, element) {
+            console.log("RenderPDF", path, element);
+            PDFObject.embed(path, "#" + element);
         }
 
         function ResetPadding() {

@@ -220,6 +220,7 @@ public class Language
     public string settings { get; set; } = "";
     public string settingsProjection { get; set; } = "";
     public string sheetMusic { get; set; } = "";
+    public string sheetMusicSelectPart { get; set; } = "";
     public string sheetMusicViewInfo { get; set; } = "";
     public string settingsGeneral { get; set; } = "";
     public string setList { get; set; } = "";

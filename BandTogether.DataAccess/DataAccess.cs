@@ -62,9 +62,9 @@ public class DataAccess : IDataAccess
 {
     private string _applicationPath = String.Empty;
     private string _basePath = String.Empty;
-    private DateOnly _released = DateOnly.FromDateTime(Convert.ToDateTime("2/26/2025"));
+    private DateOnly _released = DateOnly.FromDateTime(Convert.ToDateTime("2/28/2025"));
     private IServiceProvider? _serviceProvider;
-    private string _version = "1.0.1";
+    private string _version = "1.0.2";
 
     private string _folderAudio = String.Empty;
     private string _folderBackgrounds = String.Empty;
@@ -159,6 +159,7 @@ public class DataAccess : IDataAccess
 
             if (!System.IO.Directory.Exists(_folderSheetMusic)) {
                 System.IO.Directory.CreateDirectory(_folderSheetMusic);
+                CreateDefaultSheetMusic();
             }
 
             if (!System.IO.Directory.Exists(_folderSlideshows)) {
@@ -512,6 +513,17 @@ public class DataAccess : IDataAccess
             }
         }
 
+        sheetMusicItem? sm = null;
+        var sheetmusic = GetSheetMusic();
+        if (sheetmusic.Count > 0) {
+            var item = sheetmusic.FirstOrDefault(x => x.parts.Count > 0);
+            if (item != null) {
+                sm = new sheetMusicItem { 
+                    title = item.title,
+                };
+            }
+        }
+
         var setlist = new setList {
             name = "Sample Set List",
             fileName = "Sample_Set_List",
@@ -628,6 +640,14 @@ public class DataAccess : IDataAccess
             });
         }
 
+        if (sm != null) {
+            setlist.items.Add(new setListItem { 
+                id = Guid.NewGuid(),
+                type = setListItemType.sheetmusic,
+                item = sm,
+            });
+        }
+
         setlist.items.Add(new setListItem {
             id = Guid.NewGuid(),
             type = setListItemType.youTube,
@@ -652,6 +672,29 @@ public class DataAccess : IDataAccess
         });
 
         SaveSetList(setlist);
+    }
+
+    private void CreateDefaultSheetMusic()
+    {
+        var sampleSheetMusicFolder = Path.Combine(_applicationPath, "wwwroot", "Sample Items", "SheetMusic");
+        if (System.IO.Directory.Exists(sampleSheetMusicFolder)) {
+            // Get all folders in this folder.
+            var folders = Directory.GetDirectories(sampleSheetMusicFolder);
+            foreach(var folder in folders) {
+                var outputFolder = Path.Combine(_folderSheetMusic, System.IO.Path.GetFileName(folder));
+                if (!System.IO.Directory.Exists(outputFolder)) {
+                    System.IO.Directory.CreateDirectory(outputFolder);
+                }
+
+                // Get all the files in the source folder.
+                var files = Directory.GetFiles(folder);
+                foreach(var file in files) {
+                    var fileName  = System.IO.Path.GetFileName(file);
+                    var output = Path.Combine(outputFolder, fileName);
+                    System.IO.File.Copy(file, output);
+                }
+            }
+        }
     }
 
     private void CreateDefaultSlideshow()

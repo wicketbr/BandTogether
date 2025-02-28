@@ -99,6 +99,12 @@ public class sheetMusic
     public List<string> parts { get; set; } = new List<string>();
 }
 
+public class sheetMusicPreference
+{
+    public string title { get; set; } = "";
+    public string part { get; set; } = "";
+}
+
 public class simplePost
 {
     public string? singleItem { get; set; }

@@ -98,7 +98,7 @@ public class imageItem
 
 public class sheetMusicItem
 {
-    public string? title { get; set; }
+    public string title { get; set; } = "";
 }
 
 public class slideshowItem

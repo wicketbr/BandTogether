@@ -1483,3 +1483,8 @@ body.dark .blazor-context-menu {
     font-size:2em;
     font-weight:bold;
 }
+
+.sheet-music-pdf {
+    width:100%;
+    height: calc(100vh - 44px);
+}

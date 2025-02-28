@@ -81,6 +81,48 @@
     <Content Update="wwwroot\Sample Items\Sample Presentation\Slide1.png">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </Content>
+    <Content Update="wwwroot\Sample Items\SheetMusic\The Water is Wide\Bass Clef.pdf">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </Content>
+    <Content Update="wwwroot\Sample Items\SheetMusic\The Water is Wide\Bb Bass.pdf">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </Content>
+    <Content Update="wwwroot\Sample Items\SheetMusic\The Water is Wide\Clarinet.pdf">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </Content>
+    <Content Update="wwwroot\Sample Items\SheetMusic\The Water is Wide\Eb Bass.pdf">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </Content>
+    <Content Update="wwwroot\Sample Items\SheetMusic\The Water is Wide\Eb.pdf">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </Content>
+    <Content Update="wwwroot\Sample Items\SheetMusic\The Water is Wide\F Horn.pdf">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </Content>
+    <Content Update="wwwroot\Sample Items\SheetMusic\The Water is Wide\Flute.pdf">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </Content>
+    <Content Update="wwwroot\Sample Items\SheetMusic\The Water is Wide\Guitar.pdf">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </Content>
+    <Content Update="wwwroot\Sample Items\SheetMusic\The Water is Wide\Oboe.pdf">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </Content>
+    <Content Update="wwwroot\Sample Items\SheetMusic\The Water is Wide\Percussion.pdf">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </Content>
+    <Content Update="wwwroot\Sample Items\SheetMusic\The Water is Wide\Score.pdf">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </Content>
+    <Content Update="wwwroot\Sample Items\SheetMusic\The Water is Wide\Tenor.pdf">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </Content>
+    <Content Update="wwwroot\Sample Items\SheetMusic\The Water is Wide\Trumpet.pdf">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </Content>
+    <Content Update="wwwroot\Sample Items\SheetMusic\The Water is Wide\Tuba.pdf">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </Content>
     <Content Update="wwwroot\SampleItems\Sample Presentation\Slide10.png">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </Content>

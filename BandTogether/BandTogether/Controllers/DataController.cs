@@ -86,6 +86,19 @@ public partial class DataController : ControllerBase
     }
 
     [HttpGet]
+    [Route("~/SheetMusic/{folder}/{filename}")]
+    public IActionResult SheetMusic(string folder, string filename)
+    {
+        byte[]? fileContent = da.GetMediaItem("SheetMusic/" + folder, filename);
+        string mimeType = Tools.GetMimeType(System.IO.Path.GetExtension(filename));
+        if (fileContent == null) {
+            return new EmptyResult();
+        } else {
+            return new FileStreamResult(new MemoryStream(fileContent), mimeType);
+        }
+    }
+
+    [HttpGet]
     [Route("~/Slideshow/{folder}/{filename}")]
     public IActionResult Slideshow(string folder, string filename)
     {
