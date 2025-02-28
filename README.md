@@ -61,9 +61,9 @@ NOTE: The embeded YouTube player may not work when using the local IP address if
 are using a non-routable IP address (eg: 192.168.x.x). In those cases you should use the
 hostname of the computer running the app instead of the IP address.
 If the computer is not discoverable by name on your network you may need to add
-the name and ip address to the hosts file on the system. That process various by operating system.
+the name and ip address to the hosts file on the system. That process varies by operating system.
 
-You can point to an alertnate location for your data by modifying the shortcut used to
+You can point to an alternate location for your data by modifying the shortcut used to
 start the application executable and adding -f PATH to the end of the command line.
 For example, if you have all your data in C:\MyBandData you would add -f C:\MyBandData.
 
@@ -79,7 +79,7 @@ Or, if you wish to point to a different location on Mac for the "Data" folder:
 
 dotnet BandTogether.dll -f /path/to/data/folder
 
-The Mac version requires that you already have the .NET 9 runtime installed
+The Mac version requires that you already have a .NET runtime installed
 to issue the "dotnet" command to run the application.
 
 ### Install - Other Platforms
@@ -130,20 +130,23 @@ The first menu item is the Edit Mode toggle.
 Depending on whether or not you have Edit Mode toggled on in the top menu you will see
 different options in the interface. For example, the context menus that appear when
 right-clicking on the set list, a song book, or songs in a song book will differ
-depending on whether or not you are in Edit Mode.
+depending on whether or not you are in Edit Mode. Also, in Edit Mode you can edit
+the song in the main view area, as shown below.
 
 ![screenshot](https://github.com/wicketbr/Misc/blob/main/images/BandTogether/MainScreen-EditMode.jpg?raw=true)
 
 Next to the Edit Mode menu option is an option to show or hide the messages area.
 When shown, the messages interface will appear at the top of the item view area just
 below the toolbar menu. This feature can be used to send messages to the main projection
-screen view or to any connected tablets using the tablet view. If an audio file is 
+screen view or to any connected tablets using the tablet view.
+
+If an audio file is 
 playing from the set list the audio player controls will appear just above the messaging area.
 When an audio file is playing you can move on to other items in the set list and the
 audio will continue to play. Once the audio has completed the audio interface will disappear.
 You can close the audio player during playback by clicking the X in the upper right corner.
 
-The next two icons relate to blank the screen and hiding text. The Toggle Blank Screen menu
+The next two icons relate to blanking the screen and hiding text. The Toggle Blank Screen menu
 option will blank the screen to black. The Toggle Hide Text menu option will hide all text
 on a slide but leave the background in place. This works for Clocks, Countdowns, and Songs.
 
@@ -151,7 +154,7 @@ The Screen View menu option will open a new browser window with the screen view 
 This can be dragged onto a second monitor and then be run in full screen (usually by pressing F11.)
 You can open multiple screen views on different monitors, or even on completely different computers.
 For example, if your main projection computer running the software is connected to a projector
-or to multiple TVs mirroring a second screen, you could show on those screens from the
+or to multiple TVs mirroring a second screen, you could show the screen view on those screens from the
 projection computer. If you have TVs in another area that have a computer connected that can
 access the URL of the software, those TVs could also show the screen view interface.
 
@@ -165,8 +168,8 @@ current element of the song that is selected in the system controlling the set l
 The Settings menu item brings up the interface for configuring the software. Here you can
 select whether or not to show non-standard keys for songs and transposing, enable or disable
 the projection features, and enable a Church Mode that will show CCLI information for use
-when showing songs in a church environment. You can also use the Projection tab if that
-feature is enabled to configure the style for fonts used for lyrics, headers, footers, as
+when showing songs in a church environment. You can also use the Projection tab (if that
+feature is enabled) to configure the style for fonts used for lyrics, headers, footers, as
 well as backgrounds used for song presentation on screen. The Messaging tab allows
 you to configure the font settings for both the screen and tablet messages.
 The Fonts tab allows you to select additional fonts installed on your system that you
@@ -218,8 +221,8 @@ can be used at this point.
 ### View Area
 
 You can use the arrow keys or the page up/down keys to move between items in the view area.
-When in edit mode and editing a song you can switch parts by double-clicking on the part in the editor,
-or by pressing the CTRL key or OPTION key plus arrow up and down.
+When in edit mode and editing a song you can switch parts by double-clicking
+on the part in the editor, or by pressing the CTRL key or OPTION key plus arrow up and down.
 
 ## Tech Notes
 
@@ -239,7 +242,7 @@ slightly out of sync by a few milliseconds, but in most cases this is not notice
 The desire was to make this application completely web-based without requiring any
 advanced graphics rendering or video processing to mirror that video on other screens.
 
-For the Sheet Music option the files should be in the PDF format, and your tablets need
+For the Sheet Music option the files must be in the PDF format, and your tablets need
 to have the ability to show a PDF file. Each song should have its own folder inside the
 SheetMusic folder, with individual folders for each instrument part. When users select
 a part for a song that will be remembered as part of their user preferences.
