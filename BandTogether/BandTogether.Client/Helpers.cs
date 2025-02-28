@@ -2991,6 +2991,34 @@ public static class Helpers
         await jsRuntime.InvokeVoidAsync("RemoveClass", ElementId, ClassName);
     }
 
+    public static string RemoveExtraWhitespace(string? input)
+    {
+        string output = String.Empty;
+
+        if (!String.IsNullOrWhiteSpace(input)) {
+            bool endsWithSpace = input.EndsWith(" ");
+
+            output = string.Join(" ", input.Split(new char[] { ' ' }, StringSplitOptions.RemoveEmptyEntries));
+
+            if (endsWithSpace) {
+                output += " ";
+            }
+        }
+
+        return output;
+    }
+
+    public static List<string> RemoveExtraWhitespace(List<string> strings)
+    {
+        var output = new List<string>();
+
+        foreach(var item in strings) {
+            output.Add(RemoveExtraWhitespace(item));
+        }
+
+        return output;
+    }
+
     /// <summary>
     /// Renders a chord in the appropriate format based on song settings and user preferences.
     /// </summary>
@@ -3208,10 +3236,13 @@ public static class Helpers
 
             if (!Model.User.preferences.hideChords) {
                 output.AppendLine("    <tr class=\"chord-line\">" + ChordsToTableDataElements(chordsLine, song.key, newKey) + "</tr>");
+                output.AppendLine("    <tr class=\"lyric-line\">" + LyricsToTableDataElements(lyricsLine) + "</tr>");
+            } else {
+                output.AppendLine("    <tr class=\"lyric-line\">" + LyricsToTableDataElements(RemoveExtraWhitespace(lyricsLine)) + "</tr>");
             }
-            output.AppendLine("    <tr class=\"lyric-line\">" + LyricsToTableDataElements(lyricsLine) + "</tr>");
 
-            output.AppendLine("  </tbody>");
+
+                output.AppendLine("  </tbody>");
             output.AppendLine("</table>");
         }
 
