@@ -35,7 +35,7 @@ namespace BandTogether
 
             bool windows = System.Runtime.InteropServices.RuntimeInformation.IsOSPlatform(System.Runtime.InteropServices.OSPlatform.Windows);
             bool mac = System.Runtime.InteropServices.RuntimeInformation.IsOSPlatform(System.Runtime.InteropServices.OSPlatform.OSX);
-            bool linus = System.Runtime.InteropServices.RuntimeInformation.IsOSPlatform(System.Runtime.InteropServices.OSPlatform.Linux);
+            bool linux = System.Runtime.InteropServices.RuntimeInformation.IsOSPlatform(System.Runtime.InteropServices.OSPlatform.Linux);
 
             var builder = WebApplication.CreateBuilder(args);
 
@@ -49,12 +49,12 @@ namespace BandTogether
                 } else if (windows) {
                     builder.WebHost.UseUrls("http://0.0.0.0:5000");
                     //builder.WebHost.UseIISIntegration();
+                } else if (mac) {
+                    builder.WebHost.UseUrls("http://localhost:5000");
                 }
-
-                builder.WebHost.UseKestrelCore();
-            } else {
-                builder.WebHost.UseKestrelCore();
             }
+
+            builder.WebHost.UseKestrelCore();
 
             builder.Services.AddControllersWithViews();
 
