@@ -97,6 +97,17 @@ the application can be compiled for:
 win-x86, win-arm, win-arm64, osx-x64, linux-x64, linux-arm, and linux-arm64.
 You can do this using Visual Studio, Visual Studio Code, or the .NET CLI.
 
+For any OS that supports .NET, as long as you have the .NET SDK installed you
+can simply download the source code for this project, open a command prompt,
+change to the directory where the BandTogether.csproj file is located
+(/BandTogether/BandTogether/) and issue the following command:
+
+dotnet run
+
+That will compile the application and run it locally. The first compile will
+take a minute to run, but subsequent runs will be faster as the application
+will have already been compiled.
+
 ### Install - General
 
 When the application is first started it will create a Data folder in the same location
