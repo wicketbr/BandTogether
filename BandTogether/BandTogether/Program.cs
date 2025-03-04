@@ -1,5 +1,7 @@
 using BandTogether.Client.Pages;
 using BandTogether.Components;
+using Microsoft.Extensions.FileProviders;
+using Microsoft.Extensions.Options;
 using System.Reflection.Metadata.Ecma335;
 using System.Text;
 
@@ -54,7 +56,18 @@ namespace BandTogether
                 }
             }
 
-            builder.WebHost.UseKestrelCore();
+            builder.Logging.ClearProviders();
+
+            //builder.WebHost.ConfigureLogging((context, logging) => {
+            //    logging.ClearProviders();
+            //});
+
+            var applicationPath = AppDomain.CurrentDomain.BaseDirectory;
+            var basePath = System.IO.Path.Combine(applicationPath, "Data");
+
+            //builder.WebHost.UseKestrelCore().ConfigureKestrel(options => {
+            //    options.ListenAnyIP(5000);
+            //});
 
             builder.Services.AddControllersWithViews();
 
@@ -69,9 +82,6 @@ namespace BandTogether
             builder.Services.AddHttpContextAccessor();
 
             builder.Services.AddSingleton<IServiceProvider>(provider => provider);
-
-            var applicationPath = AppDomain.CurrentDomain.BaseDirectory;
-            var basePath = System.IO.Path.Combine(applicationPath, "Data");
 
             if (!String.IsNullOrWhiteSpace(argumentFolder)) {
                 basePath = argumentFolder;
@@ -93,7 +103,19 @@ namespace BandTogether
             }
 
             //app.UseHttpsRedirection();
-            app.MapStaticAssets();
+
+            //app.MapStaticAssets();
+
+            if (mac) {
+                app.UseStaticFiles(
+                    new StaticFileOptions {
+                        FileProvider = new PhysicalFileProvider(Path.Combine(applicationPath, "wwwroot")), RequestPath = ""
+                    }
+                );
+            } else {
+                app.UseStaticFiles();
+            }
+
             app.UseRouting();
 
             app.UseAntiforgery();

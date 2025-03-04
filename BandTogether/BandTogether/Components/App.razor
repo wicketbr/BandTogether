@@ -13,37 +13,36 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <link rel="icon" type="image/png" href="favicon.png" />
     <base href="/" />
-    <link rel="stylesheet" href="_content/Radzen.Blazor/css/material-base.css" />
-    <link rel="stylesheet" href="_content/Blazor.ContextMenu/blazorContextMenu.min.css" />
-    <link rel="stylesheet" href="_content/MudBlazor/MudBlazor.min.css" />
-    <link rel="stylesheet" href="@Assets["lib/fontawesome/css/fontawesome.css"]" />
-    <link rel="stylesheet" href="@Assets["lib/fontawesome/css/brands.css"]" />
-    <link rel="stylesheet" href="@Assets["lib/fontawesome/css/regular.css"]" />
-    <link rel="stylesheet" href="@Assets["lib/fontawesome/css/solid.css"]" />
-    <link rel="stylesheet" href="@Assets["lib/bootstrap/css/bootstrap.min.css"]" />
-    <link rel="stylesheet" href="_content/Toolbelt.Blazor.SplitContainer/Toolbelt.Blazor.SplitContainer.bundle.scp.css" />
-    <link rel="stylesheet" href="@Assets["css/app.css"]" />
-    <ImportMap />
+    <link rel="stylesheet" href="_content/Radzen.Blazor/css/material-base.css?v=@appVersion" />
+    <link rel="stylesheet" href="_content/Blazor.ContextMenu/blazorContextMenu.min.css?v=@appVersion" />
+    <link rel="stylesheet" href="_content/MudBlazor/MudBlazor.min.css?v=@appVersion" />
+    <link rel="stylesheet" href="lib/fontawesome/css/fontawesome.css?v=@appVersion" />
+    <link rel="stylesheet" href="lib/fontawesome/css/brands.css?v=@appVersion" />
+    <link rel="stylesheet" href="lib/fontawesome/css/regular.css?v=@appVersion" />
+    <link rel="stylesheet" href="lib/fontawesome/css/solid.css?v=@appVersion" />
+    <link rel="stylesheet" href="lib/bootstrap/css/bootstrap.min.css?v=@appVersion" />
+    <link rel="stylesheet" href="_content/Toolbelt.Blazor.SplitContainer/Toolbelt.Blazor.SplitContainer.bundle.scp.css?v=@appVersion" />
+    <link rel="stylesheet" href="css/app.css?v=@appVersion" />
     <HeadOutlet @rendermode="new InteractiveWebAssemblyRenderMode(prerender: false)" />
 </head>
 
 <body id="body-element" data-bs-theme="" class="loading">
     <Routes @rendermode="new InteractiveWebAssemblyRenderMode(prerender: false)" />
-    <script src="@("_content/Radzen.Blazor/Radzen.Blazor.js?v=" + (typeof(Radzen.Colors).Assembly.GetName().Version))"></script>
-    <script src="@("_content/Blazor.ContextMenu/blazorContextMenu.min.js?v=" + appVersion)"></script>
-    <script src="@("_content/MudBlazor/MudBlazor.min.js?v=" + appVersion)"></script>
-    <script src="@("_content/BlazorSortableList/SortableList.razor.js?v=" + appVersion)"></script>
+    <script src="_content/Radzen.Blazor/Radzen.Blazor.js?v=@(typeof(Radzen.Colors).Assembly.GetName().Version)"></script>
+    <script src="_content/Blazor.ContextMenu/blazorContextMenu.min.js?v=@appVersion"></script>
+    <script src="_content/MudBlazor/MudBlazor.min.js?v=@appVersion"></script>
+    <script src="_content/BlazorSortableList/SortableList.razor.js?v=@appVersion"></script>
 
-    <script src="@Assets["lib/jquery/jquery-3.7.0.min.js"]"></script>
-    <script src="@Assets["lib/bootstrap/js/bootstrap.bundle.min.js"]"></script>
-    <script src="@Assets["lib/sortablejs/sortable.min.js"]"></script>
-    <script src="@Assets["lib/pdfobject/pdfobject.js"]"></script>
-    <script src="@("_content/BlazorMonaco/jsInterop.js?v=" + appVersion)"></script>
-    <script src="@("_content/BlazorMonaco/lib/monaco-editor/min/vs/loader.js?v=" + appVersion)"></script>
-    <script src="@("_content/BlazorMonaco/lib/monaco-editor/min/vs/editor/editor.main.js?v=" + appVersion)"></script>
+    <script src="lib/jquery/jquery-3.7.0.min.js?v=@appVersion"></script>
+    <script src="lib/bootstrap/js/bootstrap.bundle.min.js?v=@appVersion"></script>
+    <script src="lib/sortablejs/sortable.min.js?v=@appVersion"></script>
+    <script src="lib/pdfobject/pdfobject.js?v=@appVersion"></script>
+    <script src="_content/BlazorMonaco/jsInterop.js?v=@appVersion"></script>
+    <script src="_content/BlazorMonaco/lib/monaco-editor/min/vs/loader.js?v=@appVersion"></script>
+    <script src="_content/BlazorMonaco/lib/monaco-editor/min/vs/editor/editor.main.js?v=@appVersion"></script>
     <script src="https://www.youtube.com/iframe_api"></script>
 
-    <script src="_framework/blazor.web.js"></script>
+    <script src="_framework/blazor.web.js?v=@appVersion"></script>
 
     <script type="text/javascript">
         var dotNetHelper;
