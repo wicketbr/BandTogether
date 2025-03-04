@@ -69,18 +69,14 @@ For example, if you have all your data in C:\MyBandData you would add -f C:\MyBa
 
 ### Install - Mac
 
-For Mac security you should place the files in a BandTogether folder inside the
-Applications folder. Start the application by issuing the following command from
-a console in the application folder. 
+For Mac security you should extract the files in a BandTogether folder inside the
+Applications folder. To start the application open a console window and issue the following command:
 
-dotnet BandTogether.dll
+dotnet /Applications/BandTogether/BandTogether.dll
 
 Or, if you wish to point to a different location on Mac for the "Data" folder:
 
-dotnet BandTogether.dll -f /path/to/data/folder
-
-The Mac version requires that you already have a .NET runtime installed
-to issue the "dotnet" command to run the application.
+dotnet /Applications/BandTogether/BandTogether.dll -f /path/to/data/folder
 
 ### Install - Other Platforms
 
