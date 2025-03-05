@@ -69,11 +69,6 @@ For example, if you have all your data in C:\MyBandData you would add -f C:\MyBa
 
 ### Install - Mac
 
-The Mac version of the software requires that you already have the .NET 9 Framework installed,
-which can be downloaded from Microsoft at:
-
-https://dotnet.microsoft.com/en-us/download/dotnet/9.0
-
 The Mac version of the software is distributed as a Disk Image file that contains the application files,
 which should be placed in a folder name "BandTogether" in the Applications folder.
 
