@@ -74,20 +74,20 @@ which can be downloaded from Microsoft at:
 
 https://dotnet.microsoft.com/en-us/download/dotnet/9.0
 
-The Mac version of the software is distributed as a zip file that contains the application files,
+The Mac version of the software is distributed as a Disk Image file that contains the application files,
 which should be placed in a folder name "BandTogether" in the Applications folder.
 
-To start the application open a console window and issue the following command:
-
-dotnet /Applications/BandTogether/BandTogether.dll
-
-Or, if you wish to point to a different location on Mac for the "Data" folder:
-
-dotnet /Applications/BandTogether/BandTogether.dll -f /path/to/data/folder
+The Mac version is now a self-contained .NET application and can be launched simply by
+double-clicking the BandTogether file.
 
 Mac OS may initially block the application from running due to security settings.
 When this happens you need to open the System Settings, go to Privacy & Security, scroll to the bottom
 and click Open Anyway.
+
+To start the Mac version pointing to a different location for the data folder
+you can open a terminal window and issue the following command, as an example:
+
+/Applications/BandTogether/BandTogether -f /Users/yourusername/BandTogether
 
 ### Install - Other Platforms
 

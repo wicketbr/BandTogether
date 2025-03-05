@@ -1,6 +1,7 @@
 ﻿using Microsoft.Office.Core;
 using Microsoft.Office.Interop.PowerPoint;
 using SkiaSharp;
+using System;
 using System.Diagnostics;
 using System.Reflection.Emit;
 using System.Runtime.CompilerServices;
@@ -9,6 +10,7 @@ using System.Text.Json;
 using System.Xml;
 using System.Xml.Linq;
 using System.Xml.Schema;
+using static System.Net.Mime.MediaTypeNames;
 
 namespace BandTogether;
 
@@ -155,6 +157,7 @@ public class DataAccess : IDataAccess
 
             if (!System.IO.Directory.Exists(_folderLanguages)) {
                 System.IO.Directory.CreateDirectory(_folderLanguages);
+                GetLanguages();
             }
 
             if (!System.IO.Directory.Exists(_folderSheetMusic)) {
@@ -173,6 +176,7 @@ public class DataAccess : IDataAccess
 
             if (!System.IO.Directory.Exists(_folderUsers)) {
                 System.IO.Directory.CreateDirectory(_folderUsers);
+                GetUsers();
             }
 
             if (!System.IO.Directory.Exists(_folderVideos)) {
@@ -926,30 +930,37 @@ public class DataAccess : IDataAccess
 
     public dataLoader GetDataLoader()
     {
-        var output = new dataLoader { 
-            backgrounds = GetBackgrounds(),
-            defaultSongs = DefaultSongs,
-            fontWoffFiles = GetFontFiles(),
-            images = GetImages(),
-            installedFonts = GetInstalledFonts(),
-            languages = GetLanguages(),
-            released = _released,
-            settings = GetSettings(),
-            setListFilenames = GetSetListFilenames(),
-            sheetMusic = GetSheetMusic(),
-            songBooks = GetSongBooks(),
-            users = GetUsers(),
-            version = _version,
-            videos = GetVideos(),
-        };
+        DataAccessCreateDefaultFolders();
 
-        if (!String.IsNullOrWhiteSpace(output.settings.lastSetList) && output.setListFilenames.Any(x => x.fileName == output.settings.lastSetList)) {
-            // See if this still exists.
-            output.setList = GetSetList(output.settings.lastSetList);
-        } else {
-            if (output.setListFilenames.Count == 1 && output.setListFilenames.First().fileName.ToLower() == "sample_set_list.json") {
-                output.setList = GetSetList("Sample_Set_List.json");
+        var output = new dataLoader();
+        output.messages = new List<string>();
+
+        try {
+            output.backgrounds = GetBackgrounds();
+            output.defaultSongs = DefaultSongs;
+            output.fontWoffFiles = GetFontFiles();
+            output.images = GetImages();
+            output.installedFonts = GetInstalledFonts();
+            output.languages = GetLanguages();
+            output.released = _released;
+            output.settings = GetSettings();
+            output.setListFilenames = GetSetListFilenames();
+            output.sheetMusic = GetSheetMusic();
+            output.songBooks = GetSongBooks();
+            output.users = GetUsers();
+            output.version = _version;
+            output.videos = GetVideos();
+
+            if (!String.IsNullOrWhiteSpace(output.settings.lastSetList) && output.setListFilenames.Any(x => x.fileName == output.settings.lastSetList)) {
+                // See if this still exists.
+                output.setList = GetSetList(output.settings.lastSetList);
+            } else {
+                if (output.setListFilenames.Count == 1 && output.setListFilenames.First().fileName.ToLower() == "sample_set_list.json") {
+                    output.setList = GetSetList("Sample_Set_List.json");
+                }
             }
+        } catch (Exception ex) {
+            output.messages.Add(ex.Message);
         }
 
         return output;
@@ -1052,12 +1063,14 @@ public class DataAccess : IDataAccess
             return cached;
         }
 
-        var fm = SKFontManager.CreateDefault();
-        foreach(var f in fm.FontFamilies) {
-            if (!String.IsNullOrWhiteSpace(f)) {
-                output.Add(f);
+        try {
+            var fm = SKFontManager.CreateDefault();
+            foreach (var f in fm.FontFamilies) {
+                if (!String.IsNullOrWhiteSpace(f)) {
+                    output.Add(f);
+                }
             }
-        }
+        } catch { }
 
         // Add any of the missing browser base fonts.
         foreach (var wsf in _webSafeFonts) {
@@ -1469,6 +1482,7 @@ public class DataAccess : IDataAccess
                 enabled = true,
                 preferences = new userPreferences(),
             };
+            user.preferences.hideChords = true;
 
             SaveUser(user);
 

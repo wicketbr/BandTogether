@@ -19,6 +19,13 @@
   </ItemGroup>
 	
   <ItemGroup>
+    <None Remove="entitlements.plist" />
+  </ItemGroup>
+	
+  <ItemGroup>
+    <Content Include="entitlements.plist">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </Content>
     <Content Include="favicon.ico">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </Content>

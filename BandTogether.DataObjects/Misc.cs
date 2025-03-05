@@ -35,6 +35,7 @@ public class dataLoader
     public List<string> fontWoffFiles { get; set; } = new List<string>();
     public List<string> images { get; set; } = new List<string>();
     public List<string> installedFonts { get; set; } = new List<string>();
+    public List<string> messages { get; set; } = new List<string>();
     public DateOnly released { get; set; }
     public List<Language> languages { get; set; } = new List<Language>();
     public setList setList { get; set; } = new setList();
