@@ -1207,6 +1207,12 @@
         Model.OnKeyboardEvent -= OnKeyboardEvent;
         Model.OnSignalRSetList -= ProcessSignalRSetList;
         Model.OnSignalRUpdate -= ProcessSignalRUpdate;
+
+        Model.Subscribers_OnChange.Remove(_pageName);
+        Model.Subscribers_OnKeyboardEvent.Remove(_pageName);
+        Model.Subscribers_OnSignalRSetList.Remove(_pageName);
+        Model.Subscribers_OnSignalRUpdate.Remove(_pageName);
+
         _timer_Editor.Dispose();
     }
 

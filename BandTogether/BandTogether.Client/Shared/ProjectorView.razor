@@ -125,8 +125,13 @@
     protected string _uniqueId = String.Empty;
     
     public void Dispose() { 
+        Model.OnChange -= OnDataModelUpdated;
         Model.OnSignalRUpdate -= SignalRUpdate;
         Model.OnSignalRSetList -= ProcessSignalRSetList;
+
+        Model.Subscribers_OnChange.Remove(_uniqueId);
+        Model.Subscribers_OnSignalRUpdate.Remove(_uniqueId);
+        Model.Subscribers_OnSignalRSetList.Remove(_uniqueId);
     }
 
     protected override async Task OnAfterRenderAsync(bool firstRender)

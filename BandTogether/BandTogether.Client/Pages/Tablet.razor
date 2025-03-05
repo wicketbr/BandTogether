@@ -235,8 +235,75 @@
             <div class="tablet-message @style">
                 <span class="tablet-message-text">@((MarkupString)msg)</span>
             </div>
-        }
+        } else {
+            // No message being show, so if the active item in the set list is not the item being shown here show that as a message.
+            if (_setList.items.Any()) {
+                var activeItem = _setList.items.FirstOrDefault(x => x.id == _setList.activeItem);
+                if (activeItem != null) {
+                    string itemMessage = String.Empty;
 
+                    switch(activeItem.type) {
+                        case setListItemType.clock:
+                            itemMessage = Text.Clock;
+                            break;
+
+                        case setListItemType.countdown:
+                            var countdown = Tools.SetListItemAsCountdown(activeItem);
+                            if (countdown != null) {
+                                if (countdown.countdownType == "seconds") {
+                                    itemMessage = Text.Countdown + " " + countdown.seconds.ToString() + " " + Text.Seconds;
+                                } else if (countdown.toTime.HasValue) {
+                                    itemMessage = Text.CountdownTo + " " + countdown.toTime.Value.ToString();
+                                }
+                            }
+                            break;
+
+                        case setListItemType.image:
+                            var image = Tools.SetListItemAsImage(activeItem);
+                            if (image != null) {
+                                if (!String.IsNullOrWhiteSpace(image.name)) {
+                                    itemMessage = Text.Image + " " + image.name;
+                                } else if (!String.IsNullOrWhiteSpace(image.filename)) {
+                                    itemMessage = Text.Image + " " + image.filename;
+                                }
+                            }
+                            break;
+
+                        case setListItemType.sheetmusic:
+                        case setListItemType.song:
+                            // These would be shown on the tablet.
+                            break;
+
+                        case setListItemType.slideshow:
+                            var slideshow = Tools.SetListItemAsSlideshow(activeItem);
+                            if (slideshow != null) {
+                                itemMessage = Text.Slideshow + " " + slideshow.folder;
+                                if (_setList.activeItemPart.HasValue && slideshow.images != null && slideshow.images.Count > 1) {
+                                    itemMessage += " (" + (_setList.activeItemPart.Value + 1).ToString() + "/" + slideshow.images.Count.ToString() + ")";
+                                }
+                            }
+                            break;
+
+                        case setListItemType.video:
+                            var video = Tools.SetListItemAsVideo(activeItem);
+                            if (video != null) {
+                                itemMessage = Text.Video + " " + video.filename;
+                            }
+                            break;
+
+                        case setListItemType.youTube:
+                            itemMessage = Text.YouTubeVideo;
+                            break;
+                    }
+
+                    if (!String.IsNullOrWhiteSpace(itemMessage)) {
+                        <div class="tablet-message blue">
+                            <span class="tablet-message-text">@((MarkupString)itemMessage)</span>
+                        </div>
+                    }
+                }
+            }
+        }
     }
 </div>
 
@@ -294,6 +361,13 @@
                 if (selectedItem == null) {
                     // Just show the first song in the list.
                     selectedItem = _setList.items.FirstOrDefault(x => x.type == setListItemType.song);
+                } else {
+                    if (selectedItem.type == setListItemType.song || selectedItem.type == setListItemType.sheetmusic) {
+                        // This is OK, as these will display on the tablet.
+                    } else {
+                        // Just show the first song in the list.
+                        selectedItem = _setList.items.FirstOrDefault(x => x.type == setListItemType.song);
+                    }
                 }
 
                 if (selectedItem != null) {
@@ -307,6 +381,8 @@
                         }
 
                         if (song != null) {
+                            _currentItemType = setListItemType.song;
+
                             _song = song;
 
                             _activeItem = selectedItem.id;
@@ -456,6 +532,8 @@
         if (Model.User.preferences.autoFollow) {
             await UpdateSetList();
         }
+
+        StateHasChanged();
     }
 
     protected void RenderCSS()
@@ -603,16 +681,16 @@
                         StateHasChanged();
 
                         await Helpers.ResetPadding();
+
+                        if (_setList.activeItemPart.HasValue) {
+                            if (_setList.activeItemPart.Value == 0) {
+                                await Helpers.ScrollToTop();
+                            } else {
+                                await Helpers.ScrollToElement("tablet-scroll-target-" + _setList.activeItemPart.ToString());
+                            }
+                        }
                     }
                     break;
-            }
-        }
-
-        if (_setList.activeItemPart.HasValue) {
-            if (_setList.activeItemPart.Value == 0) {
-                await Helpers.ScrollToTop();
-            } else {
-                await Helpers.ScrollToElement("tablet-scroll-target-" + _setList.activeItemPart.ToString());
             }
         }
     }
