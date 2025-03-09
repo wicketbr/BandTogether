@@ -1,8 +1,8 @@
 # BandTogether
 
-<img src="https://github.com/wicketbr/Misc/blob/main/images/BandTogether/MainScreen.jpg?raw=true" title="BandTogether Main Screen - Light Mode">
-
 <img src="https://github.com/wicketbr/Misc/blob/main/images/BandTogether/MainScreen-DarkMode.jpg?raw=true" title="BandTogether Main Screen - Dark Mode">
+
+<img src="https://github.com/wicketbr/Misc/blob/main/images/BandTogether/MainScreen.jpg?raw=true" title="BandTogether Main Screen - Light Mode">
 
 ## History
 
