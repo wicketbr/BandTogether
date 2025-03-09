@@ -1,6 +1,8 @@
 # BandTogether
 
-![screenshot](https://github.com/wicketbr/Misc/blob/main/images/BandTogether/MainScreen.jpg?raw=true)
+![screenshot - Light Mode](https://github.com/wicketbr/Misc/blob/main/images/BandTogether/MainScreen.jpg?raw=true)
+
+![screenshot - Dark Mode](https://github.com/wicketbr/Misc/blob/main/images/BandTogether/MainScreen-DarkMode.jpg?raw=true)
 
 ## History
 
