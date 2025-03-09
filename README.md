@@ -75,6 +75,8 @@ security prompt handling.
 
 The application is a self-contained .NET application and can be launched 
 simply by double-clicking the BandTogether file in the Applications folder.
+The application is written in .NET 9 and was designed to target Macs with
+Apple silicon, but it should run on any Mac that supports .NET 9.
 
 By default the Mac application will place the application data in a BandTogether
 folder in the user's home directory.
