@@ -69,15 +69,15 @@ For example, if you have all your data in C:\MyBandData you would add -f C:\MyBa
 
 ### Install - Mac
 
-The Mac version of the software is distributed as a Disk Image file that contains the application files,
-which should be placed in a folder name "BandTogether" in the Applications folder.
+The Mac version of the software is distributed as an installer package that
+is now signed and notarized by Apple and should no longer require any special
+security prompt handling.
 
-The Mac version is now a self-contained .NET application and can be launched simply by
-double-clicking the BandTogether file.
+The application is a self-contained .NET application and can be launched 
+simply by double-clicking the BandTogether file in the Applications folder.
 
-Mac OS may initially block the application from running due to security settings.
-When this happens you need to open the System Settings, go to Privacy & Security, scroll to the bottom
-and click Open Anyway.
+By default the Mac application will place the application data in a BandTogether
+folder in the user's home directory.
 
 To start the Mac version pointing to a different location for the data folder
 you can open a terminal window and issue the following command, as an example:
