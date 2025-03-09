@@ -63,7 +63,14 @@ namespace BandTogether
             //});
 
             var applicationPath = AppDomain.CurrentDomain.BaseDirectory;
+            
+            // For Windows the basePath default can be a folder below the application.
             var basePath = System.IO.Path.Combine(applicationPath, "Data");
+
+            // However, for Mac, the permissions won't allow this, so default to the user's home folder.
+            if (mac) {
+                basePath = "BandTogether";
+            }
 
             //builder.WebHost.UseKestrelCore().ConfigureKestrel(options => {
             //    options.ListenAnyIP(5000);

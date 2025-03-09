@@ -106,7 +106,9 @@ will have already been compiled.
 ### Install - General
 
 When the application is first started it will create a Data folder in the same location
-as the application (unless you have specified another location using the -f command line parameter).
+as the application on Windows, or it will create a BandTogether folder in the user's
+default home directory for Mac
+(unless you have specified another location using the -f command line parameter).
 In the Data folder folders will be created for storing items for
 Audio, Backgrounds, Images, Languages, SetLists, SheetMusic, Slideshows, SongBooks, Users, and Videos.
 All application data is stored in JSON files, which are plain text files that can
