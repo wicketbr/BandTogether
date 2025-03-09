@@ -72,6 +72,8 @@ namespace BandTogether
                 basePath = "BandTogether";
             }
 
+            builder.WebHost.UseKestrelCore();
+
             //builder.WebHost.UseKestrelCore().ConfigureKestrel(options => {
             //    options.ListenAnyIP(5000);
             //});
@@ -114,9 +116,14 @@ namespace BandTogether
             //app.MapStaticAssets();
 
             if (mac) {
+                var provider = new Microsoft.AspNetCore.StaticFiles.FileExtensionContentTypeProvider();
+                provider.Mappings[".dat"] = "application/octet-stream";
+
                 app.UseStaticFiles(
                     new StaticFileOptions {
-                        FileProvider = new PhysicalFileProvider(Path.Combine(applicationPath, "wwwroot")), RequestPath = ""
+                        FileProvider = new PhysicalFileProvider(Path.Combine(applicationPath, "wwwroot")), 
+                        RequestPath = "",
+                        ContentTypeProvider = provider,
                     }
                 );
             } else {
@@ -192,6 +199,8 @@ namespace BandTogether
 
                 splash.Add("         URL: " + showUrl);
             }
+            splash.Add("");
+            splash.Add("   Press Ctrl+C to exit.");
             splash.Add("");
 
             var longest = splash.Max(x => x.Length);

@@ -88,6 +88,15 @@ you can open a terminal window and issue the following command, as an example:
 
 /Applications/BandTogether/BandTogether -f /Users/yourusername/BandTogether
 
+If you wish to set the included favicon as the application icon select the icon
+file, press CMD+C to copy the file, then select the BandTogether application and
+press CMD+I (or right click and select Get Info.)
+Click on the icon to the left of the file name at the top of the dialog
+and press CMD+V to paste the icon.
+
+You can also make an alias to the BandTogether application and drag that to the
+desktop and use the same method to change the icon to the included favicon.
+
 ### Install - Other Platforms
 
 The application can run on any platform that supports .NET 9.
