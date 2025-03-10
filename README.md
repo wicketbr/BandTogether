@@ -73,12 +73,11 @@ For example, if you have all your data in C:\MyBandData you would add -f C:\MyBa
 
 The Mac version of the software is distributed as an installer package that
 is now signed and notarized by Apple and should no longer require any special
-security prompt handling.
+security prompt handling. There are installers available for both the
+arm64 and x64 Macs.
 
 The application is a self-contained .NET application and can be launched 
 simply by double-clicking the BandTogether file in the Applications folder.
-The application is written in .NET 9 and was designed to target Macs with
-Apple silicon, but it should run on any Mac that supports .NET 9.
 
 By default the Mac application will place the application data in a BandTogether
 folder in the user's home directory.
