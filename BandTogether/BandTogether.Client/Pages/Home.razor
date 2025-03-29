@@ -160,27 +160,27 @@
                             }
 
                             <button type="button"
-                                    class="ms-1 btn btn-sm @(Model.User.preferences.editMode ? "btn-primary" : "btn-secondary")"
-                                    @onclick="ToggleEditMode"
-                                    title="@Text.ToggleEditMode">
+                            class="ms-1 btn btn-sm @(Model.User.preferences.editMode ? "btn-primary" : "btn-secondary")"
+                            @onclick="ToggleEditMode"
+                            title="@Text.ToggleEditMode">
                                 <Icon Name="EditMode" /> <span class="@(Model.User.preferences.editMode ? "" : "edit-mode-off")">@Text.EditMode</span>
                             </button>
 
                             <button type="button" @onclick="ToggleMessaging"
-                                    title="@Text.Messaging"
-                                    class="ms-1 btn btn-sm @(Model.User.preferences.showMessaging ? "btn-primary" : "btn-secondary")">
+                            title="@Text.Messaging"
+                            class="ms-1 btn btn-sm @(Model.User.preferences.showMessaging ? "btn-primary" : "btn-secondary")">
                                 <Icon Name="Messaging" />
                             </button>
 
                             <button type="button" @onclick="ToggleBlankScreen"
-                                    title="@Text.ToggleBlankScreen"
-                                    class="ms-1 btn btn-sm @(Model.BlankScreen ? "btn-danger" : "btn-secondary")">
+                            title="@Text.ToggleBlankScreen"
+                            class="ms-1 btn btn-sm @(Model.BlankScreen ? "btn-danger" : "btn-secondary")">
                                 <Icon Name="Blank" />
                             </button>
 
                             <button type="button" @onclick="ToggleHideText"
-                                    title="@Text.ToggleHideText"
-                                    class="ms-1 btn btn-sm @(Model.HideText ? "btn-danger" : "btn-secondary")">
+                            title="@Text.ToggleHideText"
+                            class="ms-1 btn btn-sm @(Model.HideText ? "btn-danger" : "btn-secondary")">
                                 <Icon Name="HideText" />
                             </button>
 
@@ -199,23 +199,23 @@
                             </button>
 
                             <button type="button"
-                                    class="ms-1 btn btn-sm @chordButtonClass"
-                                    disabled="@(Model.User.preferences.editMode || Model.ActiveItemType != setListItemType.song)"
-                                    @onclick="@ToggleChords"
-                                    title="@Text.ShowOrHideChords">
+                            class="ms-1 btn btn-sm @chordButtonClass"
+                            disabled="@(Model.User.preferences.editMode || Model.ActiveItemType != setListItemType.song)"
+                            @onclick="@ToggleChords"
+                            title="@Text.ShowOrHideChords">
                                 <Icon Name="Chords" />
                             </button>
 
                             @if (Model.Settings.enableProjectionMode) {
                                 <button type="button"
-                                        class="ms-1 btn btn-sm btn-secondary dropdown-toggle"
-                                        data-toggle="dropdown"
-                                        role="button"
-                                        id="dropdownMenuPreview"
-                                        data-bs-toggle="dropdown"
-                                        aria-expanded="false"
-                                        disabled="@PreviewDisabledBasedOnSelectedItem"
-                                        title="@Text.Preview">
+                                class="ms-1 btn btn-sm btn-secondary dropdown-toggle"
+                                data-toggle="dropdown"
+                                role="button"
+                                id="dropdownMenuPreview"
+                                data-bs-toggle="dropdown"
+                                aria-expanded="false"
+                                disabled="@PreviewDisabledBasedOnSelectedItem"
+                                title="@Text.Preview">
                                     <Icon Name="Search" />
                                     @Helpers.PreviewLabel(Model.User.preferences.showPreview)
                                 </button>
@@ -244,18 +244,18 @@
                             }
 
                             <button type="button"
-                                    class="btn btn-sm btn-success @(Model.Settings.enableProjectionMode ? "" : "ms-1")" @onclick="Logout" title="@Text.SwitchUser">
+                            class="btn btn-sm btn-success @(Model.Settings.enableProjectionMode ? "" : "ms-1")" @onclick="Logout" title="@Text.SwitchUser">
                                 <Icon Name="User" /> @Model.User.name
                             </button>
                         }
 
                         <button type="button"
-                                class="ms-1 btn btn-sm btn-secondary dropdown-toggle"
-                                data-toggle="dropdown"
-                                role="button"
-                                id="dropdownMenuButtonThemeHome"
-                                data-bs-toggle="dropdown"
-                                aria-expanded="false">
+                        class="ms-1 btn btn-sm btn-secondary dropdown-toggle"
+                        data-toggle="dropdown"
+                        role="button"
+                        id="dropdownMenuButtonThemeHome"
+                        data-bs-toggle="dropdown"
+                        aria-expanded="false">
                             <span title="@Text.Theme: @CurrentThemeLabel">@((MarkupString)CurrentThemeIcon)</span>
                         </button>
                         <ul class="dropdown-menu" aria-labelledby="dropdownMenuButtonThemeHome">
@@ -278,13 +278,13 @@
 
                         @if (Model.Languages.Count() > 1) {
                             <button type="button"
-                                    class="btn btn-sm btn-secondary dropdown-toggle"
-                                    data-toggle="dropdown"
-                                    role="button"
-                                    id="dropdownMenuCultureCodeHome"
-                                    data-bs-toggle="dropdown"
-                                    aria-expanded="false"
-                                    title="@Text.Lang">
+                            class="btn btn-sm btn-secondary dropdown-toggle"
+                            data-toggle="dropdown"
+                            role="button"
+                            id="dropdownMenuCultureCodeHome"
+                            data-bs-toggle="dropdown"
+                            aria-expanded="false"
+                            title="@Text.Lang">
                                 @Model.User.preferences.cultureCode
                             </button>
                             <ul class="dropdown-menu" aria-labelledby="dropdownMenuCultureCodeHome">
@@ -304,53 +304,53 @@
         </div>
 
         <SplitContainer TSize="double"
-                @bind-FirstPaneSize="Model.User.preferences.layoutPanelLeft"
-                @bind-FirstPaneSize:after="PanelResized"
-                Class="split-bar-outer"
-                UnitOfPaneSize="UnitOfPaneSize.Percent"
-                FirstPaneMinSize="20"
-                SecondPaneMinSize="20">
+        @bind-FirstPaneSize="Model.User.preferences.layoutPanelLeft"
+        @bind-FirstPaneSize:after="PanelResized"
+        Class="split-bar-outer"
+        UnitOfPaneSize="UnitOfPaneSize.Percent"
+        FirstPaneMinSize="20"
+        SecondPaneMinSize="20">
 
             <FirstPane>
                 <SplitContainer TSize="double"
-                        Orientation="SplitterOrientation.Horizontal"
-                        @bind-FirstPaneSize="Model.User.preferences.layoutPanelSetList" 
-                        @bind-FirstPaneSize:after="PanelResized"
-                        Class="split-bar-inner"
-                        UnitOfPaneSize="UnitOfPaneSize.Percent"
-                        FirstPaneMinSize="20"
-                        SecondPaneMinSize="20"
-                        Style="height:100%;">
+                Orientation="SplitterOrientation.Horizontal"
+                @bind-FirstPaneSize="Model.User.preferences.layoutPanelSetList" 
+                @bind-FirstPaneSize:after="PanelResized"
+                Class="split-bar-inner"
+                UnitOfPaneSize="UnitOfPaneSize.Percent"
+                FirstPaneMinSize="20"
+                SecondPaneMinSize="20"
+                Style="height:100%;">
 
                     <FirstPane>
                         <div class="prevent-select pane-content @(_activePageSection == "setlist" ? "active" : "")" @onclick="@(() => SetActivePageSection("setlist"))">
                             <div class="pane-title" tabindex="0">
-                            @if (!String.IsNullOrWhiteSpace(Model.SetList.name)) {
-                                <span class="title">
-                                    @Model.SetList.name
-                                </span>
+                                @if (!String.IsNullOrWhiteSpace(Model.SetList.name)) {
+                                    <span class="title">
+                                        @Model.SetList.name
+                                    </span>
 
-                                @if (Model.SetList.saveRequired.HasValue && Model.SetList.saveRequired.Value) {
-                                    <span class="save-required">@Text.Unsaved</span>
+                                    @if (Model.SetList.saveRequired.HasValue && Model.SetList.saveRequired.Value) {
+                                        <span class="save-required">@Text.Unsaved</span>
+                                    }
+                                } else {
+                                    <span class="title">@Text.SetList</span>
                                 }
-                            } else {
-                                <span class="title">@Text.SetList</span>
-                            }
                             </div>
 
                             <div class="btn-toolbar mb-1">
                                 <div class="me-1 btn-group btn-group-sm">
                                     <button type="button"
-                                            class="btn btn-sm btn-secondary open-setlist"
-                                            title="@Text.OpenSetList"
-                                            @onclick="@((MouseEventArgs e) => OpenSetList(e))">
+                                    class="btn btn-sm btn-secondary open-setlist"
+                                    title="@Text.OpenSetList"
+                                    @onclick="@((MouseEventArgs e) => OpenSetList(e))">
                                         <Icon Name="FolderOpen" />
                                     </button>
                                     @if (!Model.EmptySetList) {
                                         <button type="button"
-                                                class="btn btn-sm btn-secondary dropdown-toggle dropdown-toggle-split"
-                                                data-bs-toggle="dropdown"
-                                                aria-expanded="false">
+                                        class="btn btn-sm btn-secondary dropdown-toggle dropdown-toggle-split"
+                                        data-bs-toggle="dropdown"
+                                        aria-expanded="false">
                                             <span class="visually-hidden">Toggle Dropdown</span>
                                         </button>
                                         <ul class="dropdown-menu">
@@ -372,17 +372,17 @@
 
                                 <div class="me-1 btn-group btn-group-sm">
                                     <button type="button"
-                                            disabled="@(Model.EmptySetList || Helpers.BooleanValue(Model.SetList.saveRequired) == false)"
-                                            class="btn btn-sm btn-success"
-                                            title="@Text.Save"
-                                            @onclick="SaveSetList">
+                                    disabled="@(Model.EmptySetList || Helpers.BooleanValue(Model.SetList.saveRequired) == false)"
+                                    class="btn btn-sm btn-success"
+                                    title="@Text.Save"
+                                    @onclick="SaveSetList">
                                         <Icon Name="Save" />
                                     </button>
                                     <button type="button"
-                                            disabled="@(Model.EmptySetList)"
-                                            class="btn btn-sm btn-success dropdown-toggle dropdown-toggle-split"
-                                            data-bs-toggle="dropdown" 
-                                            aria-expanded="false">
+                                    disabled="@(Model.EmptySetList)"
+                                    class="btn btn-sm btn-success dropdown-toggle dropdown-toggle-split"
+                                    data-bs-toggle="dropdown" 
+                                    aria-expanded="false">
                                         <span class="visually-hidden">Toggle Dropdown</span>
                                     </button>
                                     <ul class="dropdown-menu">
@@ -409,32 +409,32 @@
                                 </div>
 
                                 <button type="button"
-                                        class="btn btn-sm btn-success"
-                                        title="@Text.AddItem" @onclick="@((MouseEventArgs e) => ContextMenuShow("AddSetListItem", e))">
+                                class="btn btn-sm btn-success"
+                                title="@Text.AddItem" @onclick="@((MouseEventArgs e) => ContextMenuShow("AddSetListItem", e))">
                                     <Icon Name="AddItem" />
                                 </button>
-                                
+
                             </div>
 
                             @if (Model.SetList.items.Any(x => x.id != Guid.Empty)) {
                                 var setListItems = Model.SetList.items.Where(x => x.id != Guid.Empty).ToList();
 
                                 <SortableList
-                                        Id="sortable-list"
-                                        Items="setListItems"
-                                        OnUpdate="SetListSorted"
-                                        Context="item"
-                                        Group="sort-share"
-                                        Pull="clone" >
+                                Id="sortable-list"
+                                Items="setListItems"
+                                OnUpdate="SetListSorted"
+                                Context="item"
+                                Group="sort-share"
+                                Pull="clone" >
                                     <SortableItemTemplate>
                                         @{
                                             var selected = item.id == Model.SetList.selectedItem;
                                             var itemClass = "setlist-item setlist-item-" + item.type.ToLower() + " pointer auto-overflow" +
-                                                (selected ? " selected" : "");
+                                    (selected ? " selected" : "");
 
                                             <div class="@itemClass"
-                                                    @onclick="@(() => SelectSetListItem(item))">
-                                                
+                                            @onclick="@(() => SelectSetListItem(item))">
+
                                                 @switch(item.type) {
                                                     case setListItemType.audio:
                                                         var audio = Tools.SetListItemAsAudio(item);
@@ -442,8 +442,8 @@
 
                                                             <ContextMenuTrigger MenuId="SetListContextMenuWithEdit" Id="@item.id.ToString()">
                                                                 <span title="@Text.AudioFile - @audio.filename">
-                                                                        <Icon Name="Audio" />
-                                                                        @System.IO.Path.GetFileNameWithoutExtension(audio.filename)
+                                                                    <Icon Name="Audio" />
+                                                                    @System.IO.Path.GetFileNameWithoutExtension(audio.filename)
                                                                 </span>
                                                             </ContextMenuTrigger>
                                                         }
@@ -485,8 +485,8 @@
                                                         var image = Tools.SetListItemAsImage(item);
                                                         if (image != null) {
                                                             string imageName = !String.IsNullOrWhiteSpace(image.name)
-                                                                ? image.name
-                                                                : System.IO.Path.GetFileNameWithoutExtension(Helpers.StringValue(image.filename));
+                                        ? image.name
+                                        : System.IO.Path.GetFileNameWithoutExtension(Helpers.StringValue(image.filename));
 
                                                             <ContextMenuTrigger MenuId="SetListContextMenuWithEdit" Id="@item.id.ToString()">
                                                                 <span title="@Text.Image -  @image.filename">
@@ -526,22 +526,22 @@
                                                         if (song != null) {
                                                             var songDisplay = String.Empty;
                                                             var songbookName = String.Empty; 
-                                                            
+
                                                             // Only show the songbook name if there is more than one.
                                                             if (Model.SongBooks.Count > 1) {
                                                                 songbookName = Helpers.SongBookName(song.songBookId) + ": ";
                                                                 songDisplay +=
-                                                                    "<span class=\"songbook-name\">" +
-                                                                    Tools.AbbreviateSongBookName(songbookName) +
-                                                                    "</span> ";
+                                            "<span class=\"songbook-name\">" +
+                                            Tools.AbbreviateSongBookName(songbookName) +
+                                            "</span> ";
                                                             }
 
                                                             var songDisplayPlainText = songbookName + song.title;
 
                                                             songDisplay += 
-                                                                "<span class=\"song-title\">" +
-                                                                song.title + 
-                                                                "</span>";
+                                        "<span class=\"song-title\">" +
+                                        song.title + 
+                                        "</span>";
 
                                                             if (!String.IsNullOrWhiteSpace(song.key)) {
                                                                 songDisplay += "<span class=\"key\"> (" + song.key + ")</span>";
@@ -605,7 +605,7 @@
 
                             @foreach(var songbook in Model.SongBooks.OrderBy(x => x.name)) {
                                 bool saveRequired = songbook.saveRequired.HasValue && songbook.saveRequired.Value;
-                                
+
                                 var songCount = " <span class=\"songbook-song-count\">(" + songbook.songs.Count + " " + 
                                     (songbook.songs.Count > 1 ? Text.Songs : Text.Song) +
                                     ")</span>";
@@ -648,13 +648,13 @@
                                         bool enableDragging = true;
                                         if (enableDragging) {
                                             <SortableList
-                                                Id="@("songbook-" + songbook.id)"
-                                                Group="sort-share"
-                                                Put="false"
-                                                Sort="false"
-                                                Items="@songbookSongs"
-                                                Context="song"
-                                                OnRemove="@(((int oldIndex, int newIndex) indices) => SongMovedToSetList(indices, songbook))"
+                                            Id="@("songbook-" + songbook.id)"
+                                            Group="sort-share"
+                                            Put="false"
+                                            Sort="false"
+                                            Items="@songbookSongs"
+                                            Context="song"
+                                            OnRemove="@(((int oldIndex, int newIndex) indices) => SongMovedToSetList(indices, songbook))"
                                             >
                                                 <SortableItemTemplate>
                                                     @{
@@ -681,8 +681,8 @@
 
                                                         <ContextMenuTrigger MenuId="SongContextMenu" Id="@(songbook.id.ToString() + "|" + song.id.ToString())">
                                                             <div class="pointer auto-overflow songlist-title @selectedClass"
-                                                                    title="@songDisplay"
-                                                                    @onclick="@(() => SetSong(song))">
+                                                            title="@songDisplay"
+                                                            @onclick="@(() => SetSong(song))">
                                                                 <Icon Name="Music" Size="Icon.IconSize.Small" /> <span class="song-title">@songDisplay</span>
                                                             </div>
                                                         </ContextMenuTrigger>
@@ -707,14 +707,14 @@
                                                 } else if (selected) {
                                                     selectedClass = "selected";
                                                 }
-                                            
+
 
                                                 if (!String.IsNullOrWhiteSpace(song.artist)) {
                                                     songDisplay += " - " + song.artist;
                                                 }
                                                 <div class="pointer auto-overflow songlist-title @selectedClass"
-                                                        title="@songDisplay"
-                                                        @onclick="@(() => SetSong(song))" >
+                                                title="@songDisplay"
+                                                @onclick="@(() => SetSong(song))" >
                                                     <Icon Name="Music" /> @songDisplay
                                                 </div>
                                             }
@@ -731,7 +731,7 @@
                 <div class="panel-wrapper @(_activePageSection == "setlist-element" ? "active" : "") @(Model.User.preferences.editMode ? "" : "item-detail-view")">
                     <div class="prevent-select pane-content pane-item-details">
                         <div class="top-wrapper @(Model.AudioPlaying || Model.User.preferences.showMessaging ? "" : "hidden")"
-                                @onclick="@(() => SetActivePageSection("top-wrapper"))">
+                        @onclick="@(() => SetActivePageSection("top-wrapper"))">
                             @{
                                 // The audio player renders here, but is only visible when playing.
                                 var fileNameWithoutExtension = System.IO.Path.GetFileNameWithoutExtension(Model.AudioPlayingFile);
@@ -754,15 +754,15 @@
                                                 <label for="messaging-screen">@Text.ScreenMessage</label>
 
                                                 <FreeBlazor.AutoGrowText
-                                                        Id="messaging-screen"
-                                                        Class="mb-1 form-control form-control-sm"
-                                                        @bind-Value="Model.MessageItems.screenMessage.text" />
+                                                Id="messaging-screen"
+                                                Class="mb-1 form-control form-control-sm"
+                                                @bind-Value="Model.MessageItems.screenMessage.text" />
 
                                                 <div class="input-group">
                                                     <select class="form-select form-select-sm"
-                                                            id="messaging-screen-theme"
-                                                            @bind="Model.MessageItems.screenMessage.style"
-                                                            title="@Text.Theme">
+                                                    id="messaging-screen-theme"
+                                                    @bind="Model.MessageItems.screenMessage.style"
+                                                    title="@Text.Theme">
                                                         <option value="black" selected="@(Model.MessageItems.screenMessage.style == "black")">@Text.MessagingThemeBlack</option>
                                                         <option value="blue" selected="@(Model.MessageItems.screenMessage.style == "blue")">@Text.MessagingThemeBlue</option>
                                                         <option value="green" selected="@(Model.MessageItems.screenMessage.style == "green")">@Text.MessagingThemeGreen</option>
@@ -774,8 +774,8 @@
                                                     </button>
 
                                                     <button type="button"
-                                                            class="btn btn-sm btn-success"
-                                                            @onclick="@(() => MessagingSend("screen"))">
+                                                    class="btn btn-sm btn-success"
+                                                    @onclick="@(() => MessagingSend("screen"))">
                                                         <Icon Name="Send" /> @Text.Send
                                                     </button>
                                                 </div>
@@ -788,15 +788,15 @@
                                             <label for="messaging-tablet">@Text.TabletMessage</label>
 
                                             <FreeBlazor.AutoGrowText
-                                                    Id="messaging-tablet"
-                                                    Class="mb-1 form-control form-control-sm"
-                                                    @bind-Value="Model.MessageItems.tabletMessage.text" />
+                                            Id="messaging-tablet"
+                                            Class="mb-1 form-control form-control-sm"
+                                            @bind-Value="Model.MessageItems.tabletMessage.text" />
 
                                             <div class="input-group">
                                                 <select class="form-select form-select-sm"
-                                                        id="messaging-tablet-theme"
-                                                        @bind="Model.MessageItems.tabletMessage.style"
-                                                        title="@Text.Theme">
+                                                id="messaging-tablet-theme"
+                                                @bind="Model.MessageItems.tabletMessage.style"
+                                                title="@Text.Theme">
                                                     <option value="black" selected="@(Model.MessageItems.tabletMessage.style == "black")">@Text.MessagingThemeBlack</option>
                                                     <option value="blue" selected="@(Model.MessageItems.tabletMessage.style == "blue")">@Text.MessagingThemeBlue</option>
                                                     <option value="green" selected="@(Model.MessageItems.tabletMessage.style == "green")">@Text.MessagingThemeGreen</option>
@@ -808,8 +808,8 @@
                                                 </button>
 
                                                 <button type="button"
-                                                        class="btn btn-sm btn-success"
-                                                        @onclick="@(() => MessagingSend("tablet"))">
+                                                class="btn btn-sm btn-success"
+                                                @onclick="@(() => MessagingSend("tablet"))">
                                                     <Icon Name="Send" /> @Text.Send
                                                 </button>
                                             </div>
@@ -821,289 +821,307 @@
 
                         <div @onclick="@(() => SetActivePageSection("setlist-element"))">
                             @{
-                            // Get the current active item
-                            var activeItem = Model.SetList.items.FirstOrDefault(x => x.id == Model.SetList.activeItem);
+                                // Get the current active item
+                                var activeItem = Model.SetList.items.FirstOrDefault(x => x.id == Model.SetList.activeItem);
 
-                            if (activeItem != null) {
-                                switch(activeItem.type) {
-                                    case setListItemType.clock:
-                                        var clock = Tools.SetListItemAsClock(activeItem);
-                                        if (clock != null) {
-                                            <ClockEngine Value="clock" Preview="true" />
-                                        }
-                                        break;
-
-                                    case setListItemType.countdown:
-                                        // Only render in the item area if no preview is being shown.
-                                        if (String.IsNullOrWhiteSpace(Model.User.preferences.showPreview)) {
-                                            var countdown = Tools.SetListItemAsCountdown(activeItem);
-                                            if (countdown != null) {
-                                                <div class="countdown-preview-label">
-                                                    @if (countdown.countdownType == "time" && countdown.toTime.HasValue) {
-                                                        <span>@Text.CountdownTo</span>
-                                                        <span>@countdown.toTime.Value.ToShortTimeString()</span>
-                                                    } else {
-                                                        @Text.Countdown
-                                                    }
-                                                </div>
-                                                <CountdownTimer Value="countdown" Preview="true" UniqueId="main-screen-preview" />
+                                if (activeItem != null) {
+                                    switch(activeItem.type) {
+                                        case setListItemType.clock:
+                                            var clock = Tools.SetListItemAsClock(activeItem);
+                                            if (clock != null) {
+                                                <ClockEngine Value="clock" Preview="true" />
                                             }
-                                        }
-                                        break;
+                                            break;
 
-                                    case setListItemType.image:
-                                        var img = Tools.SetListItemAsImage(activeItem);
-                                        if (img != null && !String.IsNullOrWhiteSpace(img.filename)) {
-                                            <div class="mb-2">
-                                                <img class="slideshow-image" src="@Helpers.MediaUrl("Images", img.filename)" />
-                                            </div>
-                                        }
-                                        break;
-
-                                    case setListItemType.sheetmusic:
-                                        var sheetmusic = Tools.SetListItemAsSheetMusic(activeItem);
-                                        if (sheetmusic != null) {
-                                            <div class="mb-2 sheet-music-title">
-                                                @Text.SheetMusic - @sheetmusic.title
-                                            </div>
-                                            <div class="mb-2">
-                                                @Text.SheetMusicViewInfo
-                                            </div>
-                                        }
-                                        break;
-
-                                    case setListItemType.slideshow:
-                                        var slideshow = Tools.SetListItemAsSlideshow(activeItem);
-                                        if (slideshow != null && slideshow.images != null && slideshow.images.Count > 0) {
-                                            <div class="mb-2">
-                                                <label for="slideshow-thumbnail-size">@Text.ThumbnailColumns (@Model.User.preferences.slideshowThumbnailColumns)</label>
-                                                <input type="range" class="form-range" min="1" max="10" step="1" 
-                                                        id="slideshow-thumbnail-size" @bind="Model.User.preferences.slideshowThumbnailColumns"/>
-                                            </div>
-
-                                            <div class="mb-2 slideshow-thumbnails">
-                                                @foreach (var image in slideshow.images.Index()) {
-                                                    string thumbnailColumnClass = "c-" + Model.User.preferences.slideshowThumbnailColumns.ToString();
-
-                                                    <div class="slideshow-thumbnail @thumbnailColumnClass  @Model.AspectRatio @(image.Index == Model.SetList.activeItemPart ? "active" : "")"
-                                                         @onclick="@(() => SetActiveElement(image.Index))">
-                                                        <img src="@Helpers.SlideShowUrl(slideshow.folder, image.Item)" />
-                                                    </div>
-                                                }
-                                            </div>
-                                        }
-                                        break;
-
-                                    case setListItemType.song:
-                                        // The song item will already be loaded in the Model.Song
-
-                                        if (Model.Song != null) {
-                                            Helpers.UsingDoReMi = Helpers.SongUsesDoReMiSystem(Model.Song);
-                                            Helpers.UsingNashvilleNumbering = Helpers.SongUsesNashvilleNumberingSystem(Model.Song);
-
-                                            var key = Model.Song.key;
-
-                                            if (Model.User.preferences.editMode) {
-                                                // Edit View
-                                                var colspan = Model.Settings.churchMode ? 9 : 7;
-
-                                                // If this is in a set list, not just viewing a song
-                                                // in an empty fake setlist, then show the transpose option bound
-                                                // to the setlist .Transpose property.
-                                                if (Model.ActiveItem != null && Model.ActiveItem.id != Guid.Empty) {
-                                                    colspan += 1;
-                                                }
-
-                                                <div class="mb-1">
-                                                    <button type="button" class="btn btn-sm btn-success" @onclick="SaveSong">
-                                                        <Icon Name="Save" /> @Text.Save
-                                                    </button>
-
-                                                    <FreeBlazor.DeleteConfirmation 
-                                                            ButtonSize="small"
-                                                            CancelText="@Text.Cancel"
-                                                            ConfirmDeleteText="@Text.Confirm"
-                                                            DeleteText="@Text.Delete"
-                                                            CancelIcon="@Helpers.Icon("Cancel")"
-                                                            DeleteIcon="@Helpers.Icon("Delete")"
-                                                            ConfirmDeleteIcon="@Helpers.Icon("Delete")"
-                                                            OnConfirmed="DeleteSong" />
-
-                                                    <span class="edit-message">@((MarkupString)_editMessage)</span>
-                                                </div>
-
-                                                <table class="table-sm mb-2">
-                                                    <tbody>
-                                                        <tr>
-                                                            <td style="width:1%;" class="no-wrap right">
-                                                                <label for="edit-song-title">@Text.Title</label>
-                                                            </td>
-
-                                                            <td colspan="@colspan">
-                                                                <input type="text" class="form-control form-control-sm" id="edit-song-title" @bind="Model.Song.title" @bind:after="SongModified" />
-                                                            </td>
-                                                        </tr>
-
-                                                        <tr>
-                                                            <td style="width:1%;" class="no-wrap right">
-                                                                <label for="edit-song-artist">@Text.Artist</label>
-                                                            </td>
-
-                                                            <td colspan="@colspan">
-                                                                <input type="text" class="form-control form-control-sm" id="edit-song-artist" @bind="Model.Song.artist" @bind:after="SongModified" />
-                                                            </td>
-                                                        </tr>
-
-                                                        <tr>
-                                                            <td style="width:1%;" class="no-wrap right">
-                                                                <label for="edit-song-copyright">@Text.Copyright</label>
-                                                            </td>
-
-                                                            <td colspan="@colspan">
-                                                                <input type="text" class="form-control form-control-sm" id="edit-song-copyright" @bind="Model.Song.copyright" @bind:after="SongModified" />
-                                                            </td>
-                                                        </tr>
-
-                                                        <tr>
-                                                            <td style="width:1%;" class="no-wrap right">
-                                                                <label for="edit-song-key">@Text.SongKey</label>
-                                                            </td>
-                                                            <td>
-                                                                <select class="form-select form-select-sm" id="edit-song-key" @bind="Model.Song.key" @bind:after="SongModified">
-                                                                    @foreach(var keyOption in Helpers.SongKeys) {
-                                                                        <option value="@keyOption.key" selected="@(keyOption.key == Model.Song.key)">@keyOption.label</option>
-                                                                    }
-                                                                </select>
-                                                            </td>
-
-                                                            <td style="width:1%;" class="no-wrap right">
-                                                                <label for="edit-song-tempo">@Text.Tempo</label>
-                                                            </td>
-                                                            <td>
-                                                                <input type="text" class="form-control form-control-sm" id="edit-song-tempo" @bind="Model.Song.tempo" @bind:after="SongModified" />
-                                                            </td>
-
-                                                            <td style="width:1%;" class="no-wrap right">
-                                                                <label for="edit-song-time-signature">@Text.TimeSignature</label>
-                                                            </td>
-                                                            <td>
-                                                                <input type="text" class="form-control form-control-sm" id="edit-song-time-signature" @bind="Model.Song.timeSignature" @bind:after="SongModified" />
-                                                            </td>
-
-                                                            <td style="width:1%;" class="no-wrap right">
-                                                                <label for="edit-song-Transpose">@Text.Transpose</label>
-                                                            </td>
-                                                            <td>
-                                                                @if (Model.ActiveItem != null) {
-                                                                    <select class="form-select form-select-sm" id="edit-song-Transpose" @bind="Model.ActiveItem.transpose" @bind:after="SongTransposeChanged">
-                                                                        <option></option>
-                                                                        @foreach (var keyOption in Helpers.SongKeys) {
-                                                                            <option value="@keyOption.key" selected="@(keyOption.key == Model.ActiveItem.transpose)">@keyOption.label</option>
-                                                                        }
-                                                                    </select>
-                                                                }
-                                                            </td>
-
-                                                            @if (Model.Settings.churchMode) {
-                                                                <td style="width:1%;" class="no-wrap right">
-                                                                    <label for="edit-song-ccliNumber">@Text.ccliNumber</label>
-                                                                </td>
-                                                                <td>
-                                                                    <input type="text" class="form-control form-control-sm" id="edit-song-ccliNumber" @bind="Model.Song.ccliNumber" @bind:after="SongModified" />
-                                                                </td>
-                                                            }
-                                                        </tr>
-                                                    </tbody>
-                                                </table>
-
-                                                var chordsInSong = Model.ChordsInSong;
-                                                <div class="chords-in-song mb-2">
-                                                    <span class="text">@((MarkupString)(Text.ChordsInSong + ": " ))</span>
-                                                    @if (chordsInSong.Any()) {
-                                                        foreach (var chord in chordsInSong) {
-                                                            <span class="insert-chord" @onclick="@(() => EditorInsertChord(chord))">@chord</span>
+                                        case setListItemType.countdown:
+                                            // Only render in the item area if no preview is being shown.
+                                            if (String.IsNullOrWhiteSpace(Model.User.preferences.showPreview)) {
+                                                var countdown = Tools.SetListItemAsCountdown(activeItem);
+                                                if (countdown != null) {
+                                                    <div class="countdown-preview-label">
+                                                        @if (countdown.countdownType == "time" && countdown.toTime.HasValue) {
+                                                            <span>@Text.CountdownTo</span>
+                                                            <span>@countdown.toTime.Value.ToShortTimeString()</span>
+                                                        } else {
+                                                            @Text.Countdown
                                                         }
-                                                    } else {
-                                                        @Text.None
-                                                    }
+                                                    </div>
+                                                    <CountdownTimer Value="countdown" Preview="true" UniqueId="main-screen-preview" />
+                                                }
+                                            }
+                                            break;
 
-                                                        <button type="button" class="ms-2 btn btn-xs btn-dark" @onclick="ConvertChordsOverTextToChordpro">
-                                                        @Text.ConvertChordsOverTextToChordpro
-                                                    </button>
+                                        case setListItemType.image:
+                                            var img = Tools.SetListItemAsImage(activeItem);
+                                            if (img != null && !String.IsNullOrWhiteSpace(img.filename)) {
+                                                <div class="mb-2">
+                                                    <img class="slideshow-image" src="@Helpers.MediaUrl("Images", img.filename)" />
                                                 </div>
-                                            } else {
-                                                // View Mode
-                                                // If this is a song in the setlist being transposed then get the new key.
-                                                var songKey = Helpers.StringValue(Model.Song.key);
-                                                song? activeSong = null;
-                                                if (Model.ActiveItem != null) {
-                                                    activeSong = Tools.SetListItemAsSong(Model.ActiveItem);
-                                                    if (activeSong != null && !String.IsNullOrWhiteSpace(Model.ActiveItem.transpose)) {
-                                                        songKey = Model.ActiveItem.transpose;
-                                                    }
-                                                }
-                                                
+                                            }
+                                            break;
 
-                                                var title = Helpers.StringValue(Model.Song.title);
-                                                if (!String.IsNullOrWhiteSpace(Model.Song.artist)) {
-                                                    title += " - " + Model.Song.artist;
-                                                }
+                                        case setListItemType.sheetmusic:
+                                            var sheetmusic = Tools.SetListItemAsSheetMusic(activeItem);
+                                            if (sheetmusic != null) {
+                                                <div class="mb-2 sheet-music-title">
+                                                    @Text.SheetMusic - @sheetmusic.title
+                                                </div>
+                                                <div class="mb-2">
+                                                    @Text.SheetMusicViewInfo
+                                                </div>
+                                            }
+                                            break;
 
-                                                <div id="item-detail-view-control">
-                                                    <div class="songview-title auto-overflow" title="@title">@((MarkupString)title)</div>
+                                        case setListItemType.slideshow:
+                                            var slideshow = Tools.SetListItemAsSlideshow(activeItem);
+                                            if (slideshow != null && slideshow.images != null && slideshow.images.Count > 0) {
+                                                <div class="mb-2">
+                                                    <label for="slideshow-thumbnail-size">@Text.ThumbnailColumns (@Model.User.preferences.slideshowThumbnailColumns)</label>
+                                                    <input type="range" class="form-range" min="1" max="10" step="1" 
+                                                    id="slideshow-thumbnail-size" @bind="Model.User.preferences.slideshowThumbnailColumns"/>
+                                                </div>
 
-                                                    <div class="songview-key">@Text.SongKey @Model.SongKey</div>
+                                                <div class="mb-2 slideshow-thumbnails">
+                                                    @foreach (var image in slideshow.images.Index()) {
+                                                        string thumbnailColumnClass = "c-" + Model.User.preferences.slideshowThumbnailColumns.ToString();
+                                                        var partId = "slideshow-part-" + image.Index.ToString();
 
-                                                    @foreach(var part in Model.SongParts.Index()) {
-                                                        var elementId = "current-song-part-"  + part.Index.ToString();
-
-                                                        <div id="@elementId" class="current-song-part @(part.Index == Model.SetList.activeItemPart ? "active" : "")"
-                                                        @onclick="@(() => SetActiveElement(part.Index))">
-                                                            @if (!part.Item.partOfPrevious) {
-                                                                <div class="songview-part-label">@part.Item.label</div>
-                                                            }
-                                                            
-                                                            <div>
-                                                                @((MarkupString)Helpers.RenderSongElement(Model.Song, part.Item, songKey))
+                                                        <div class="slideshow-thumbnail @thumbnailColumnClass  @Model.AspectRatio @(image.Index == Model.SetList.activeItemPart ? "active" : "")">
+                                                            <div @onclick="@(() => SetActiveElement(image.Index))">
+                                                                <img src="@Helpers.SlideShowUrl(slideshow.folder, image.Item)" />
+                                                            </div>
+                                                            <div class="slideshow-thumbnail-counter">
+                                                                @(image.Index + 1) / @slideshow.images.Count
+                                                                <span class="songview-part-skip">
+                                                                    <input type="checkbox" id="@partId"
+                                                                    @onchange="@((ChangeEventArgs e) => UpdateDisabledElements(e, activeItem.id, image.Index))"
+                                                                    checked="@(activeItem.disabledElements != null && activeItem.disabledElements.Contains(image.Index))" />
+                                                                    <label for="@partId" class="songview-part-skip-label">@Text.Skip</label>
+                                                                </span>
                                                             </div>
                                                         </div>
                                                     }
                                                 </div>
                                             }
-                                        }
-                                        break;
+                                            break;
 
-                                    case setListItemType.video:
-                                        var video = Tools.SetListItemAsVideo(activeItem);
+                                        case setListItemType.song:
+                                            // The song item will already be loaded in the Model.Song
 
-                                        if (video != null && !String.IsNullOrWhiteSpace(video.filename)) {
-                                            var videoUrl = Helpers.MediaUrl("Videos", video.filename);
-                                            <VideoPlayer ElementId="video-player-main" 
+                                            if (Model.Song != null) {
+                                                Helpers.UsingDoReMi = Helpers.SongUsesDoReMiSystem(Model.Song);
+                                                Helpers.UsingNashvilleNumbering = Helpers.SongUsesNashvilleNumberingSystem(Model.Song);
+
+                                                var key = Model.Song.key;
+
+                                                if (Model.User.preferences.editMode) {
+                                                    // Edit View
+                                                    var colspan = Model.Settings.churchMode ? 9 : 7;
+
+                                                    // If this is in a set list, not just viewing a song
+                                                    // in an empty fake setlist, then show the transpose option bound
+                                                    // to the setlist .Transpose property.
+                                                    if (Model.ActiveItem != null && Model.ActiveItem.id != Guid.Empty) {
+                                                        colspan += 1;
+                                                    }
+
+                                                    <div class="mb-1">
+                                                        <button type="button" class="btn btn-sm btn-success" @onclick="SaveSong">
+                                                            <Icon Name="Save" /> @Text.Save
+                                                        </button>
+
+                                                        <FreeBlazor.DeleteConfirmation 
+                                                        ButtonSize="small"
+                                                        CancelText="@Text.Cancel"
+                                                        ConfirmDeleteText="@Text.Confirm"
+                                                        DeleteText="@Text.Delete"
+                                                        CancelIcon="@Helpers.Icon("Cancel")"
+                                                        DeleteIcon="@Helpers.Icon("Delete")"
+                                                        ConfirmDeleteIcon="@Helpers.Icon("Delete")"
+                                                        OnConfirmed="DeleteSong" />
+
+                                                        <span class="edit-message">@((MarkupString)_editMessage)</span>
+                                                    </div>
+
+                                                    <table class="table-sm mb-2">
+                                                        <tbody>
+                                                            <tr>
+                                                                <td style="width:1%;" class="no-wrap right">
+                                                                    <label for="edit-song-title">@Text.Title</label>
+                                                                </td>
+
+                                                                <td colspan="@colspan">
+                                                                    <input type="text" class="form-control form-control-sm" id="edit-song-title" @bind="Model.Song.title" @bind:after="SongModified" />
+                                                                </td>
+                                                            </tr>
+
+                                                            <tr>
+                                                                <td style="width:1%;" class="no-wrap right">
+                                                                    <label for="edit-song-artist">@Text.Artist</label>
+                                                                </td>
+
+                                                                <td colspan="@colspan">
+                                                                    <input type="text" class="form-control form-control-sm" id="edit-song-artist" @bind="Model.Song.artist" @bind:after="SongModified" />
+                                                                </td>
+                                                            </tr>
+
+                                                            <tr>
+                                                                <td style="width:1%;" class="no-wrap right">
+                                                                    <label for="edit-song-copyright">@Text.Copyright</label>
+                                                                </td>
+
+                                                                <td colspan="@colspan">
+                                                                    <input type="text" class="form-control form-control-sm" id="edit-song-copyright" @bind="Model.Song.copyright" @bind:after="SongModified" />
+                                                                </td>
+                                                            </tr>
+
+                                                            <tr>
+                                                                <td style="width:1%;" class="no-wrap right">
+                                                                    <label for="edit-song-key">@Text.SongKey</label>
+                                                                </td>
+                                                                <td>
+                                                                    <select class="form-select form-select-sm" id="edit-song-key" @bind="Model.Song.key" @bind:after="SongModified">
+                                                                        @foreach(var keyOption in Helpers.SongKeys) {
+                                                                            <option value="@keyOption.key" selected="@(keyOption.key == Model.Song.key)">@keyOption.label</option>
+                                                                        }
+                                                                    </select>
+                                                                </td>
+
+                                                                <td style="width:1%;" class="no-wrap right">
+                                                                    <label for="edit-song-tempo">@Text.Tempo</label>
+                                                                </td>
+                                                                <td>
+                                                                    <input type="text" class="form-control form-control-sm" id="edit-song-tempo" @bind="Model.Song.tempo" @bind:after="SongModified" />
+                                                                </td>
+
+                                                                <td style="width:1%;" class="no-wrap right">
+                                                                    <label for="edit-song-time-signature">@Text.TimeSignature</label>
+                                                                </td>
+                                                                <td>
+                                                                    <input type="text" class="form-control form-control-sm" id="edit-song-time-signature" @bind="Model.Song.timeSignature" @bind:after="SongModified" />
+                                                                </td>
+
+                                                                <td style="width:1%;" class="no-wrap right">
+                                                                    <label for="edit-song-Transpose">@Text.Transpose</label>
+                                                                </td>
+                                                                <td>
+                                                                    @if (Model.ActiveItem != null) {
+                                                                        <select class="form-select form-select-sm" id="edit-song-Transpose" @bind="Model.ActiveItem.transpose" @bind:after="SongTransposeChanged">
+                                                                            <option></option>
+                                                                            @foreach (var keyOption in Helpers.SongKeys) {
+                                                                                <option value="@keyOption.key" selected="@(keyOption.key == Model.ActiveItem.transpose)">@keyOption.label</option>
+                                                                            }
+                                                                        </select>
+                                                                    }
+                                                                </td>
+
+                                                                @if (Model.Settings.churchMode) {
+                                                                    <td style="width:1%;" class="no-wrap right">
+                                                                        <label for="edit-song-ccliNumber">@Text.ccliNumber</label>
+                                                                    </td>
+                                                                    <td>
+                                                                        <input type="text" class="form-control form-control-sm" id="edit-song-ccliNumber" @bind="Model.Song.ccliNumber" @bind:after="SongModified" />
+                                                                    </td>
+                                                                }
+                                                            </tr>
+                                                        </tbody>
+                                                    </table>
+
+                                                    var chordsInSong = Model.ChordsInSong;
+                                                    <div class="chords-in-song mb-2">
+                                                        <span class="text">@((MarkupString)(Text.ChordsInSong + ": " ))</span>
+                                                        @if (chordsInSong.Any()) {
+                                                            foreach (var chord in chordsInSong) {
+                                                                <span class="insert-chord" @onclick="@(() => EditorInsertChord(chord))">@chord</span>
+                                                            }
+                                                        } else {
+                                                            @Text.None
+                                                        }
+
+                                                        <button type="button" class="ms-2 btn btn-xs btn-dark" @onclick="ConvertChordsOverTextToChordpro">
+                                                            @Text.ConvertChordsOverTextToChordpro
+                                                        </button>
+                                                    </div>
+                                                } else {
+                                                    // View Mode
+                                                    // If this is a song in the setlist being transposed then get the new key.
+                                                    var songKey = Helpers.StringValue(Model.Song.key);
+                                                    song? activeSong = null;
+                                                    if (Model.ActiveItem != null) {
+                                                        activeSong = Tools.SetListItemAsSong(Model.ActiveItem);
+                                                        if (activeSong != null && !String.IsNullOrWhiteSpace(Model.ActiveItem.transpose)) {
+                                                            songKey = Model.ActiveItem.transpose;
+                                                        }
+                                                    }
+
+
+                                                    var title = Helpers.StringValue(Model.Song.title);
+                                                    if (!String.IsNullOrWhiteSpace(Model.Song.artist)) {
+                                                        title += " - " + Model.Song.artist;
+                                                    }
+
+                                                    <div id="item-detail-view-control">
+                                                        <div class="songview-title auto-overflow" title="@title">@((MarkupString)title)</div>
+
+                                                        <div class="songview-key">@Text.SongKey @Model.SongKey</div>
+
+                                                        @foreach(var part in Model.SongParts.Index()) {
+                                                            var elementId = "current-song-part-"  + part.Index.ToString();
+                                                            var partId = "song-part-" + part.Index.ToString();
+
+                                                            <div id="@elementId" class="current-song-part @(part.Index == Model.SetList.activeItemPart ? "active" : "")">
+                                                                <div @onclick="@(() => SetActiveElement(part.Index))">
+                                                                    @if (!part.Item.partOfPrevious) {
+                                                                        <div class="songview-part-label">@part.Item.label</div>
+                                                                    }
+                                                                    <div>
+                                                                        @((MarkupString)Helpers.RenderSongElement(Model.Song, part.Item, songKey))
+                                                                    </div>
+                                                                </div>
+                                                                <span class="songview-part-skip">
+                                                                    <input type="checkbox" id="@partId"
+                                                                    @onchange="@((ChangeEventArgs e) => UpdateDisabledElements(e, activeItem.id, part.Index))"
+                                                                    checked="@(activeItem.disabledElements != null && activeItem.disabledElements.Contains(part.Index))" />
+                                                                    <label for="@partId">@Text.Skip</label>
+                                                                </span>
+                                                            </div>
+                                                        }
+                                                    </div>
+                                                }
+                                            }
+                                            break;
+
+                                        case setListItemType.video:
+                                            var video = Tools.SetListItemAsVideo(activeItem);
+
+                                            if (video != null && !String.IsNullOrWhiteSpace(video.filename)) {
+                                                var videoUrl = Helpers.MediaUrl("Videos", video.filename);
+                                                <VideoPlayer ElementId="video-player-main" 
                                                 Loop="@video.loop"
                                                 Mute="@video.muteInMainWindow"
                                                 ShowControls="true" 
                                                 VideoUrl="@videoUrl"/>
-                                        }
-                                        break;
+                                            }
+                                            break;
 
-                                    case setListItemType.youTube:
-                                        var youTube = Tools.SetListItemAsYouTube(activeItem);
-                                        if (youTube != null) {
-                                            <YouTubePlayer VideoId="@youTube.videoId" ElementId="youtube-player-main" />
-                                        }
-                                        
-                                        break;
+                                        case setListItemType.youTube:
+                                            var youTube = Tools.SetListItemAsYouTube(activeItem);
+                                            if (youTube != null) {
+                                                <YouTubePlayer VideoId="@youTube.videoId" ElementId="youtube-player-main" />
+                                            }
+
+                                            break;
+                                    }
                                 }
                             }
-                        }
 
-                        <div class="mb-2" @ondblclick="EditorDoubleClicked">
-                            <BlazorMonaco.Editor.StandaloneCodeEditor @ref="_editor"
-                                    CssClass="@EditorClass"
-                                    Id="code-editor"
-                                    OnDidChangeModelContent="EditorUpdated"
-                                    OnDidChangeCursorPosition="EditorCursorPosition"
-                                    ConstructionOptions="@((BlazorMonaco.Editor.StandaloneCodeEditor editor) => { return new BlazorMonaco.Editor.StandaloneEditorConstructionOptions {
+                            <div class="mb-2" @ondblclick="EditorDoubleClicked">
+                                <BlazorMonaco.Editor.StandaloneCodeEditor @ref="_editor"
+                                CssClass="@EditorClass"
+                                Id="code-editor"
+                                OnDidChangeModelContent="EditorUpdated"
+                                OnDidChangeCursorPosition="EditorCursorPosition"
+                                ConstructionOptions="@((BlazorMonaco.Editor.StandaloneCodeEditor editor) => { return new BlazorMonaco.Editor.StandaloneEditorConstructionOptions {
                                         AutomaticLayout = true,
                                         Language = "plaintext",
                                         AutoClosingBrackets = "always",
@@ -1126,16 +1144,16 @@
                                         },
                                         RenderWhitespace = "all",
                                     };})"
-                            />
-                        </div>
+                                />
+                            </div>
                         </div>
 
                         @if (Model.Settings.enableProjectionMode && !String.IsNullOrWhiteSpace(Model.User.preferences.showPreview) && !PreviewDisabledBasedOnSelectedItem) {
                             <div class="preview-area docked @Model.User.preferences.showPreview @Model.AspectRatio">
                                 <ProjectorView @ref="_preview"
-                                        AspectRatio="@Model.Settings.projectionModeAspectRatio"
-                                        Id="main-screen-preview"
-                                        Scale="Helpers.PreviewScale(Model.User.preferences.showPreview)" />
+                                AspectRatio="@Model.Settings.projectionModeAspectRatio"
+                                Id="main-screen-preview"
+                                Scale="Helpers.PreviewScale(Model.User.preferences.showPreview)" />
                             </div>
                         }
                     </div>
@@ -1370,7 +1388,7 @@
                                 await MovePrevious();
                             }
                             break;
-                        
+
                         case "tab":
                             await SetActivePageSection("setlist");
                             break;
@@ -1396,7 +1414,7 @@
                             }
                             break;
                     }
-                    
+
                 }
                 break;
         }
@@ -1663,7 +1681,7 @@
 
     protected async Task ContextMenuShow(string menu, MouseEventArgs e)
     {
-         await contextMenuService.ShowMenu(menu, (int)e.ClientX, (int)e.ClientY);
+        await contextMenuService.ShowMenu(menu, (int)e.ClientX, (int)e.ClientY);
     }
 
     protected async Task ConvertChordsOverTextToChordpro()
@@ -1845,7 +1863,7 @@
             }
 
             //return Model.Song.id != Guid.Empty && Model.User.preferences.editMode ? "code-editor edit-mode" : "code-editor hidden";
-            
+
             return output;
         }
     }
@@ -2107,6 +2125,25 @@
         int activePart = Model.SetList.activeItemPart.HasValue ? (int)Model.SetList.activeItemPart : 0;
         activePart--;
 
+        int maxParts = Tools.MaxItemParts(Model.ActiveItem);
+        if (Model.ActiveItem != null && Model.ActiveItem.disabledElements != null && Model.ActiveItem.disabledElements.Count > 0 && maxParts > -1) {
+            // Find the previous enabled part. If we get to the beginning of the available parts then move to the previous item.
+            bool foundPreviousItem = false;
+
+            for (int i = activePart; i > -1; i--) {
+                if (!Model.ActiveItem.disabledElements.Contains(i)) {
+                    activePart = i;
+                    foundPreviousItem = true;
+                    break;
+                }
+            }
+
+            if (!foundPreviousItem) {
+                await MovePrevious(focusElement);
+                return;
+            }
+        }
+
         if(focusElement) {
             await SetActiveElement(activePart);
 
@@ -2120,6 +2157,27 @@
     {
         int activePart = Model.SetList.activeItemPart.HasValue ? (int)Model.SetList.activeItemPart : 0;
         activePart++;
+
+        int maxParts = Tools.MaxItemParts(Model.ActiveItem);
+        if (Model.ActiveItem != null && Model.ActiveItem.disabledElements != null && Model.ActiveItem.disabledElements.Count > 0 && maxParts > -1) {
+            if (Model.ActiveItem.disabledElements.Contains(activePart)) {
+                // Find the next enabled part. If we get to the end of the available parts then move to the next item.
+                bool foundNextItem = false;
+
+                for (int i = activePart; i < maxParts; i++) {
+                    if (!Model.ActiveItem.disabledElements.Contains(i)) {
+                        activePart = i;
+                        foundNextItem = true;
+                        break;
+                    }
+                }
+
+                if (!foundNextItem) {
+                    await MoveNext(focusElement);
+                    return;
+                }
+            }
+        }
 
         if(focusElement) {
             await SetActiveElement(activePart);
@@ -2138,6 +2196,26 @@
             int newIndex = currentSetListIndex + 1;
             var setListItem = Model.SetList.items[newIndex];
             if (setListItem != null) {
+                // Various types will either go to the first element or the last based on their type.
+                int maxParts = Tools.MaxItemParts(setListItem);
+                if (setListItem.disabledElements != null && setListItem.disabledElements.Count > 0 && maxParts > -1) {
+                    var focusPart = 0;
+                    bool foundPart = false;
+                    for (int i = focusPart; i < maxParts; i++) {
+                        if (!setListItem.disabledElements.Contains(i)) {
+                            foundPart = true;
+                            focusPart = i;
+                            break;
+                        }
+                    }
+                    if (!foundPart) {
+                        await MoveForward(focusElement);
+                    } else {
+                        await SelectSetListItem(setListItem, true, focusPart);
+                        return;
+                    }
+                }
+
                 await SelectSetListItem(setListItem, true);
             }
         }
@@ -2150,11 +2228,23 @@
             var setListItem = Model.SetList.items[newIndex];
             if (setListItem != null) {
                 // Various types will either go to the first element or the last based on their type.
-
-                var song = Tools.SetListItemAsSong(setListItem);
-                if (song != null && song.parts != null && song.parts.Count > 0) {
-                    await SelectSetListItem(setListItem, true, song.parts.Count - 1);
-                    return;
+                int maxParts = Tools.MaxItemParts(setListItem);
+                if (setListItem.disabledElements != null && setListItem.disabledElements.Count > 0 && maxParts > -1) {
+                    var focusPart = maxParts - 1;
+                    bool foundPart = false;
+                    for (int i = focusPart; i > -1; i--) {
+                        if (!setListItem.disabledElements.Contains(i)) {
+                            foundPart = true;
+                            focusPart = i;
+                            break;
+                        }
+                    }
+                    if (!foundPart) {
+                        await MoveBackward(focusElement);
+                    } else {
+                        await SelectSetListItem(setListItem, true, focusPart);
+                        return;
+                    }
                 }
 
                 await SelectSetListItem(setListItem, true);
@@ -2344,24 +2434,24 @@
         //double playbackTime = 0;
 
         //switch (update.UpdateType) {
-            // These are disabled as the preview is now hidden for videos
-            // case SignalRUpdateType.VideoPlayerPlabackTime:
-            //     playbackTime = Tools.Double(update.Message);
-            //     await Helpers.PlayVideoUpdatePlaybackTime("main-screen-preview", playbackTime);
-            //     break;
+        // These are disabled as the preview is now hidden for videos
+        // case SignalRUpdateType.VideoPlayerPlabackTime:
+        //     playbackTime = Tools.Double(update.Message);
+        //     await Helpers.PlayVideoUpdatePlaybackTime("main-screen-preview", playbackTime);
+        //     break;
 
-            // case SignalRUpdateType.VideoPlayerState:
-            //     await Helpers.PlayVideoSetPlaybackState("main-screen-preview", update.Message);
-            //     break;
+        // case SignalRUpdateType.VideoPlayerState:
+        //     await Helpers.PlayVideoSetPlaybackState("main-screen-preview", update.Message);
+        //     break;
 
-            // case SignalRUpdateType.YouTubePlayState:
-            //     await Helpers.PlayYouTubeVideoSetPlaybackState("main-screen-preview", update.Message);
-            //     break;
+        // case SignalRUpdateType.YouTubePlayState:
+        //     await Helpers.PlayYouTubeVideoSetPlaybackState("main-screen-preview", update.Message);
+        //     break;
 
-            // case SignalRUpdateType.YouTubePlaybackTime:
-            //     playbackTime = Tools.Double(update.Message);
-            //     await Helpers.PlayYouTubeVideoUpdatePlayTimeForPlayer("main-screen-preview", playbackTime);
-            //     break;
+        // case SignalRUpdateType.YouTubePlaybackTime:
+        //     playbackTime = Tools.Double(update.Message);
+        //     await Helpers.PlayYouTubeVideoUpdatePlayTimeForPlayer("main-screen-preview", playbackTime);
+        //     break;
         //}
     }
 
@@ -2369,7 +2459,7 @@
     // {
     //     var m = await _editor.GetModel();
     //     var lines = await m.GetLineCount();
-        
+
     //     var cssHeight = (lines * 19) + 20;
 
     //     await Helpers.SetElementHeight("code-editor", cssHeight + "px");
@@ -2551,7 +2641,7 @@
     protected async Task SaveSongBook(songBook songbook)
     {
         Model.Message_Saving();
-        
+
         var saved = await Helpers.GetOrPost<booleanResponse>("api/SaveSongBook", songbook);
 
         Model.ClearMessages();
@@ -2602,6 +2692,17 @@
                             if (Model.Song.id != song.id || Model.Song.songBookId != song.songBookId || Model.SetList.activeItem != item.id) {
                                 Model.Song = song;
                                 Model.SetList.activeItem = item.id;
+
+                                var maxItems = Tools.MaxItemParts(Model.ActiveItem);
+                                if (Model.ActiveItem != null && Model.ActiveItem.disabledElements != null && Model.ActiveItem.disabledElements.Count > 0 && maxItems > -1) {
+                                    for(int i = 0; i < maxItems; i++) {
+                                        if (!Model.ActiveItem.disabledElements.Contains(i)) {
+                                            await SetActiveElement(setItemPart != null ? setItemPart.Value : i);
+                                            await Helpers.SetActiveItemTypeJSInterop(setListItemType.song);
+                                            return;
+                                        }
+                                    }
+                                }
 
                                 await SetActiveElement(setItemPart != null ? setItemPart.Value : 0);
                                 await Helpers.SetActiveItemTypeJSInterop(setListItemType.song);
@@ -2692,6 +2793,11 @@
     }
 
     protected async Task SetActiveElement(int index){
+        // If this is a disabled item then just return.
+        if (Model.ActiveItem != null && Model.ActiveItem.disabledElements != null && Model.ActiveItem.disabledElements.Contains(index)) {
+            return;
+        }
+
         // Instead of updating the model directly, send this out via SignalR so all clients are updated.
         var setlist = Helpers.DuplicateObject<setList>(Model.SetList);
         if (setlist != null) {
@@ -2705,7 +2811,7 @@
                     type = setListItemType.song,
                 };
                 setlist.items = new List<setListItem> { newItem };
-                
+
                 setlist.activeItem = Guid.Empty;
             }
 
@@ -3088,6 +3194,36 @@
 
         song.saveRequired = true;
         UpdateSongbooksSaveRequired();
+    }
+
+    protected async Task UpdateDisabledElements(ChangeEventArgs e, Guid itemId, int index)
+    {
+        string value = String.Empty;
+
+        if (e.Value != null) {
+            value += e.Value.ToString();
+        }
+
+        var item = Model.SetList.items.FirstOrDefault(x => x.id == itemId);
+        if (item != null) {
+            if (item.disabledElements == null) {
+                item.disabledElements = new List<int>();
+            }
+
+            if (value.ToLower() == "true") {
+                if (!item.disabledElements.Contains(index)) {
+                    item.disabledElements.Add(index);
+                }
+            } else {
+                item.disabledElements = item.disabledElements.Where(x => x != index).ToList();
+            }
+
+            if (item.disabledElements.Count == 0) {
+                item.disabledElements = null;
+            }
+
+            SetListChanged();
+        }
     }
 
     protected void UpdateSongbooksSaveRequired()

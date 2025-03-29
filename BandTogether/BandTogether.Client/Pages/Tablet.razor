@@ -659,6 +659,8 @@
         _setList.activeItemPart = _activeItemPart;
         _setList.selectedItem = _selectedItem;
 
+        // Console.WriteLine("UpdateSetList: " + _setList.activeItem.ToString() + " - " + _setList.activeItemPart.ToString() + " - " + _selectedItem.ToString());
+
         // We also will only update what song we are viewing if the active item is a song or sheet music.
         var selectedItem = _setList.items.FirstOrDefault(x => x.id == _activeItem);
         if (selectedItem != null) {

@@ -729,7 +729,7 @@ body.dark .btn-dark {
     padding: 0;
 }
 
-.pane-item-details label {
+.pane-item-details label:not(.songview-part-skip-label) {
     font-size:0.7em;
 }
 
@@ -829,6 +829,11 @@ body.dark .songview-title {
 .songview-part-label {
     font-weight:bold;
     font-size:1.2em;
+}
+
+.songview-part-skip {
+    margin-left:.5em;
+    opacity:.4;
 }
 
 .pane-item-details .songformat-chord {
@@ -1260,6 +1265,16 @@ label.small {
 
 .slideshow-thumbnail img {
     width:100%;
+}
+
+.slideshow-thumbnail-counter {
+    text-align:center;
+    font-size:.7em;
+}
+
+.slideshow-thumbnail.active .slideshow-thumbnail-counter {
+    background-color:orange;
+    color:#000;
 }
 
 .slideshow-image {

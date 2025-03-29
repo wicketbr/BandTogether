@@ -1,5 +1,6 @@
 ﻿using System.Text.RegularExpressions;
 using System.Text;
+using System.Reflection;
 
 namespace BandTogether;
 
@@ -859,6 +860,31 @@ public static class Tools
 
             if (ExtensionsForImages.Contains(extension.ToLower())) {
                 output = true;
+            }
+        }
+
+        return output;
+    }
+
+    public static int MaxItemParts(setListItem? item) 
+    {
+        int output = -1;
+
+        if (item != null) {
+            switch (item.type) {
+                case setListItemType.slideshow:
+                    var slideshow = SetListItemAsSlideshow(item);
+                    if (slideshow != null && slideshow.images != null) {
+                        output = slideshow.images.Count;
+                    }
+                    break;
+
+                case setListItemType.song:
+                    var song = Tools.SetListItemAsSong(item);
+                    if (song != null && song.parts != null) {
+                        output = song.parts.Count;
+                    }
+                    break;
             }
         }
 

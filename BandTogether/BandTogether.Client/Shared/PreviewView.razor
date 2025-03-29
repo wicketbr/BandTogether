@@ -28,6 +28,7 @@
                     ObjectToRender="ObjectToRender"
                     ObjectType="@ObjectType"
                     ItemStyle="Style"
+                    SetListItemId="@SetListItemId"
                     UniqueId="@_uniqueId" />
         </div>
     </div>
@@ -40,6 +41,7 @@
     [Parameter] public string ObjectType { get; set; } = "";
     [Parameter] public string PreviewId { get; set; } = "";
     [Parameter] public previewSize PreviewSize { get; set; } = previewSize.medium;
+    [Parameter] public Guid? SetListItemId { get; set; }
     [Parameter] public viewStyle Style { get; set; } = new viewStyle();
     [Parameter] public int? TransitionSpeed { get; set; }
 

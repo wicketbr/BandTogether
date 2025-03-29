@@ -112,8 +112,21 @@
 
                         if (Helpers.BooleanValue(ItemStyle.showPreviousLyrics)) {
                             // Get the previous element for this song and update the previous lyrics array.
+                            // Now that elements can be disabled, we need to get the previous enabled item.
                             if (activeItemPart > 0) {
-                                var previousPart = parts[activeItemPart - 1];
+                                songPart? previousPart = null;
+
+                                if (CurrentSetListItem != null && CurrentSetListItem.disabledElements != null && CurrentSetListItem.disabledElements.Count > 0) {
+                                    for (int i = activeItemPart - 1; i >= 0; i--) {
+                                        if (!CurrentSetListItem.disabledElements.Contains(i)) {
+                                            previousPart = parts[i];
+                                            break;
+                                        }
+                                    }
+                                } else {
+                                    previousPart = parts[activeItemPart - 1];
+                                }
+
                                 if (previousPart != null && !String.IsNullOrWhiteSpace(previousPart.content)) {
                                     var partLines = Tools.SplitTextIntoLines(Helpers.LyricsOnly(previousPart.content));
                                     var lastThree = partLines.Take(3).ToList();
@@ -130,8 +143,21 @@
 
                         if (Helpers.BooleanValue(ItemStyle.showUpcomingLyrics)) {
                             // Get the upcoming element for this song and update the next lyrics array.
+                            // Now that elements can be disabled, we need to get the next enabled item.
                             if (parts.Count() > activeItemPart + 1) {
-                                var upcomingPart = parts[activeItemPart + 1];
+                                songPart? upcomingPart = null;
+
+                                if (CurrentSetListItem != null && CurrentSetListItem.disabledElements != null && CurrentSetListItem.disabledElements.Count > 0) {
+                                    for (int i = activeItemPart + 1; i < parts.Count(); i++) {
+                                        if (!CurrentSetListItem.disabledElements.Contains(i)) {
+                                            upcomingPart = parts[i];
+                                            break;
+                                        }
+                                    }
+                                } else {
+                                    upcomingPart = parts[activeItemPart + 1];
+                                }
+
                                 if (upcomingPart != null && !String.IsNullOrWhiteSpace(upcomingPart.content)) {
                                     var partLines = Tools.SplitTextIntoLines(Helpers.LyricsOnly(upcomingPart.content));
                                     var firstThree = partLines.Take(3).ToList();
@@ -168,9 +194,9 @@
                 var videoUrl = Helpers.MediaUrl("Videos", video.filename);
 
                 <VideoPlayer ElementId="@("video-player-" + UniqueId)" 
-                        Loop="@video.loop"
-                        Mute="@mute" 
-                        VideoUrl="@videoUrl"/>
+                Loop="@video.loop"
+                Mute="@mute" 
+                VideoUrl="@videoUrl"/>
             }
             break;
 
@@ -191,6 +217,7 @@
     [Parameter] public viewStyle ItemStyle { get; set; } = new viewStyle();
     [Parameter] public object? ObjectToRender { get; set; }
     [Parameter] public String ObjectType { get; set; } = "";
+    [Parameter] public Guid? SetListItemId { get; set; }
     [Parameter] public string UniqueId { get; set; } = "";
 
     public void Dispose() { }
@@ -207,4 +234,15 @@
         StateHasChanged();
     }
 
+    protected setListItem? CurrentSetListItem {
+        get {
+            setListItem? output = null;
+
+            if (SetListItemId != null) {
+                output = Model.SetList.items.FirstOrDefault(x => x.id == SetListItemId);
+            }
+
+            return output;
+        }
+    }
 }

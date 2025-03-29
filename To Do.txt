@@ -2,4 +2,4 @@ Add support for running the app in a Docker container.
 
 Give the presenter the ability to change user settings for them.
 
-When using the arrow keys to move items, the Tablet view is moving even if the current song is not the main item in focus.
+Add the ability to disable individual elements of certain set list item types (songs, slideshows).

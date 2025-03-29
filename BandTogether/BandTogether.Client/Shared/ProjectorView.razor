@@ -29,8 +29,8 @@
 
             case backgroundType.video:
                 <video autoplay muted playsinline loop onloadedmetadata="this.muted=true" preload="auto" oncanplay="this.play()"
-                        class="video-background"
-                        src="./Backgrounds/@_background[0]" type="@Helpers.MimeType(_background[0])" />
+                class="video-background"
+                src="./Backgrounds/@_background[0]" type="@Helpers.MimeType(_background[0])" />
                 break;
         }
     </div>
@@ -50,28 +50,30 @@
 
             case backgroundType.video:
                 <video autoplay muted playsinline loop onloadedmetadata="this.muted=true" preload="auto" oncanplay="this.play()"
-                        class="video-background"
-                        src="./Background/@_background[1]" type="@Helpers.MimeType(_background[1])" />
+                class="video-background"
+                src="./Background/@_background[1]" type="@Helpers.MimeType(_background[1])" />
                 break;
         }
     </div>
 
     <div id="@uniqueId0" class="projection-lyrics-wrapper main-screen-preview @uniqueId0 @_fadeClass[0] @Helpers.AspectRatioToCssClass(AspectRatio)">
         <ProjectorRender
-            ActiveItemPart="@_activeItemPart[0]"
-            ObjectToRender="_objectArray[0]"
-            ObjectType="@_objectType[0]"
-            ItemStyle="_styles[0]"
-            UniqueId="@uniqueId0" />
+        ActiveItemPart="@_activeItemPart[0]"
+        ObjectToRender="_objectArray[0]"
+        ObjectType="@_objectType[0]"
+        ItemStyle="_styles[0]"
+        SetListItemId="@_setListItemId[0]"
+        UniqueId="@uniqueId0" />
     </div>
 
     <div id="@uniqueId1" class="projection-lyrics-wrapper main-screen-preview @uniqueId1 @_fadeClass[1] @Helpers.AspectRatioToCssClass(AspectRatio)">
         <ProjectorRender
-            ActiveItemPart="@_activeItemPart[1]"
-            ObjectToRender="_objectArray[1]"
-            ObjectType="@_objectType[1]"
-            ItemStyle="_styles[1]"
-            UniqueId="@uniqueId1" />
+        ActiveItemPart="@_activeItemPart[1]"
+        ObjectToRender="_objectArray[1]"
+        ObjectType="@_objectType[1]"
+        ItemStyle="_styles[1]"
+        SetListItemId="@_setListItemId[1]"
+        UniqueId="@uniqueId1" />
     </div>
 
     @if (Model.MessageItems.screenMessage.active && !String.IsNullOrWhiteSpace(Model.MessageItems.screenMessage.text)) {
@@ -109,6 +111,7 @@
     protected int? _newTransitionSpeed = null;
     protected object[] _objectArray = new object[] { 1, 2 };
     protected string[] _objectType = new string[] { "", "" };
+    protected Guid[] _setListItemId = new Guid[] { Guid.Empty, Guid.Empty };
     protected int[] _transitionSpeed = new int[] { 0, 0 };
     protected bool[] _useStyle = new bool[] { true, true };
     protected viewStyle[] _styles = new viewStyle[] { new viewStyle(), new viewStyle() };
@@ -123,7 +126,7 @@
     // So, the active item from the Model will only be used on initialization.
 
     protected string _uniqueId = String.Empty;
-    
+
     public void Dispose() { 
         Model.OnChange -= OnDataModelUpdated;
         Model.OnSignalRUpdate -= SignalRUpdate;
@@ -308,7 +311,7 @@
                 objectToRender = activeItem.item;
                 objectType = activeItem.type;
                 break;
-                
+
             case setListItemType.image:
                 useStyle = false;
                 objectToRender = activeItem.item;
@@ -318,7 +321,7 @@
                     _newTransitionSpeed = image.transitionSpeed;
                 }
                 break;
-                
+
             case setListItemType.slideshow:
                 var slideshow = Tools.SetListItemAsSlideshow(activeItem);
                 if (slideshow != null) {
@@ -362,7 +365,7 @@
                 break;
         }
 
-        UpdateProjectorView(objectToRender, objectType, useStyle, _newItemStyle, _newTransitionSpeed);
+        UpdateProjectorView(objectToRender, activeItem.id, objectType, useStyle, _newItemStyle, _newTransitionSpeed);
     }
 
     protected async void SignalRUpdate(signalRUpdate update)
@@ -420,6 +423,7 @@
 
     protected void UpdateProjectorView(
         object? obj,
+        Guid setListItemId,
         string objectType = "",
         bool useStyle = false,
         viewStyle? newItemStyle = null,
@@ -439,6 +443,7 @@
                 _activeObject = 1 - _activeObject;
                 _objectArray[_activeObject] = obj;
                 _objectType[_activeObject] = objectType;
+                _setListItemId[_activeObject] = setListItemId;
                 _useStyle[_activeObject] = useStyle;
 
                 if (Model.BlankScreen || Model.HideText) {

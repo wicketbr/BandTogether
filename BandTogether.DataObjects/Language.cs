@@ -234,6 +234,7 @@ public class Language
     public string showUpcomingLyrics { get; set; } = "";
     public string showSeconds { get; set; } = "";
     public string showUserList { get; set; } = "";
+    public string skip { get; set; } = "";
     public string slideshow { get; set; } = "";
     public string song { get; set; } = "";
     public string songBook { get; set; } = "";

@@ -232,6 +232,7 @@ public static class Text
     public static string ShowUpcomingLyrics { get; set; } = "Show Upcoming Lyrics";
     public static string ShowSeconds { get; set; } = "Show Seconds";
     public static string ShowUserList { get; set; } = "Show User List";
+    public static string Skip { get; set; } = "Skip";
     public static string Slideshow { get; set; } = "Slideshow";
     public static string Song { get; set; } = "Song";
     public static string SongBook { get; set; } = "Song Book";

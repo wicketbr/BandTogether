@@ -28,6 +28,7 @@ public class setListFile
     public string? itemJson { get; set; }
     public string? afterItemOption { get; set; }
     public string? transpose { get; set; }
+    public List<int>? disabledElements { get; set; }
 }
 
 public static class setListAfterItemOption
