@@ -2,7 +2,6 @@
   "profiles": {
     "http": {
       "commandName": "Project",
-      "commandLineArgs": "-folder C:\\Working\\BandTogether",
       "launchBrowser": true,
       "environmentVariables": {
         "ASPNETCORE_ENVIRONMENT": "Development"
@@ -13,7 +12,6 @@
     },
     "https": {
       "commandName": "Project",
-      "commandLineArgs": "-folder C:\\Working\\BandTogether",
       "launchBrowser": true,
       "environmentVariables": {
         "ASPNETCORE_ENVIRONMENT": "Development"
@@ -24,7 +22,6 @@
     },
     "IIS Express": {
       "commandName": "IISExpress",
-      "commandLineArgs": "-folder C:\\Working\\BandTogether",
       "launchBrowser": true,
       "environmentVariables": {
         "ASPNETCORE_ENVIRONMENT": "Development"

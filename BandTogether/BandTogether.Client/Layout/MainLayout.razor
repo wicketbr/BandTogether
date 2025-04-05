@@ -128,8 +128,8 @@
         DialogService.OnClose += DialogClosed;
         DialogService.OnOpen += DialogOpened;
 
-        await Helpers.LoadCachedSetList();
         await Helpers.ReloadModel();
+        await Helpers.LoadCachedSetList();
 
         NavManager.LocationChanged += LocationChanged;
 

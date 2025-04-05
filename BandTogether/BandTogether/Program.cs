@@ -94,6 +94,12 @@ namespace BandTogether
 
             if (!String.IsNullOrWhiteSpace(argumentFolder)) {
                 basePath = argumentFolder;
+            } else {
+                // No folder was specified in the command-line arguments, check if a folder is configured in the appsettings.json file.
+                var configuredFolder = builder.Configuration.GetValue<string>("DataPath");
+                if (!String.IsNullOrWhiteSpace(configuredFolder)) {
+                    basePath = configuredFolder;
+                }
             }
 
             var da = new DataAccess(applicationPath, basePath);

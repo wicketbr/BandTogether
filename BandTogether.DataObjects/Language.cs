@@ -103,6 +103,7 @@ public class Language
     public string errors { get; set; } = "";
     public string export { get; set; } = "";
     public string exportTitle { get; set; } = "";
+    public string filterSongbooks { get; set; } = "";
     public string fontColor { get; set; } = "";
     public string fontFamily { get; set; } = "";
     public string fontLineHeight { get; set; } = "";

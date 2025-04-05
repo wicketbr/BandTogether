@@ -1708,6 +1708,8 @@ public static class Helpers
                 { "fa:fa-solid fa-book",                         new List<string> { "SongBook" }},
                 { "fa:fa-solid fa-book-open",                    new List<string> { "AddSongBook", "SongBookOpen" }},
                 { "fa:fa-solid fa-broom",                        new List<string> { "Clear", "Reset" }},
+                { "fa:fa-solid fa-circle-arrow-left",            new List<string> { "Previous" }},
+                { "fa:fa-solid fa-circle-arrow-right",           new List<string> { "Next" }},
                 { "fa:fa-solid fa-circle-half-stroke",           new List<string> { "ThemeAuto" }},
                 { "fa:fa-solid fa-circle-info",                  new List<string> { "About", "Info" }},
                 { "fa:fa-solid fa-clock",                        new List<string> { "Clock" }},

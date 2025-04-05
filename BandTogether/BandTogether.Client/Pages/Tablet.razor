@@ -16,7 +16,7 @@
                 </button>
 
                 <button type="button" class="btn btn-sm @(Model.User.preferences.autoFollow? "btn-success" : "btn-danger")"
-                        @onclick="ToggleAutoFollow">
+                @onclick="ToggleAutoFollow">
                     @if (Model.User.preferences.autoFollow) {
                         <span>@Text.AutoFollowOn</span>
                     } else {
@@ -29,20 +29,20 @@
                         string partTitle = !String.IsNullOrWhiteSpace(SheetMusicPart) ? SheetMusicPart : Text.SheetMusicSelectPart;
 
                         <button type="button"
-                                class="ms-1 btn btn-sm btn-secondary dropdown-toggle"
-                                data-toggle="dropdown"
-                                role="button"
-                                id="dropdownMenuPart"
-                                data-bs-toggle="dropdown"
-                                aria-expanded="false">
+                        class="ms-1 btn btn-sm btn-secondary dropdown-toggle"
+                        data-toggle="dropdown"
+                        role="button"
+                        id="dropdownMenuPart"
+                        data-bs-toggle="dropdown"
+                        aria-expanded="false">
                             @partTitle
                         </button>
                         <ul class="dropdown-menu dopdown-menu-part" aria-labelledby="dropdownMenuPart">
                             @foreach (var part in SheetMusicItem.parts) {
                                 <li>
                                     <a href="javascript:void('0');"
-                                       class="dropdown-item @(SheetMusicPart == part ? "active" : "")"
-                                            @onclick="@(() => SheetMusicPartSelected(part))">
+                                    class="dropdown-item @(SheetMusicPart == part ? "active" : "")"
+                                    @onclick="@(() => SheetMusicPartSelected(part))">
                                         @part
                                     </a>
                                 </li>
@@ -65,18 +65,18 @@
                     </div>
 
                     <button type="button" class="ms-1 btn btn-sm @(Model.User.preferences.hideChords ? "btn-danger" : "btn-success")"
-                            @onclick="ToggleChords">
+                    @onclick="ToggleChords">
                         @Text.Chords
                     </button>
 
                     if (!Model.User.preferences.hideChords) {
                         <button type="button"
-                                class="ms-1 btn btn-sm btn-secondary dropdown-toggle"
-                                data-toggle="dropdown"
-                                role="button"
-                                id="dropdownMenuButtonCapo"
-                                data-bs-toggle="dropdown"
-                                aria-expanded="false">
+                        class="ms-1 btn btn-sm btn-secondary dropdown-toggle"
+                        data-toggle="dropdown"
+                        role="button"
+                        id="dropdownMenuButtonCapo"
+                        data-bs-toggle="dropdown"
+                        aria-expanded="false">
                             @((MarkupString)CapoText(Capo))
                         </button>
                         <ul class="dropdown-menu dopdown-menu-capo" aria-labelledby="dropdownMenuButtonCapo">
@@ -84,8 +84,8 @@
                                 int capoValue = x;
                                 <li>
                                     <a href="javascript:void('0');"
-                                       class="dropdown-item @(capoValue == Capo ? "active" : "")"
-                                       @onclick="@(() => CapoChanged(capoValue))">
+                                    class="dropdown-item @(capoValue == Capo ? "active" : "")"
+                                    @onclick="@(() => CapoChanged(capoValue))">
                                         @((MarkupString)CapoLabel(capoValue))
                                     </a>
                                 </li>
@@ -95,12 +95,12 @@
                 }
 
                 <button type="button"
-                        class="btn btn-sm btn-secondary dropdown-toggle"
-                        data-toggle="dropdown"
-                        role="button"
-                        id="dropdownMenuButtonTheme"
-                        data-bs-toggle="dropdown"
-                        aria-expanded="false">
+                class="btn btn-sm btn-secondary dropdown-toggle"
+                data-toggle="dropdown"
+                role="button"
+                id="dropdownMenuButtonTheme"
+                data-bs-toggle="dropdown"
+                aria-expanded="false">
                     <span title="@Text.Theme: @CurrentThemeLabel">@((MarkupString)CurrentThemeIcon)</span>
                 </button>
                 <ul class="dropdown-menu" aria-labelledby="dropdownMenuButtonTheme">
@@ -121,6 +121,45 @@
                     </li>
                 </ul>
             </div>
+
+            if (!Model.User.preferences.autoFollow && AllSetListSongs.Count > 1) {
+                <div class="mt-2 mb-2 sticky-tablet-buttons">
+                    <table style="width:100%;">
+                        <tbody>
+                            <tr>
+                                <td style="width:50%;">
+                                    @if (AllSetListSongsCurrentIndex > 0) {
+                                        var previousSong = AllSetListSongs[AllSetListSongsCurrentIndex - 1];
+                                        if (previousSong != null) {
+                                            var previousSongItem = Tools.SetListItemAsSong(previousSong);
+                                            if (previousSongItem != null) {
+                                                <button type="button" class="ms-2 btn btn-secondary" @onclick="@(() => SetActiveSong(previousSong.id))">
+                                                    <Icon Name="Previous" />
+                                                    @previousSongItem.title
+                                                </button>
+                                            }
+                                        }
+                                    }
+                                </td>
+                                <td style="width:50%;" align="right">
+                                    @if (AllSetListSongsCurrentIndex < AllSetListSongs.Count - 1) {
+                                        var nextSong = AllSetListSongs[AllSetListSongsCurrentIndex + 1];
+                                        if (nextSong != null) {
+                                            var nextSongItem = Tools.SetListItemAsSong(nextSong);
+                                            if (nextSongItem != null) {
+                                                <button type="button" class="me-2 btn btn-secondary" @onclick="@(() => SetActiveSong(nextSong.id))">
+                                                    @nextSongItem.title
+                                                    <Icon Name="Next" />
+                                                </button>
+                                            }
+                                        }
+                                    }
+                                </td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+            }
 
             if (_setList.items.Any()) {
                 switch(_currentItemType) {
@@ -148,9 +187,11 @@
                                 Helpers.ShowChordsAsNashvilleNumbers = false;
                             }
 
-                            <div class="song-title">@_song.title</div>
+                            <div class="tablet-song-title-sticky">
+                                <div class="song-title @(_activeItemPart > 0 ? "faded" : "")">@_song.title</div>
+                            </div>
 
-                            if (!String.IsNullOrWhiteSpace(_song.artist)) {
+                            @if (!String.IsNullOrWhiteSpace(_song.artist)) {
                                 <div class="song-author">@_song.artist</div>
                             }
 
@@ -323,6 +364,8 @@
     protected int? _activeItemPart = null;
     protected Guid? _selectedItem = null;
 
+    protected Guid? _viewingItem = null;
+
     protected override async Task OnInitializedAsync()
     {
         if (!Model.Subscribers_OnChange.Contains(_pageName)) {
@@ -388,6 +431,7 @@
                             _activeItem = selectedItem.id;
                             _activeItemPart = 0;
                             _selectedItem = selectedItem.id;
+                            _viewingItem = selectedItem.id;
 
                             Model.Song = song;
                             await Helpers.ResetPadding();
@@ -405,6 +449,35 @@
         if (Model.View == _pageName) {
             StateHasChanged();
             RenderCSS();
+        }
+    }
+
+    protected List<setListItem> AllSetListSongs
+    {
+        get {
+            var output = new List<setListItem>();
+
+            if (_setList.items.Any(x => x.type == setListItemType.song)) {
+                output = _setList.items.Where(x => x.type == setListItemType.song).ToList();
+            }
+
+            return output;
+        }
+    }
+
+    protected int AllSetListSongsCurrentIndex
+    {
+        get {
+            int output = 0;
+
+            if (AllSetListSongs.Count > 0) {
+                var currentSong = AllSetListSongs.FirstOrDefault(x => x.id == _viewingItem);
+                if (currentSong != null) {
+                    output = AllSetListSongs.IndexOf(currentSong);
+                }
+            }
+
+            return output;
         }
     }
 
@@ -565,6 +638,20 @@
         Model.User = user;
     }
 
+    protected async Task SetActiveSong(Guid itemId)
+    {
+        var songItem = _setList.items.FirstOrDefault(x => x.id == itemId);
+        if(songItem != null) {
+            _currentItemType = setListItemType.song;
+            _song = Tools.SetListItemAsSong(songItem);
+            _viewingItem = itemId;
+
+            await Helpers.ScrollToTop();
+
+            StateHasChanged();
+        }
+    }
+
     protected sheetMusic? SheetMusicItem {
         get {
             sheetMusic? output = null;
@@ -658,6 +745,7 @@
         _setList.activeItem = _activeItem;
         _setList.activeItemPart = _activeItemPart;
         _setList.selectedItem = _selectedItem;
+        _viewingItem = _activeItem;
 
         // Console.WriteLine("UpdateSetList: " + _setList.activeItem.ToString() + " - " + _setList.activeItemPart.ToString() + " - " + _selectedItem.ToString());
 

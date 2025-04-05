@@ -8,6 +8,7 @@
 	<ApplicationIcon>favicon.ico</ApplicationIcon>
 	<SignAssembly>False</SignAssembly>
 	<AssemblyOriginatorKeyFile></AssemblyOriginatorKeyFile>
+	<UserSecretsId>8421aac1-3335-4c03-869f-cbb05c194ab4</UserSecretsId>
   </PropertyGroup>
 
   <PropertyGroup Condition=" '$(Configuration)' == 'Release' ">

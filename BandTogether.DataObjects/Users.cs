@@ -16,6 +16,7 @@ public class userPreferences
     public bool autoFollow { get; set; } = true;
     public string cultureCode { get; set; } = "en-US";
     public bool editMode { get; set; }
+    public string? filterSongbooks { get; set; }
     public bool hideChords { get; set; } = false;
     public string settingsPreviewSize { get; set; } = "m";
     public string settingsTab { get; set; } = "";

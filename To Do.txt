@@ -2,4 +2,4 @@ Add support for running the app in a Docker container.
 
 Give the presenter the ability to change user settings for them.
 
-Add the ability to disable individual elements of certain set list item types (songs, slideshows).
+When auto-follow is off in the tablet view allow moving between songs in the set list.

@@ -49,6 +49,13 @@ schools, etc. The major features are:
 
 ## Getting Started with BandTogether
 
+### Install
+
+The available downloads are published as self-contained .NET applications for Windows and Mac.
+If you want to run this application as a standard hosted web application, such as on IIS
+on a Windows server, you could download the source code and publish it as a standard web application.
+The following instructions are for the self-contained applications.
+
 ### Install - Windows
 
 Download and unzip the files to a location on a computer that will be used to run the app.
@@ -133,6 +140,10 @@ and a sample set list will be created and will include samples of most set list 
 If you wish to force the URL that the app will run as you can modify the LaunchUrl
 setting in the appsettings.json file. If this is left empty the app will attempt to run
 on http://0.0.0.0:5000 for windows and http://localhost:5000 for Mac.
+
+You can also specify a different data folder path in the appsettings.json file by setting
+the value of the DataPath setting to the path you wish to use. This will be used only
+if a data folder is not specified on the command line when starting the application.
 
 ### Language
 

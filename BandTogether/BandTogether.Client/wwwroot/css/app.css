@@ -1503,3 +1503,18 @@ body.dark .blazor-context-menu {
     width:100%;
     height: calc(100vh - 44px);
 }
+
+.sticky-tablet-buttons {
+    position: sticky;
+    top: 45px;
+    z-index:10;
+}
+
+.tablet-song-title-sticky {
+    position:sticky;
+    top: 37px;
+}
+
+.tablet-song-title-sticky .song-title.faded {
+    opacity:0.25;
+}

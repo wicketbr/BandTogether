@@ -420,12 +420,12 @@
                                 var setListItems = Model.SetList.items.Where(x => x.id != Guid.Empty).ToList();
 
                                 <SortableList
-                                Id="sortable-list"
-                                Items="setListItems"
-                                OnUpdate="SetListSorted"
-                                Context="item"
-                                Group="sort-share"
-                                Pull="clone" >
+                                        Id="sortable-list"
+                                        Items="setListItems"
+                                        OnUpdate="SetListSorted"
+                                        Context="item"
+                                        Group="sort-share"
+                                        Pull="clone" >
                                     <SortableItemTemplate>
                                         @{
                                             var selected = item.id == Model.SetList.selectedItem;
@@ -603,12 +603,39 @@
                                 }
                             </span>
 
+                            <div class="input-group mt-2 mb-2">
+                                <input id="filter-songbooks" type="text" class="form-control" placeholder="@Text.FilterSongbooks" @bind="Model.User.preferences.filterSongbooks" @bind:event="oninput" />
+                                <span class="input-group-text" 
+                                        title="@Text.Clear"
+                                        disabled="@(String.IsNullOrWhiteSpace(Model.User.preferences.filterSongbooks))"
+                                        @onclick="@(() => { Model.User.preferences.filterSongbooks = null; StateHasChanged(); })">
+                                    <Icon Name="Clear" />
+                                </span>
+                            </div>
+
                             @foreach(var songbook in Model.SongBooks.OrderBy(x => x.name)) {
                                 bool saveRequired = songbook.saveRequired.HasValue && songbook.saveRequired.Value;
 
-                                var songCount = " <span class=\"songbook-song-count\">(" + songbook.songs.Count + " " + 
-                                    (songbook.songs.Count > 1 ? Text.Songs : Text.Song) +
-                                    ")</span>";
+                                var songbookSongs = songbook.songs.OrderBy(x => x.title).ThenBy(x => x.artist).ToList();
+
+                                var songCount = String.Empty;
+                                int totalSongs = songbookSongs.Count;
+
+                                if (!String.IsNullOrWhiteSpace(Model.User.preferences.filterSongbooks)) {
+                                    var filter = Model.User.preferences.filterSongbooks.ToLower();
+                                    songbookSongs = songbookSongs.Where(x =>
+                                            (x.title != null && x.title.ToLower().Contains(filter)) ||
+                                            (x.content != null && x.content.ToLower().Contains(filter))
+                                        ).ToList();
+
+                                    songCount = " <span class=\"songbook-song-count\">(" + songbookSongs.Count + "/" + totalSongs + " " +
+                                        (totalSongs > 1 ? Text.Songs : Text.Song) +
+                                        ")</span>";
+                                } else {
+                                    songCount = " <span class=\"songbook-song-count\">(" + totalSongs + " " +
+                                        (totalSongs > 1 ? Text.Songs : Text.Song) +
+                                        ")</span>";
+                                }
 
                                 var songbookName = saveRequired 
                                     ? "*" + songbook.name + songCount + "<span class=\"save-required\">" + Text.Unsaved + "</span>"
@@ -643,82 +670,48 @@
                                             }
                                         }
 
-                                        var songbookSongs = songbook.songs.OrderBy(x => x.title).ThenBy(x => x.artist).ToList();
+                                        <SortableList
+                                        Id="@("songbook-" + songbook.id)"
+                                        Group="sort-share"
+                                        Put="false"
+                                        Sort="false"
+                                        Items="@songbookSongs"
+                                        Context="song"
+                                        OnRemove="@(((int oldIndex, int newIndex) indices) => SongMovedToSetList(indices, songbook))"
+                                        >
+                                            <SortableItemTemplate>
+                                                @{
+                                                    var songDisplay = song.title;
 
-                                        bool enableDragging = true;
-                                        if (enableDragging) {
-                                            <SortableList
-                                            Id="@("songbook-" + songbook.id)"
-                                            Group="sort-share"
-                                            Put="false"
-                                            Sort="false"
-                                            Items="@songbookSongs"
-                                            Context="song"
-                                            OnRemove="@(((int oldIndex, int newIndex) indices) => SongMovedToSetList(indices, songbook))"
-                                            >
-                                                <SortableItemTemplate>
-                                                    @{
-                                                        var songDisplay = song.title;
-
-                                                        if (song.saveRequired.HasValue && song.saveRequired.Value) {
-                                                            songDisplay = "*" + song.title;
-                                                        }
-
-                                                        bool selected = song.id == _selectedSong.songId && song.songBookId == _selectedSong.songBookId;
-
-                                                        string selectedClass = String.Empty;
-
-                                                        if (activeSong != null && activeSong.id == song.id && activeSong.songBookId == song.songBookId) {
-                                                            // This item is selected in the set list, so it gets a special class.
-                                                            selectedClass = "selected-in-setlist";
-                                                        } else if (selected) {
-                                                            selectedClass = "selected";
-                                                        }
-
-                                                        if (!String.IsNullOrWhiteSpace(song.artist)) {
-                                                            songDisplay += " - " + song.artist;
-                                                        }
-
-                                                        <ContextMenuTrigger MenuId="SongContextMenu" Id="@(songbook.id.ToString() + "|" + song.id.ToString())">
-                                                            <div class="pointer auto-overflow songlist-title @selectedClass"
-                                                            title="@songDisplay"
-                                                            @onclick="@(() => SetSong(song))">
-                                                                <Icon Name="Music" Size="Icon.IconSize.Small" /> <span class="song-title">@songDisplay</span>
-                                                            </div>
-                                                        </ContextMenuTrigger>
+                                                    if (song.saveRequired.HasValue && song.saveRequired.Value) {
+                                                        songDisplay = "*" + song.title;
                                                     }
-                                                </SortableItemTemplate>
-                                            </SortableList>
-                                        } else {
-                                            foreach (var song in songbook.songs.OrderBy(x => x.title).ThenBy(x => x.artist)) {
-                                                var songDisplay = song.title;
 
-                                                if (song.saveRequired.HasValue && song.saveRequired.Value) {
-                                                    songDisplay = "*" + song.title;
+                                                    bool selected = song.id == _selectedSong.songId && song.songBookId == _selectedSong.songBookId;
+
+                                                    string selectedClass = String.Empty;
+
+                                                    if (activeSong != null && activeSong.id == song.id && activeSong.songBookId == song.songBookId) {
+                                                        // This item is selected in the set list, so it gets a special class.
+                                                        selectedClass = "selected-in-setlist";
+                                                    } else if (selected) {
+                                                        selectedClass = "selected";
+                                                    }
+
+                                                    if (!String.IsNullOrWhiteSpace(song.artist)) {
+                                                        songDisplay += " - " + song.artist;
+                                                    }
+
+                                                    <ContextMenuTrigger MenuId="SongContextMenu" Id="@(songbook.id.ToString() + "|" + song.id.ToString())">
+                                                        <div class="pointer auto-overflow songlist-title @selectedClass"
+                                                        title="@songDisplay"
+                                                        @onclick="@(() => SetSong(song))">
+                                                            <Icon Name="Music" Size="Icon.IconSize.Small" /> <span class="song-title">@songDisplay</span>
+                                                        </div>
+                                                    </ContextMenuTrigger>
                                                 }
-
-                                                bool selected = song.id == _selectedSong.songId && song.songBookId == _selectedSong.songBookId;
-
-                                                string selectedClass = String.Empty;
-
-                                                if (activeSong != null && activeSong.id == song.id && activeSong.songBookId == song.songBookId) {
-                                                    // This item is selected in the set list, so it gets a special class.
-                                                    selectedClass = "selected-in-setlist";
-                                                } else if (selected) {
-                                                    selectedClass = "selected";
-                                                }
-
-
-                                                if (!String.IsNullOrWhiteSpace(song.artist)) {
-                                                    songDisplay += " - " + song.artist;
-                                                }
-                                                <div class="pointer auto-overflow songlist-title @selectedClass"
-                                                title="@songDisplay"
-                                                @onclick="@(() => SetSong(song))" >
-                                                    <Icon Name="Music" /> @songDisplay
-                                                </div>
-                                            }
-                                        }
+                                            </SortableItemTemplate>
+                                        </SortableList>
                                     }
                                 </div>
                             }
@@ -886,7 +879,7 @@
                                                         string thumbnailColumnClass = "c-" + Model.User.preferences.slideshowThumbnailColumns.ToString();
                                                         var partId = "slideshow-part-" + image.Index.ToString();
 
-                                                        <div class="slideshow-thumbnail @thumbnailColumnClass  @Model.AspectRatio @(image.Index == Model.SetList.activeItemPart ? "active" : "")">
+                                                        <div class="slideshow-thumbnail @thumbnailColumnClass @Model.AspectRatio @(image.Index == Model.SetList.activeItemPart ? "active" : "")">
                                                             <div @onclick="@(() => SetActiveElement(image.Index))">
                                                                 <img src="@Helpers.SlideShowUrl(slideshow.folder, image.Item)" />
                                                             </div>

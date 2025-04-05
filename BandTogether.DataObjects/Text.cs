@@ -101,6 +101,7 @@ public static class Text
     public static string Errors { get; set; } = "The following errors have occurred:";
     public static string Export { get; set; } = "Export";
     public static string ExportTitle { get; set; } = "Export Transposed Song to Clipboard";
+    public static string FilterSongbooks { get; set; } = "Filter Song Books";
     public static string FontColor { get; set; } = "Font Color";
     public static string FontFamily { get; set; } = "Font Family";
     public static string FontLineHeight { get; set; } = "Line Height";
