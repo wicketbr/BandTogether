@@ -51,7 +51,8 @@ public static class CacheStore
     /// <returns>Stored object from cache</returns>
     public static T? GetCachedItem<T>(string cacheKey)
     {
-        dynamic? output = null;
+        //dynamic? output = null;
+        var output = default(T);
         var memCache = MemoryCache.Default;
 
         if (memCache.Contains(cacheKey)) {

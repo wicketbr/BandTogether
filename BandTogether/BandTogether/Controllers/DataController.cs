@@ -183,6 +183,16 @@ public partial class DataController : ControllerBase
     public ActionResult<messages> GetCachedMessages()
     {
         var output = GlobalSettings.CachedMessages;
+
+        if (String.IsNullOrWhiteSpace(output.screenMessage.text) || String.IsNullOrWhiteSpace(output.tabletMessage.text)) {
+            var cached = CacheStore.GetCachedItem<messages>("messages");
+            if (cached != null) {
+                if (!String.IsNullOrWhiteSpace(cached.screenMessage.text) || !String.IsNullOrWhiteSpace(cached.tabletMessage.text)) {
+                    output = cached;
+                }
+            }
+        }
+
         return Ok(output);
     }
 
@@ -191,6 +201,14 @@ public partial class DataController : ControllerBase
     public ActionResult<setList> GetCachedSetList()
     {
         var output = GlobalSettings.CachedSetList;
+
+        if (!output.items.Any()) {
+            var cached = CacheStore.GetCachedItem<setList>("setlist");
+            if (cached != null && cached.items.Any()) {
+                output = cached;
+            }
+        }
+
         return Ok(output);
     }
 
@@ -391,7 +409,7 @@ public partial class DataController : ControllerBase
     [Route("~/api/SetCachedSetList")]
     public ActionResult<booleanResponse> SetCachedSetList(setList setlist)
     {
-        GlobalSettings.CachedSetList = setlist;
+        CacheStore.SetCacheItem("setlist", setlist);
         return Ok(new booleanResponse { result = true });
     }
 

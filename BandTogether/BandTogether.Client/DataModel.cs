@@ -1094,7 +1094,7 @@ public class BlazorDataModel
     /// </summary>
     public string SongKey {
         get {
-            return _Song.key;
+            return !String.IsNullOrWhiteSpace(_Song.key) ? _Song.key : String.Empty;
         }
     }
 

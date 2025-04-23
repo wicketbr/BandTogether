@@ -1,4 +1,4 @@
-namespace BandTogether;
+﻿namespace BandTogether;
 
 /// <summary>
 /// This static class is used to persist a few settings about the startup state of the application.

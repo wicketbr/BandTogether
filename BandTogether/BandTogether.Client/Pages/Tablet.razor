@@ -597,7 +597,8 @@
         // We will update our local copy of the set list, but not the active items unless we are auto-following.
         RenderCSS();
 
-        _setList.items = setList.items;
+        //_setList.items = setList.items;
+        _setList = setList;
         _activeItem = setList.activeItem;
         _activeItemPart = setList.activeItemPart;
         _selectedItem = setList.selectedItem;

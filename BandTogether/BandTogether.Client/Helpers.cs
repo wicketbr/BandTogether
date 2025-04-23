@@ -1590,7 +1590,7 @@ public static class Helpers
     /// </summary>
     /// <param name="lyrics"></param>
     /// <returns></returns>
-    public static string HyphenatedLyricsToTable(string? lyrics)
+    public static string HyphenatedLyricsToTable(string? lyrics, bool atStart)
     {
         string output = "";
 
@@ -1603,8 +1603,11 @@ public static class Helpers
                 var items = lyrics.Split('-');
                 foreach (var item in items) {
                     if (!String.IsNullOrWhiteSpace(item)) {
-                        //output += "<td>" + item.Trim() + "</td><td class=\"hyphen\"><div class=\"hyphen\"></div></td>";
-                        output += "<td class=\"hyphen\"><div class=\"hyphen\"></div></td><td>" + item.Trim() + "</td>";
+                        if (atStart) {
+                            output += "<td class=\"hyphen\"><div class=\"hyphen\"></div></td><td>" + item.Trim() + "</td>";
+                        } else {
+                            output += "<td>" + item.Trim() + "</td><td class=\"hyphen\"><div class=\"hyphen\"></div></td>";
+                        }
                     }
                 }
             }
@@ -2249,11 +2252,19 @@ public static class Helpers
             foreach (var item in lyrics) {
                 string lyric = item.Replace(" ", "&nbsp;");
 
-                if (lyric.Contains("-")) {
-                    output += "<td class=\"songformat-lyric hyphenated\">" + HyphenatedLyricsToTable(lyric) + "</td>";
+                if (lyric.StartsWith("-")) {
+                    output += "<td class=\"songformat-lyric hyphenated\">" + HyphenatedLyricsToTable(lyric, true) + "</td>";
+                } else if (lyric.EndsWith("-")) {
+                    output += "<td class=\"songformat-lyric hyphenated\">" + HyphenatedLyricsToTable(lyric, false) + "</td>";
                 } else {
                     output += "<td class=\"songformat-lyric\">" + lyric + "</td>";
                 }
+
+                //if (lyric.Contains("-")) {
+                //    output += "<td class=\"songformat-lyric hyphenated\">" + HyphenatedLyricsToTable(lyric) + "</td>";
+                //} else {
+                //    output += "<td class=\"songformat-lyric\">" + lyric + "</td>";
+                //}
             }
         }
 
@@ -3203,26 +3214,49 @@ public static class Helpers
                         export += lyrics;
                     }
 
-                    string remainingLyrics = String.Empty;
-                    if (x < elementCount - 1) {
-                        for (int y = x + 1; y < elementCount; y++) {
-                            remainingLyrics += lyricsLine[y];
-                        }
-                    }
+                    // Hyphenation is too unpredictable at this point, so don't do it for now.
+                    // It is easy to see where they should go, but from a coding perspective it
+                    // is hard to tell if the break between parts of a word is going to be big
+                    // enough to warrant a hyphen. It all depends on the length of the rendered
+                    // chord and the length of the part of the word. Some breaks leave no space
+                    // at all, while others leave quite a large space. Until I can figure out
+                    // a good way to know when a hyphen would be needed I am going to omit them,
+                    // as they are not rendering consistently enough.
 
-                    bool nextCharIsLetter = false;
-                    string nextCharacter = String.Empty;
+                    //string remainingLyrics = String.Empty;
+                    //if (x < elementCount - 1) {
+                    //    for (int y = x + 1; y < elementCount; y++) {
+                    //        remainingLyrics += lyricsLine[y];
+                    //    }
+                    //}
 
-                    if (!String.IsNullOrWhiteSpace(remainingLyrics)) {
-                        nextCharacter = remainingLyrics.Substring(0, 1);
-                        if (nextCharacter.ToLower() != nextCharacter.ToUpper()) {
-                            nextCharIsLetter = true;
-                        }
-                    }
+                    //bool nextCharIsLetter = false;
+                    //string nextCharacter = String.Empty;
 
-                    if (previousLyrics != String.Empty && !previousLyrics.EndsWith(" ") && !previousLyrics.EndsWith("-") && nextCharIsLetter) {
-                        lyrics = "-" + lyrics;
-                    }
+                    //if (!String.IsNullOrWhiteSpace(remainingLyrics)) {
+                    //    nextCharacter = remainingLyrics.Substring(0, 1);
+                    //    if (nextCharacter.ToLower() != nextCharacter.ToUpper()) {
+                    //        nextCharIsLetter = true;
+                    //    }
+                    //}
+
+                    //if (!String.IsNullOrWhiteSpace(previousLyrics) && !previousLyrics.EndsWith(" ") && !previousLyrics.EndsWith("-") && nextCharIsLetter) {
+                    //    lyrics = "-" + lyrics;
+                    //    if (x > 0) {
+                    //        newLyrics[x - 1] = newLyrics[x - 1] + "-";
+                    //    }
+                    //}
+
+                    //if (x < elementCount - 1 && !String.IsNullOrWhiteSpace(lyrics) && !String.IsNullOrWhiteSpace(lyricsLine[x + 1])) {
+                    //    // If this line ends with a character and the next line starts with a character then add dashes.
+                    //    var lastCharacterInThisLine = lyrics.Last();
+                    //    var firstCharacterInNextLine = lyricsLine[x + 1].FirstOrDefault();
+
+                    //    if (lastCharacterInThisLine.ToString().ToLower() != lastCharacterInThisLine.ToString().ToUpper() && firstCharacterInNextLine.ToString().ToLower() != firstCharacterInNextLine.ToString().ToUpper()) {
+                    //        lyrics += "-";
+                    //        lyricsLine[x + 1] = "-" + lyricsLine[x + 1];
+                    //    }
+                    //}
 
                     newChords.Add(chord);
                     newLyrics.Add(lyrics);
@@ -4075,7 +4109,7 @@ public static class Helpers
             if (steps != 0) {
                 List<string> transpose = new List<string>();
 
-                switch (key.ToUpper()) {
+                switch (key) {
                     case "Ab":
                     case "A♭":
                     case "G#":

@@ -13,13 +13,15 @@ public class signalRhub : Hub
             GlobalSettings.CachedMessages.tabletMessage = msg;
         }
 
+        CacheStore.SetCacheItem("messages", GlobalSettings.CachedMessages);
+
         await Clients.All.SendAsync("message", msg);
     }
 
     public async Task SetList(setList setlist)
     {
         GlobalSettings.CachedSetList = setlist;
-
+        CacheStore.SetCacheItem("setlist", setlist);
         await Clients.All.SendAsync("setlist", setlist);
     }
 

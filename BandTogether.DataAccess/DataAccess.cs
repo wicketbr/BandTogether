@@ -64,9 +64,9 @@ public class DataAccess : IDataAccess
 {
     private string _applicationPath = String.Empty;
     private string _basePath = String.Empty;
-    private DateOnly _released = DateOnly.FromDateTime(Convert.ToDateTime("3/29/2025"));
+    private DateOnly _released = DateOnly.FromDateTime(Convert.ToDateTime("4/23/2025"));
     private IServiceProvider? _serviceProvider;
-    private string _version = "1.0.7";
+    private string _version = "1.0.8";
 
     private string _folderAudio = String.Empty;
     private string _folderBackgrounds = String.Empty;
@@ -187,7 +187,6 @@ public class DataAccess : IDataAccess
                 System.IO.Directory.CreateDirectory(_folderSetLists);
                 CreateDefaultSetList();
             }
-
         }
 
         GlobalSettings.StartupComplete = true;
