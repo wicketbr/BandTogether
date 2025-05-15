@@ -1908,6 +1908,16 @@ public static class Helpers
         return value.HasValue ? value.Value : 0;
     }
 
+    public static int IntValue(string? value) {
+        int output = 0;
+        if (!String.IsNullOrWhiteSpace(value)) {
+            try {
+                output = Convert.ToInt32(value);
+            } catch { }
+        }
+        return output;
+    }
+
     /// <summary>
     /// Indicates if the value contains a valid DateTime.
     /// </summary>

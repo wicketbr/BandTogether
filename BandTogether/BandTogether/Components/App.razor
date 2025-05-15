@@ -688,59 +688,53 @@
         }
 
         function OnKeyDown(event) {
+            // If the browser body has the focus and the F5 key is pressed, don't refresh the browser.
+            if (event.key == "f5" || event.key == "F5") {
+                event.preventDefault();
+                return;
+            }
+
             if (dialogOpen) {
                 return;
             }
 
             var sendKeyup = false;
 
-            switch(activePageSection) {
-                case "setlist":
-                    if (event.ctrlKey || event.metaKey || event.altKey) {
-                        switch (event.key) {
-                            case "c":
-                            case "v":
-                            case "x":
-                                sendKeyup = true;
-                                break;
-                        }
-                    } else {
-                        switch(event.key) {
-                            case "ArrowDown":
-                            case "ArrowUp":
-                            case "Delete":
-                            case "Enter":
-                            case "Tab":
-                                sendKeyup = true;
-                                break;
-                        }
-                    }
-                    break;
+            //console.log("Key", event.key);
 
-                case "setlist-element":
-                    if (editMode == false) {
-                        switch(event.key) {
-                            case "ArrowDown":
-                            case "ArrowLeft":
-                            case "ArrowRight":
-                            case "ArrowUp":
-                            case "PageDown":
-                            case "PageUp":
-                            case "Tab":
-                                sendKeyup = true;
-                                break;
-                        }
-                    } else {
-                        if (activeItemType == "song" && (event.ctrlKey || event.metaKey || event.altKey)) {
-                            switch(event.key) {
-                                case "ArrowDown":
-                                case "ArrowLeft":
-                                case "ArrowRight":
-                                case "ArrowUp":
+            // First, the L key toggles the lyrics off and on whenever we are not in edit mode.
+            if (editMode == false && (event.key == "l" || event.key == "L" || event.key == "pause" || event.key == "Pause" || event.key == "b" || event.key == "B")) {
+                sendKeyup = true;
+            } else {
+                switch(activePageSection) {
+                    case "setlist":
+                        if (event.ctrlKey || event.metaKey || event.altKey) {
+                            switch (event.key) {
+                                case "c":
+                                case "v":
+                                case "x":
                                     sendKeyup = true;
                                     break;
                             }
                         } else {
+                            switch(event.key) {
+                                case "ArrowDown":
+                                case "ArrowUp":
+                                case "Delete":
+                                case "Enter":
+                                case "Tab":
+                                case "l":
+                                case "L":
+                                case "pause":
+                                case "Pause":
+                                    sendKeyup = true;
+                                    break;
+                            }
+                        }
+                        break;
+
+                    case "setlist-element":
+                        if (editMode == false) {
                             switch(event.key) {
                                 case "ArrowDown":
                                 case "ArrowLeft":
@@ -749,12 +743,35 @@
                                 case "PageDown":
                                 case "PageUp":
                                 case "Tab":
+                                    sendKeyup = true;
                                     break;
                             }
+                        } else {
+                            if (activeItemType == "song" && (event.ctrlKey || event.metaKey || event.altKey)) {
+                                switch(event.key) {
+                                    case "ArrowDown":
+                                    case "ArrowLeft":
+                                    case "ArrowRight":
+                                    case "ArrowUp":
+                                        sendKeyup = true;
+                                        break;
+                                }
+                            } else {
+                                switch(event.key) {
+                                    case "ArrowDown":
+                                    case "ArrowLeft":
+                                    case "ArrowRight":
+                                    case "ArrowUp":
+                                    case "PageDown":
+                                    case "PageUp":
+                                    case "Tab":
+                                        break;
+                                }
+                            }
                         }
-                    }
 
-                    break;
+                        break;
+                }
             }
 
             if (sendKeyup) {

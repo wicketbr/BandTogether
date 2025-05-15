@@ -141,7 +141,7 @@
             if (!ignoreTheme) {
                 await ThemeWatcher();
             }
-            
+
             MessageWatcher();
             await SavePendingUserPreferences();
         }, new System.Threading.AutoResetEvent(false), 0, 500);
@@ -282,7 +282,7 @@
             "buffering", 
             "cued" };
 
-        
+
         Console.WriteLine("YouTube Player State Change: " + playStates[state + 1] + " (" + state + ")");
         //Model.OnYouTubePlayerStateChange(state);
         Model.YouTubePlayingStatus = state;
@@ -439,34 +439,38 @@
     {
         //await System.Threading.Tasks.Task.Delay(0);
         if (setlist != null) {
-            Model.SetList = Helpers.ReloadSetListItemsFromJson(setlist);
+            if (Helpers.StringLower(setlist.fileName) == "videopsalm_api_call") {
+                // Ignore this update, it only applied to the tablet view.
+            } else {
+                Model.SetList = Helpers.ReloadSetListItemsFromJson(setlist);
 
-            // If there are any songs in the set list this push may include updates to them.
-            foreach(var item in Model.SetList.items) {
-                if (item.id == setlist.activeItem) {
-                    // Keep the model updated with the current component type so background processing
-                    // in components can be disabled when that component type is not being rendered.
-                    Model.CurrentComponentType = item.type;
-                }
+                // If there are any songs in the set list this push may include updates to them.
+                foreach(var item in Model.SetList.items) {
+                    if (item.id == setlist.activeItem) {
+                        // Keep the model updated with the current component type so background processing
+                        // in components can be disabled when that component type is not being rendered.
+                        Model.CurrentComponentType = item.type;
+                    }
 
-                if (item.type == setListItemType.song && item.item != null) {
-                    var song = (song)item.item;
+                    if (item.type == setListItemType.song && item.item != null) {
+                        var song = (song)item.item;
 
-                    if (song != null) {
-                        var songbook = Model.SongBooks.FirstOrDefault(x => x.id == song.songBookId);
-                        if (songbook != null) {
-                            var songInSongBook = songbook.songs.FirstOrDefault(x => x.id == song.id);
-                            if (songInSongBook != null) {
-                                if (Helpers.SerializeObject(song) != Helpers.SerializeObject(songInSongBook)) {
-                                    songInSongBook = song;
+                        if (song != null) {
+                            var songbook = Model.SongBooks.FirstOrDefault(x => x.id == song.songBookId);
+                            if (songbook != null) {
+                                var songInSongBook = songbook.songs.FirstOrDefault(x => x.id == song.id);
+                                if (songInSongBook != null) {
+                                    if (Helpers.SerializeObject(song) != Helpers.SerializeObject(songInSongBook)) {
+                                        songInSongBook = song;
 
-                                    // If this is the current song in the view pane then it needs to be update there as well.
-                                    if (Model.Song.id == song.id) {
-                                        Model.Song = song;
+                                        // If this is the current song in the view pane then it needs to be update there as well.
+                                        if (Model.Song.id == song.id) {
+                                            Model.Song = song;
 
-                                        if (Model.User.preferences.editMode) {
-                                            // If the user is in edit mode need to reload the Monoco editor.
+                                            if (Model.User.preferences.editMode) {
+                                                // If the user is in edit mode need to reload the Monoco editor.
 
+                                            }
                                         }
                                     }
                                 }

@@ -7,6 +7,7 @@
     <NoDefaultLaunchSettingsFile>true</NoDefaultLaunchSettingsFile>
     <StaticWebAssetProjectMode>Default</StaticWebAssetProjectMode>
     <UserSecretsId>3bb8a889-0bd9-4430-8a05-dffc49a4f59d</UserSecretsId>
+    <ApplicationIcon>wwwroot\favicon.ico</ApplicationIcon>
 </PropertyGroup>
 
   <ItemGroup>

@@ -20,8 +20,14 @@ public class signalRhub : Hub
 
     public async Task SetList(setList setlist)
     {
-        GlobalSettings.CachedSetList = setlist;
-        CacheStore.SetCacheItem("setlist", setlist);
+        //var json = System.Text.Json.JsonSerializer.Serialize(setlist);
+
+        // Only cache the item if this didn't come from VideoPsalm.
+        if (Helpers.StringLower(setlist.fileName) != "videopsalm_api_call") {
+            GlobalSettings.CachedSetList = setlist;
+            CacheStore.SetCacheItem("setlist", setlist);
+        }
+            
         await Clients.All.SendAsync("setlist", setlist);
     }
 

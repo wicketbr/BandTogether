@@ -1294,6 +1294,19 @@
         bool editMode = Model.User.preferences.editMode;
         int activePart = Model.SetList.activeItemPart.HasValue ? (int)Model.SetList.activeItemPart : 0;
 
+        // The key to toggle showing or hiding lyrics can be used no matter what the active page section is.
+        // This is done using the pause/break key.
+        if (keyboardEvent.key == "l" || keyboardEvent.key == "L" || keyboardEvent.key == "pause" || keyboardEvent.key == "Pause") {
+            await ToggleHideText();
+            return;
+        }
+
+        if (keyboardEvent.key == "b" || keyboardEvent.key == "B") {
+            await ToggleBlankScreen();
+            return;
+        }
+
+
         // Handlers are different depending on which element has the focus.
         switch (Helpers.StringLower(_activePageSection)) {
             case "setlist":
@@ -2354,6 +2367,11 @@
     }
 
     protected async void ProcessSignalRSetList(setList setlist) {
+        if (Helpers.StringLower(setlist.fileName) == "videopsalm_api_call") {
+            // This was a special case for the VideoPsalm API, so ignore that in the main app, as it's only applicable to the tablets.
+            return;
+        }
+
         if (Model.User.preferences.editMode) {
             await EditorUpdatedApplyStyles();
         }

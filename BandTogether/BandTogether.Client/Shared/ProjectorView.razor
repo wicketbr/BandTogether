@@ -232,6 +232,10 @@
 
     protected async void ProcessSignalRSetList(setList setlist)
     {
+        if (Helpers.StringLower(setlist.fileName) == "videopsalm_api_call") {
+            return;
+        }
+
         _newActiveItemPart = setlist.activeItemPart;
         _newActiveItem = setlist.activeItem;
         _newItemStyle = null;
