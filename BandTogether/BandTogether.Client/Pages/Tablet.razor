@@ -122,13 +122,13 @@
                 </ul>
             </div>
 
-            if (!Model.User.preferences.autoFollow && AllSetListSongs.Count > 1) {
+            if (AllSetListSongs.Count > 1) {
                 <div class="mt-2 mb-2 sticky-tablet-buttons">
                     <table style="width:100%;">
                         <tbody>
                             <tr>
                                 <td style="width:50%;">
-                                    @if (AllSetListSongsCurrentIndex > 0) {
+                                    @if (!Model.User.preferences.autoFollow && AllSetListSongsCurrentIndex > 0) {
                                         var previousSong = AllSetListSongs[AllSetListSongsCurrentIndex - 1];
                                         if (previousSong != null) {
                                             var previousSongItem = Tools.SetListItemAsSong(previousSong);
@@ -147,10 +147,17 @@
                                         if (nextSong != null) {
                                             var nextSongItem = Tools.SetListItemAsSong(nextSong);
                                             if (nextSongItem != null) {
-                                                <button type="button" class="me-2 btn btn-secondary" @onclick="@(() => SetActiveSong(nextSong.id))">
-                                                    @nextSongItem.title
-                                                    <Icon Name="Next" />
-                                                </button>
+                                                if (!Model.User.preferences.autoFollow) {
+                                                    <button type="button" class="me-2 btn btn-secondary" @onclick="@(() => SetActiveSong(nextSong.id))">
+                                                        @nextSongItem.title
+                                                        <Icon Name="Next" />
+                                                    </button>
+                                                } else {
+                                                    <button type="button" class="me-2 btn btn-secondary" disabled>
+                                                        @nextSongItem.title
+                                                        <Icon Name="Next" />
+                                                    </button>
+                                                }
                                             }
                                         }
                                     }

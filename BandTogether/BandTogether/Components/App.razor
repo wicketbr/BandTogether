@@ -590,7 +590,7 @@
         }
 
         function RenderPDF(path, element) {
-            console.log("RenderPDF", path, element);
+            //console.log("RenderPDF", path, element);
             PDFObject.embed(path, "#" + element);
         }
 
@@ -599,7 +599,7 @@
             if (h > 90) {
                 var zoomableArea = document.getElementById("zoomable-area");
                 if (zoomableArea != undefined && zoomableArea != null) {
-                    console.log("zoomableArea", zoomableArea.offsetHeight);
+                    //console.log("zoomableArea", zoomableArea.offsetHeight);
 
                     var afterSongPadding = document.getElementById("after-song-padding");
                     if (afterSongPadding != undefined && afterSongPadding != null) {
@@ -694,89 +694,71 @@
                 return;
             }
 
-            if (dialogOpen) {
-                return;
+            if (dialogOpen || activePageSection == "login" || activePageSection == "top-wrapper") {
+                return; // Prevent further processing if a dialog is open or the active page section is login
             }
 
             var sendKeyup = false;
+            var preventDefault = false;
 
             //console.log("Key", event.key);
 
-            // First, the L key toggles the lyrics off and on whenever we are not in edit mode.
-            if (editMode == false && (event.key == "l" || event.key == "L" || event.key == "pause" || event.key == "Pause" || event.key == "b" || event.key == "B")) {
-                sendKeyup = true;
-            } else {
-                switch(activePageSection) {
-                    case "setlist":
-                        if (event.ctrlKey || event.metaKey || event.altKey) {
-                            switch (event.key) {
-                                case "c":
-                                case "v":
-                                case "x":
-                                    sendKeyup = true;
-                                    break;
-                            }
-                        } else {
-                            switch(event.key) {
-                                case "ArrowDown":
-                                case "ArrowUp":
-                                case "Delete":
-                                case "Enter":
-                                case "Tab":
-                                case "l":
-                                case "L":
-                                case "pause":
-                                case "Pause":
-                                    sendKeyup = true;
-                                    break;
-                            }
+            switch(activePageSection) {
+                case "setlist":
+                    if (event.ctrlKey || event.metaKey || event.altKey) {
+                        switch (event.key) {
+                            case "c":
+                            case "v":
+                            case "x":
+                                preventDefault = true;
+                                sendKeyup = true;
+                                break;
                         }
-                        break;
-
-                    case "setlist-element":
-                        if (editMode == false) {
-                            switch(event.key) {
-                                case "ArrowDown":
-                                case "ArrowLeft":
-                                case "ArrowRight":
-                                case "ArrowUp":
-                                case "PageDown":
-                                case "PageUp":
-                                case "Tab":
-                                    sendKeyup = true;
-                                    break;
-                            }
-                        } else {
-                            if (activeItemType == "song" && (event.ctrlKey || event.metaKey || event.altKey)) {
-                                switch(event.key) {
-                                    case "ArrowDown":
-                                    case "ArrowLeft":
-                                    case "ArrowRight":
-                                    case "ArrowUp":
-                                        sendKeyup = true;
-                                        break;
-                                }
-                            } else {
-                                switch(event.key) {
-                                    case "ArrowDown":
-                                    case "ArrowLeft":
-                                    case "ArrowRight":
-                                    case "ArrowUp":
-                                    case "PageDown":
-                                    case "PageUp":
-                                    case "Tab":
-                                        break;
-                                }
-                            }
+                    } else {
+                        switch(event.key) {
+                            case "ArrowDown":
+                            case "ArrowUp":
+                            case "Delete":
+                            case "Enter":
+                            case "Tab":
+                                sendKeyup = true;
+                                break;
                         }
+                    }
+                    break;
 
-                        break;
-                }
+                case "setlist-element":
+                    if (editMode == false || activeItemType != "song") {
+                        switch(event.key) {
+                            case "ArrowDown":
+                            case "ArrowLeft":
+                            case "ArrowRight":
+                            case "ArrowUp":
+                            case "PageDown":
+                            case "PageUp":
+                            case "Tab":
+                            case "l":
+                            case "L":
+                            case "t":
+                            case "T":
+                            case "pause":
+                            case "Pause":
+                            case "b":
+                            case "B":
+                            case ".":
+                                sendKeyup = true;
+                                break;
+                        }
+                    }
+
+                    break;
             }
 
             if (sendKeyup) {
-                event.preventDefault();
-                    
+                if (preventDefault) {
+                    event.preventDefault();
+                }
+                
                 if (dotNetHelper != null) {
                     var key = event.key;
                     var code = event.code;

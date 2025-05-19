@@ -259,10 +259,9 @@ can be used at this point.
 ### View Area
 
 You can use the arrow keys or the page up/down keys to move between items in the view area.
-When in edit mode and editing a song you can switch parts by double-clicking
-on the part in the editor, or by pressing the CTRL key or OPTION key plus arrow up and down.
-When not in edit mode the "L" key or the "Pause/Break" key will toggle the lyrics on and off
-and the "B" key will toggle the blank screen on and off.
+When in edit mode and editing a song you can switch parts by double-clicking on the part in the editor.
+When not in edit mode the "L" key, the "T" key, or the "Pause/Break" key will toggle the lyrics on and off
+and the "B" key or "." key will toggle the blank screen on and off.
 If you are using a foot pedal to control the software you can assign these keys to the
 various pedals to control the set list using your feet.
 

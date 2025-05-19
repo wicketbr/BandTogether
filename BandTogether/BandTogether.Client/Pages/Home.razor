@@ -604,7 +604,11 @@
                             </span>
 
                             <div class="input-group mt-2 mb-2">
-                                <input id="filter-songbooks" type="text" class="form-control" placeholder="@Text.FilterSongbooks" @bind="Model.User.preferences.filterSongbooks" @bind:event="oninput" />
+                                <input id="filter-songbooks" type="text" class="form-control" 
+                                        placeholder="@Text.FilterSongbooks" 
+                                        @onclick="@(() => Helpers.SetTimeout(() => SetActivePageSection("filter-songbooks"), 200))"
+                                        @bind="Model.User.preferences.filterSongbooks" 
+                                        @bind:event="oninput" />
                                 <span class="input-group-text" 
                                         title="@Text.Clear"
                                         disabled="@(String.IsNullOrWhiteSpace(Model.User.preferences.filterSongbooks))"
@@ -1236,6 +1240,10 @@
         if (Model.Loaded && !_loaded) {
             _loaded = true;
             await Helpers.SetEditMode(Model.User.preferences.editMode);
+
+            if (!Model.LoggedIn) {
+                Helpers.SetTimeout(() => SetActivePageSection("login"), 200);
+            }
         }
     }
 
@@ -1293,19 +1301,6 @@
 
         bool editMode = Model.User.preferences.editMode;
         int activePart = Model.SetList.activeItemPart.HasValue ? (int)Model.SetList.activeItemPart : 0;
-
-        // The key to toggle showing or hiding lyrics can be used no matter what the active page section is.
-        // This is done using the pause/break key.
-        if (keyboardEvent.key == "l" || keyboardEvent.key == "L" || keyboardEvent.key == "pause" || keyboardEvent.key == "Pause") {
-            await ToggleHideText();
-            return;
-        }
-
-        if (keyboardEvent.key == "b" || keyboardEvent.key == "B") {
-            await ToggleBlankScreen();
-            return;
-        }
-
 
         // Handlers are different depending on which element has the focus.
         switch (Helpers.StringLower(_activePageSection)) {
@@ -1373,7 +1368,11 @@
             case "setlist-element":
                 var activeItemPartCount = Model.ActiveItemPartCount;
 
-                if (!editMode) {
+                if (editMode && Model.CurrentComponentType == setListItemType.song) {
+                    // Keyboard navigation is disabled when in edit mode and editing a song.
+                    // The only option here is to double-click the element.
+                } else {
+                    // Not editing a song, so all navigation is allowed.
                     switch(Helpers.StringLower(keyboardEvent.key)) {
                         case "arrowdown":
                         case "arrowright":
@@ -1398,29 +1397,18 @@
                         case "tab":
                             await SetActivePageSection("setlist");
                             break;
-                    }
-                } else if (keyboardEvent.ctrlKey || keyboardEvent.metaKey || keyboardEvent.altKey) {
-                    // In edit mode we will move on CTRL+Arrow keys.
-                    switch(Helpers.StringLower(keyboardEvent.key)) {
-                        case "arrowdown":
-                        case "arrowright":
-                            if (activePart < activeItemPartCount - 1) {
-                                await MoveForward();
-                            } else {
-                                await MoveNext();
-                            }
+
+                        case "l":
+                        case "t":
+                        case "pause":
+                            await ToggleHideText();
                             break;
 
-                        case "arrowup":
-                        case "arrowleft":
-                            if (activePart > 0) {
-                                await MoveBackward();
-                            } else {
-                                await MovePrevious();
-                            }
+                        case "b":
+                        case ".":
+                            await ToggleBlankScreen();
                             break;
                     }
-
                 }
                 break;
         }
@@ -2074,7 +2062,7 @@
 
     protected async Task Logout() 
     {
-        await SetActivePageSection("");
+        Helpers.SetTimeout(() => SetActivePageSection("login"), 200);
 
         await Helpers.ClearLocalStorageItem("UserId");
 
