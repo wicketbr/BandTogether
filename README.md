@@ -289,6 +289,15 @@ to have the ability to show a PDF file. Each song should have its own folder ins
 SheetMusic folder, with individual folders for each instrument part. When users select
 a part for a song that will be remembered as part of their user preferences.
 
+## VideoPsalm Integration
+
+The Tablet view now supports being the stage view for VideoPsalm. If you are using VideoPsalm
+go into the Options and select the Modules area. Check the "connect to a remote stage view app"
+option and enter the URL as the root of your BandTogether URL plus /VideoPsalm
+(eg: http://localhost:5000/VideoPsalm). The Tablet view will show a song shown from VideoPsalm
+when presented from there, and when the BandTogether set list item is updated will
+automatically switch back to the item from BandTogether.
+
 ## Contact
 
 Contact Brad Wickett at [brad@wickett.net](mailto:brad@wickett.net) for assistance.
