@@ -1,6 +1,8 @@
 ﻿@inject IDataAccess data
 @{
     string appVersion = data.Version;
+    string appleTouchIcon = "apple-touch-icon.png";
+    string favicon = "favicon.png";
 }
 <!DOCTYPE html>
 <html lang="en">
@@ -11,7 +13,9 @@
     <meta name="app:released" content="@data.Released" />
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <link rel="icon" type="image/png" href="favicon.png" />
+    <link rel="apple-touch-icon" sizes="180x180" href="@appleTouchIcon">
+    <link rel="icon" type="image/png" href="@favicon" />
+    <link rel="manifest" href="/site.webmanifest">
     <base href="/" />
     <link rel="stylesheet" href="_content/Radzen.Blazor/css/material-base.css?v=@appVersion" />
     <link rel="stylesheet" href="_content/Blazor.ContextMenu/blazorContextMenu.min.css?v=@appVersion" />

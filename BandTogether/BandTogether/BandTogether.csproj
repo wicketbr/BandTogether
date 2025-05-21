@@ -31,7 +31,7 @@
   <ItemGroup>
     <ProjectReference Include="..\..\BandTogether.DataAccess\BandTogether.DataAccess.csproj" />
     <ProjectReference Include="..\BandTogether.Client\BandTogether.Client.csproj" />
-    <PackageReference Include="Microsoft.AspNetCore.Components.WebAssembly.Server" Version="9.0.3" />
+    <PackageReference Include="Microsoft.AspNetCore.Components.WebAssembly.Server" Version="9.0.5" />
   </ItemGroup>
 	
   <ItemGroup>
