@@ -297,6 +297,23 @@ option and enter the URL as the root of your BandTogether URL plus /VideoPsalm
 when presented from there, and when the BandTogether set list item is updated will
 automatically switch back to the item from BandTogether.
 
+## Integration with Other Software
+
+If you are a developer and would like to integrate BandTogether with your own software to 
+make use of the Tablet View in our software please contact me for details.
+Your software would simply need to post to an API endpoint. Ideally, the post would
+include the entire set list from your software and would indicate the current active part.
+Currently, the integration with VideoPsalm is only sending the active song, so that could be
+done as well. If you do send the entire set list then users on stage in the Table View
+can turn off the "Auto-Follow" option and look through all the songs in the set list
+before the show starts. When they turn "Auto-Follow" back on they will immediately
+be taken to the current song in the set list.
+
+Your software should store songs in the ChordPro format, as that is the native format
+used in BandTogether. However, a conversion can be written if your software is storing
+your lyrics and chords in a different format. Also, your post to our API endpoint could
+be designed to post the objects we are using, but I can convert those to our format if needed as well.
+
 ## Contact
 
 Contact Brad Wickett at [brad@wickett.net](mailto:brad@wickett.net) for assistance.

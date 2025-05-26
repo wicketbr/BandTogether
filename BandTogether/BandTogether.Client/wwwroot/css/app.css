@@ -1518,3 +1518,25 @@ body.dark .blazor-context-menu {
 .tablet-song-title-sticky .song-title.faded {
     opacity:0.25;
 }
+
+.songformat-pipe,
+.songformat-repeat-start,
+.songformat-repeat-end,
+.songformat-slash {
+    font-weight:bold;
+    padding:0 .2em;
+}
+
+.pane-item-details .songformat-pipe,
+.pane-item-details .songformat-repeat-start,
+.pane-item-details .songformat-repeat-end,
+.pane-item-details .songformat-slash {
+    color: mediumblue;
+}
+
+body.dark .pane-item-details .songformat-pipe,
+body.dark .pane-item-details .songformat-repeat-start,
+body.dark .pane-item-details .songformat-repeat-end,
+body.dark .pane-item-details .songformat-slash {
+    color: deepskyblue;
+}

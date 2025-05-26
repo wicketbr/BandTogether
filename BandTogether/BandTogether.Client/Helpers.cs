@@ -938,11 +938,13 @@ public static class Helpers
                 output = "<span class=\"songformat-comment\">" + chord.Substring(1) + "&nbsp;</span>";
             } else {
                 if (chord == "||:") {
-                    output = "<div class='chord-image'><img src='" + Model.ApplicationUrl + "Images/RepeatStart.svg' /></div>";
+                    output = "<span class='songformat-repeat-start'>||:</span>";
                 } else if (chord == ":||") {
-                    output = "<div class='chord-image'><img src='" + Model.ApplicationUrl + "Images/RepeatEnd.svg' /></div>";
+                    output = "<span class='songformat-repeat-end'>:||</span>";
                 } else if (chord == "|") {
-                    output = "<div class='chord-image'><img src='" + Model.ApplicationUrl + "Images/Pipe.svg' /></div>";
+                    output = "<span class='songformat-pipe'>|</span>";
+                } else if (chord == "/") {
+                    output = "<span class='songformat-slash'>/</span>";
                 } else if (!chord.Contains("/")) {
                     // Just a chord, no bass part
                     output = "<span class='songformat-chord'>" + RenderChord(chord, originalKey, newKey) + "</span>";
