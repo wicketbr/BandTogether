@@ -2038,25 +2038,60 @@ public static class Helpers
         get {
             var output = new List<keyMatrix> {
                 new keyMatrix{ key = "A♭", preferSharp = false, items = new List<string>{ "{A♭}", "{A}", "{B♭}{A♯}", "{B}", "{C}", "{D♭}{C♯}", "{D}", "{E♭}{D♯}", "{E}", "{F}", "{G♭}{F♯}", "{G}" }},
+                new keyMatrix{ key = "Fm", preferSharp = false, items = new List<string>{ "{G♭}{F♯}", "{G}", "{A♭}", "{A}", "{B♭}{A♯}", "{B}", "{C}", "{D♭}{C♯}", "{D}", "{E♭}{D♯}", "{E}", "{F}" }},
+
                 new keyMatrix{ key = "A", preferSharp = true,  items = new List<string>{ "{A}", "{A♯}{B♭}", "{B}", "{C}", "{C♯}{D♭}", "{D}", "{D♯}{E♭}", "{E}", "{F}", "{F♯}{G♭}", "{G}", "{G♯}{A♭}" }},
+                new keyMatrix{ key = "F♯m", preferSharp = true,  items = new List<string>{ "{G}", "{G♯}{A♭}", "{A}", "{A♯}{B♭}", "{B}", "{C}", "{C♯}{D♭}", "{D}", "{D♯}{E♭}", "{E}", "{F}", "{F♯}{G♭}" }},
+
                 new keyMatrix{ key = "A♯", preferSharp = true,  items = new List<string>{ "{A♯}", "{B}", "{C}", "{C♯}{D♭}", "{D}", "{D♯}{E♭}", "{E}", "{F}", "{F♯}{G♭}", "{G}", "{G♯}{A♭}", "{A}" }},
+
                 new keyMatrix{ key = "B♭", preferSharp = false, items = new List<string>{ "{B♭}", "{B}", "{C}", "{D♭}{C♯}", "{D}", "{E♭}{D♯}", "{E}", "{F}", "{G♭}{F♯}", "{G}", "{A♭}{G♯}", "{A}" }},
+                new keyMatrix{ key = "Gm", preferSharp = false, items = new List<string>{ "{A♭}{G♯}", "{A}", "{B♭}", "{B}", "{C}", "{D♭}{C♯}", "{D}", "{E♭}{D♯}", "{E}", "{F}", "{G♭}{F♯}", "{G}" }},
+
                 new keyMatrix{ key = "B", preferSharp = true,  items = new List<string>{ "{B}", "{C}", "{C♯}{D♭}", "{D}", "{D♯}{E♭}", "{E}", "{F}", "{F♯}{G♭}", "{G}", "{G♯}{A♭}", "{A}", "{A♯}{B♭}" }},
+                new keyMatrix{ key = "G♯m", preferSharp = true,  items = new List<string>{ "{A}", "{A♯}{B♭}", "{B}", "{C}", "{C♯}{D♭}", "{D}", "{D♯}{E♭}", "{E}", "{F}", "{F♯}{G♭}", "{G}", "{G♯}{A♭}" }},
+
                 new keyMatrix{ key = "B♯",preferSharp = true,  items = new List<string>{ "{B♯}", "{C}", "{C♯}{D♭}", "{D}", "{D♯}{E♭}", "{E}", "{F}", "{F♯}{G♭}", "{G}", "{G♯}{A♭}", "{A}", "{A♯}{B♭}" }},
+
                 new keyMatrix{ key = "C♭", preferSharp = false, items = new List<string>{ "{C♭}", "{C}", "{D♭}{C♯}", "{D}", "{E♭}{D♯}", "{E}", "{F}", "{G♭}{F♯}", "{G}", "{A♭}{G♯}", "{A}", "{B♭}{A♯}" }},
+                new keyMatrix{ key = "A♭m", preferSharp = false, items = new List<string>{ "{A}", "{B♭}{A♯}", "{C♭}", "{C}", "{D♭}{C♯}", "{D}", "{E♭}{D♯}", "{E}", "{F}", "{G♭}{F♯}", "{G}", "{A♭}{G♯}" }},
+
                 new keyMatrix{ key = "C", preferSharp = true,  items = new List<string>{ "{C}", "{C♯}{D♭}", "{D}", "{D♯}{E♭}", "{E}", "{F}", "{F♯}{G♭}", "{G}", "{G♯}{A♭}", "{A}", "{A♯}{B♭}", "{B}" }},
+                new keyMatrix{ key = "Am", preferSharp = true,  items = new List<string>{ "{A♯}{B♭}", "{B}", "{C}", "{C♯}{D♭}", "{D}", "{D♯}{E♭}", "{E}", "{F}", "{F♯}{G♭}", "{G}", "{G♯}{A♭}", "{A}" }},
+
                 new keyMatrix{ key = "C♯", preferSharp = true,  items = new List<string>{ "{C♯}", "{D}", "{D♯}{E♭}", "{E}", "{F}", "{F♯}{G♭}", "{G}", "{G♯}{A♭}", "{A}", "{A♯}{B♭}", "{B}", "{C}" }},
+                new keyMatrix{ key = "A♯m", preferSharp = true,  items = new List<string>{ "{B}", "{C}", "{C♯}", "{D}", "{D♯}{E♭}", "{E}", "{F}", "{F♯}{G♭}", "{G}", "{G♯}{A♭}", "{A}", "{A♯}{B♭}" }},
+
                 new keyMatrix{ key = "D♭", preferSharp = false, items = new List<string>{ "{D♭}", "{D}", "{E♭}{D♯}", "{E}", "{F}", "{G♭}{F♯}", "{G}", "{A♭}{G♯}", "{A}", "{B♭}{A♯}", "{B}", "{C}" }},
+                new keyMatrix{ key = "B♭m", preferSharp = false, items = new List<string>{ "{B}", "{C}", "{D♭}", "{D}", "{E♭}{D♯}", "{E}", "{F}", "{G♭}{F♯}", "{G}", "{A♭}{G♯}", "{A}", "{B♭}{A♯}" }},
+
                 new keyMatrix{ key = "D", preferSharp = true,  items = new List<string>{ "{D}", "{D♯}{E♭}", "{E}", "{F}", "{F♯}{G♭}", "{G}", "{G♯}{A♭}", "{A}", "{A♯}{B♭}", "{B}", "{C}", "{C♯}{D♭}" }},
+                new keyMatrix{ key = "Bm", preferSharp = true,  items = new List<string>{ "{C}", "{C♯}{D♭}", "{D}", "{D♯}{E♭}", "{E}", "{F}", "{F♯}{G♭}", "{G}", "{G♯}{A♭}", "{A}", "{A♯}{B♭}", "{B}" }},
+
                 new keyMatrix{ key = "D♯", preferSharp = true,  items = new List<string>{ "{D♯}", "{E}", "{F}", "{F♯}{G♭}", "{G}", "{G♯}{A♭}", "{A}", "{A♯}{B♭}", "{B}", "{C}", "{C♯}{D♭}", "{D}" }},
+
                 new keyMatrix{ key = "E♭", preferSharp = false, items = new List<string>{ "{E♭}", "{E}", "{F}", "{G♭}{F♯}", "{G}", "{A♭}{G♯}", "{A}", "{B♭}{A♯}", "{B}", "{C}", "{D♭}{C♯}", "{D}" }},
+                new keyMatrix{ key = "Cm", preferSharp = false, items = new List<string>{ "{D♭}{C♯}", "{D}", "{E♭}", "{E}", "{F}", "{G♭}{F♯}", "{G}", "{A♭}{G♯}", "{A}", "{B♭}{A♯}", "{B}", "{C}" }},
+
                 new keyMatrix{ key = "E", preferSharp = true,  items = new List<string>{ "{E}", "{F}", "{F♯}{G♭}", "{G}", "{G♯}{A♭}", "{A}", "{A♯}{B♭}", "{B}", "{C}", "{C♯}{D♭}", "{D}", "{D♯}{E♭}" }},
+                new keyMatrix{ key = "C♯m", preferSharp = true,  items = new List<string>{ "{D}", "{D♯}{E♭}", "{E}", "{F}", "{F♯}{G♭}", "{G}", "{G♯}{A♭}", "{A}", "{A♯}{B♭}", "{B}", "{C}", "{C♯}{D♭}" }},
+
                 new keyMatrix{ key = "E♯", preferSharp = true,  items = new List<string>{ "{E♯}", "{F♯}{G♭}", "{G}", "{G♯}{A♭}", "{A}", "{A♯}{B♭}", "{B}", "{C}", "{C♯}{D♭}", "{D}", "{D♯}{E♭}", "{E}" }},
+                
                 new keyMatrix{ key = "F♭", preferSharp = false, items = new List<string>{ "{F♭}", "{G♭}{F♯}", "{G}", "{A♭}{G♯}", "{A}", "{B♭}{A♯}", "{B}", "{C}", "{D♭}{C♯}", "{D}", "{E♭}{D♯}", "{E}" }},
+
                 new keyMatrix{ key = "F", preferSharp = true,  items = new List<string>{ "{F}", "{F♯}{G♭}", "{G}", "{G♯}{A♭}", "{A}", "{A♯}{B♭}", "{B}", "{C}", "{C♯}{D♭}", "{D}", "{D♯}{E♭}", "{E}" }},
+                new keyMatrix{ key = "Dm", preferSharp = true,  items = new List<string>{ "{D♯}{E♭}", "{E}", "{F}", "{F♯}{G♭}", "{G}", "{G♯}{A♭}", "{A}", "{A♯}{B♭}", "{B}", "{C}", "{C♯}{D♭}", "{D}" }},
+
                 new keyMatrix{ key = "F♯", preferSharp = true,  items = new List<string>{ "{F♯}", "{G}", "{G♯}{A♭}", "{A}", "{A♯}{B♭}", "{B}", "{C}", "{C♯}{D♭}", "{D}", "{D♯}{E♭}", "{E}", "{F}" }},
+                new keyMatrix{ key = "D♯m", preferSharp = true,  items = new List<string>{ "{E}", "{F}", "{F♯}", "{G}", "{G♯}{A♭}", "{A}", "{A♯}{B♭}", "{B}", "{C}", "{C♯}{D♭}", "{D}", "{D♯}{E♭}" }},
+
                 new keyMatrix{ key = "G♭", preferSharp = false, items = new List<string>{ "{G♭}", "{G}", "{A♭}{G♯}", "{A}", "{B♭}{A♯}", "{C♭}{B}", "{C}", "{D♭}{C♯}", "{D}", "{E♭}{D♯}", "{E}", "{F}" }},
+                new keyMatrix{ key = "E♭m", preferSharp = false, items = new List<string>{ "{E}", "{F}", "{G♭}", "{G}", "{A♭}{G♯}", "{A}", "{B♭}{A♯}", "{C♭}{B}", "{C}", "{D♭}{C♯}", "{D}", "{E♭}{D♯}" }},
+
                 new keyMatrix{ key = "G", preferSharp = true,  items = new List<string>{ "{G}", "{G♯}{A♭}", "{A}", "{A♯}{B♭}", "{B}", "{C}", "{C♯}{D♭}", "{D}", "{D♯}{E♭}", "{E}", "{F}", "{F♯}{G♭}" }},
+                new keyMatrix{ key = "Em", preferSharp = true,  items = new List<string>{ "{F}", "{F♯}{G♭}", "{G}", "{G♯}{A♭}", "{A}", "{A♯}{B♭}", "{B}", "{C}", "{C♯}{D♭}", "{D}", "{D♯}{E♭}", "{E}" }},
+
                 new keyMatrix{ key = "G♯", preferSharp = true,  items = new List<string>{ "{G♯}", "{A}", "{A♯}{B♭}", "{B}", "{C}", "{C♯}{D♭}", "{D}", "{D♯}{E♭}", "{E}", "{F}", "{F♯}{G♭}", "{G}" }},
             };
 
@@ -3657,46 +3692,76 @@ public static class Helpers
             if (Model.Settings.showNonStandardKeys) {
                 output = new List<songKey> {
                     new songKey { label = "A♭", key = "Ab" },
+                    new songKey { label = "A♭m", key = "Abm" },
                     new songKey { label = "A", key = "A" },
+                    new songKey { label = "Am", key = "Am" },
                     new songKey { label = "A♯", key = "A#" },
+                    new songKey { label = "A♯m", key = "A#m" },
                     new songKey { label = "B♭", key = "Bb" },
+                    new songKey { label = "B♭m", key = "Bbm" },
                     new songKey { label = "B", key = "B" },
+                    new songKey { label = "Bm", key = "Bm" },
                     new songKey { label = "B♯", key = "B#" },
                     new songKey { label = "C♭", key = "Cb" },
                     new songKey { label = "C", key = "C" },
+                    new songKey { label = "Cm", key = "Cm" },
                     new songKey { label = "C♯", key = "C#" },
+                    new songKey { label = "C♯m", key = "C#m" },
                     new songKey { label = "D♭", key = "Db" },
                     new songKey { label = "D", key = "D" },
+                    new songKey { label = "Dm", key = "Dm" },
                     new songKey { label = "D♯", key = "D#" },
+                    new songKey { label = "D♯m", key = "D#m" },
                     new songKey { label = "E♭", key = "Eb" },
+                    new songKey { label = "E♭m", key = "Ebm" },
                     new songKey { label = "E", key = "E" },
+                    new songKey { label = "Em", key = "Em" },
                     new songKey { label = "E♯", key = "E#" },
                     new songKey { label = "F♭", key = "Fb" },
                     new songKey { label = "F", key = "F" },
+                    new songKey { label = "Fm", key = "Fm" },
                     new songKey { label = "F♯", key = "F#" },
+                    new songKey { label = "F♯m", key = "F#m" },
                     new songKey { label = "G♭", key = "Gb" },
                     new songKey { label = "G", key = "G" },
+                    new songKey { label = "Gm", key = "Gm" },
                     new songKey { label = "G♯", key = "G#" },
+                    new songKey { label = "G♯m", key = "G#m" },
                 };
             } else {
                 output = new List<songKey> {
                     new songKey { label = "A♭", key = "Ab" },
+                    new songKey { label = "A♭m", key = "Abm" },
                     new songKey { label = "A", key = "A" },
+                    new songKey { label = "Am", key = "Am" },
                     new songKey { label = "A♯", key = "A#" },
+                    new songKey { label = "A♯m", key = "A#m" },
                     new songKey { label = "B♭", key = "Bb" },
+                    new songKey { label = "B♭m", key = "Bbm" },
                     new songKey { label = "B", key = "B" },
+                    new songKey { label = "Bm", key = "Bm" },
                     new songKey { label = "C", key = "C" },
+                    new songKey { label = "Cm", key = "Cm" },
                     new songKey { label = "C♯", key = "C#" },
+                    new songKey { label = "C♯m", key = "C#m" },
                     new songKey { label = "D♭", key = "Db" },
                     new songKey { label = "D", key = "D" },
+                    new songKey { label = "Dm", key = "Dm" },
                     new songKey { label = "D♯", key = "D#" },
+                    new songKey { label = "D♯m", key = "D#m" },
                     new songKey { label = "E♭", key = "Eb" },
+                    new songKey { label = "E♭m", key = "Ebm" },
                     new songKey { label = "E", key = "E" },
+                    new songKey { label = "Em", key = "Em" },
                     new songKey { label = "F", key = "F" },
+                    new songKey { label = "Fm", key = "Fm" },
                     new songKey { label = "F♯", key = "F#" },
+                    new songKey { label = "F♯m", key = "F#m" },
                     new songKey { label = "G♭", key = "Gb" },
                     new songKey { label = "G", key = "G" },
+                    new songKey { label = "Gm", key = "Gm" },
                     new songKey { label = "G♯", key = "G#" },
+                    new songKey { label = "G♯m", key = "G#m" },
                 };
             }
 
@@ -4129,8 +4194,19 @@ public static class Helpers
                         transpose = new List<string> { "A", "Bflat", "B", "C", "Csharp", "D", "Eflat", "E", "F", "Fsharp", "G" };
                         break;
 
+                    case "Abm":
+                    case "A♭m":
+                    case "G#m":
+                    case "G♯m":
+                        transpose = new List<string> { "Am", "Bflatm", "Bm", "Cm", "Csharpm", "Dm", "Eflatm", "Em", "Fm", "Fsharpm", "Gm" };
+                        break;
+
                     case "A":
                         transpose = new List<string> { "Bflat", "B", "C", "Csharp", "D", "Eflat", "E", "F", "Fsharp", "G", "Aflat" };
+                        break;
+
+                    case "Am":
+                        transpose = new List<string> { "Bflatm", "Bm", "Cm", "Csharpm", "Dm", "Eflatm", "Em", "Fm", "Fsharpm", "Gm", "Aflatm" };
                         break;
 
                     case "A#":
@@ -4138,6 +4214,13 @@ public static class Helpers
                     case "Bb":
                     case "B♭":
                         transpose = new List<string> { "B", "C", "Csharp", "D", "Eflat", "E", "F", "Fsharp", "G", "Aflat", "A" };
+                        break;
+
+                    case "A#m":
+                    case "A♯m":
+                    case "Bbm":
+                    case "B♭m":
+                        transpose = new List<string> { "Bm", "Cm", "Csharpm", "Dm", "Eflatm", "Em", "Fm", "Fsharpm", "Gm", "Aflatm", "Am" };
                         break;
 
                     case "B":
@@ -4148,8 +4231,16 @@ public static class Helpers
                         transpose = new List<string> { "C", "Csharp", "D", "Eflat", "E", "F", "Fsharp", "G", "Aflat", "A", "Bflat" };
                         break;
 
+                    case "Bm":
+                        transpose = new List<string> { "Cm", "Csharpm", "Dm", "Eflatm", "Em", "Fm", "Fsharpm", "Gm", "Aflatm", "Am", "Bflatm" };
+                        break;
+
                     case "C":
                         transpose = new List<string> { "Csharp", "D", "Eflat", "E", "F", "Fsharp", "G", "Aflat", "A", "Bflat", "B" };
+                        break;
+
+                    case "Cm":
+                        transpose = new List<string> { "Csharpm", "Dm", "Eflatm", "Em", "Fm", "Fsharpm", "Gm", "Aflatm", "Am", "Bflatm", "Bm" };
                         break;
 
                     case "C#":
@@ -4159,8 +4250,17 @@ public static class Helpers
                         transpose = new List<string> { "D", "Eflat", "E", "F", "Fsharp", "G", "Aflat", "A", "Bflat", "B", "C" };
                         break;
 
+                    case "C#m":
+                    case "C♯m":
+                        transpose = new List<string> { "Dm", "Eflatm", "Em", "Fm", "Fsharpm", "Gm", "Aflatm", "Am", "Bflatm", "Bm", "Cm" };
+                        break;
+
                     case "D":
                         transpose = new List<string> { "Eflat", "E", "F", "Fsharp", "G", "Aflat", "A", "Bflat", "B", "C", "Csharp" };
+                        break;
+
+                    case "Dm":
+                        transpose = new List<string> { "Eflatm", "Em", "Fm", "Fsharpm", "Gm", "Aflatm", "Am", "Bflatm", "Bm", "Cm", "Csharpm" };
                         break;
 
                     case "D#":
@@ -4170,8 +4270,19 @@ public static class Helpers
                         transpose = new List<string> { "E", "F", "Fsharp", "G", "Aflat", "A", "Bflat", "B", "C", "Csharp", "D" };
                         break;
 
+                    case "D#m":
+                    case "D♯m":
+                    case "Ebm":
+                    case "E♭m":
+                        transpose = new List<string> { "Em", "Fm", "Fsharpm", "Gm", "Aflatm", "Am", "Bflatm", "Bm", "Cm", "Csharpm", "Dm" };
+                        break;
+
                     case "E":
                         transpose = new List<string> { "F", "Fsharp", "G", "Aflat", "A", "Bflat", "B", "C", "Csharp", "D", "Eflat" };
+                        break;
+
+                    case "Em":
+                        transpose = new List<string> { "Fm", "Fsharpm", "Gm", "Aflatm", "Am", "Bflatm", "Bm", "Cm", "Csharpm", "Dm", "Eflatm" };
                         break;
 
                     case "E#":
@@ -4182,6 +4293,10 @@ public static class Helpers
                         transpose = new List<string> { "Fsharp", "G", "Aflat", "A", "Bflat", "B", "C", "Csharp", "D", "Eflat", "E" };
                         break;
 
+                    case "Fm":
+                        transpose = new List<string> { "Fsharpm", "Gm", "Aflatm", "Am", "Bflatm", "Bm", "Cm", "Csharpm", "Dm", "Eflatm", "Em" };
+                        break;
+
                     case "F#":
                     case "F♯":
                     case "Gb":
@@ -4189,8 +4304,17 @@ public static class Helpers
                         transpose = new List<string> { "G", "Aflat", "A", "Bflat", "B", "C", "Csharp", "D", "Eflat", "E", "F" };
                         break;
 
+                    case "F#m":
+                    case "F♯m":
+                        transpose = new List<string> { "Gm", "Aflatm", "Am", "Bflatm", "Bm", "Cm", "Csharpm", "Dm", "Eflatm", "Em", "Fm", "Fsharpm" };
+                        break;
+
                     case "G":
                         transpose = new List<string> { "Aflat", "A", "Bflat", "B", "C", "Csharp", "D", "Eflat", "E", "F", "Fsharp" };
+                        break;
+
+                    case "Gm":
+                        transpose = new List<string> { "Aflatm", "Am", "Bflatm", "Bm", "Cm", "Csharpm", "Dm", "Eflatm", "Em", "Fm", "Fsharpm" };
                         break;
                 }
 

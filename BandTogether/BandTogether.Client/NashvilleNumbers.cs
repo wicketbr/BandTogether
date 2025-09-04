@@ -7,9 +7,8 @@ public static class NashvilleNumbering
 
     public static void Init(string key = "", string keyType = "major")
     {
-        _key = FixKey(key);
-
         SetKeyType(keyType);
+        _key = FixKey(key);
     }
 
     public static string Key {
@@ -174,7 +173,13 @@ public static class NashvilleNumbering
 
             if (output == "") {
                 output = key.Substring(0, 1);
+            } else {
+                if (_keyType == "minor" && !output.Contains("m")) {
+                    output += "m";
+                }
             }
+
+
         }
 
         return output;
@@ -251,8 +256,14 @@ public static class NashvilleNumbering
                             if (_keyType.ToLower() == "minor") {
                                 switch (position) {
                                     case 1:
+                                    case 2:
+                                    case 3:
                                     case 4:
                                     case 5:
+                                        //output += "m";
+                                        break;
+
+                                    default:
                                         output += "m";
                                         break;
                                 }
@@ -287,20 +298,35 @@ public static class NashvilleNumbering
             var output = new Dictionary<string, List<string>>();
 
             output.Add("A", new List<string> { "A", "A♯", "B", "C", "C♯", "D", "D♯", "E", "F", "F♯", "G", "G♯" });
+            output.Add("F♯m", new List<string> { "A", "A♯", "B", "C", "C♯", "D", "D♯", "E", "F", "F♯", "G", "G♯" });
             output.Add("B♭", new List<string> { "B♭", "B", "C", "D♭", "D", "E♭", "E", "F", "G♭", "G", "A♭", "A" });
+            output.Add("Gm", new List<string> { "B♭", "B", "C", "D♭", "D", "E♭", "E", "F", "G♭", "G", "A♭", "A" });
             output.Add("B", new List<string> { "B", "C", "C♯", "D", "D♯", "E", "F", "F♯", "G", "G♯", "A", "A♯" });
+            output.Add("G♯m", new List<string> { "B", "C", "C♯", "D", "D♯", "E", "F", "F♯", "G", "G♯", "A", "A♯" });
             output.Add("C♭", new List<string> { "C♭", "C", "D♭", "D", "E♭", "E", "F", "G♭", "G", "A♭", "A", "B♭" });
+            output.Add("A♭m", new List<string> { "C♭", "C", "D♭", "D", "E♭", "E", "F", "G♭", "G", "A♭", "A", "B♭" });
             output.Add("C", new List<string> { "C", "D♭", "D", "E♭", "E", "F", "G♭", "G", "A♭", "A", "B♭", "B" });
+            output.Add("Am", new List<string> { "C", "D♭", "D", "E♭", "E", "F", "G♭", "G", "A♭", "A", "B♭", "B" });
             output.Add("C♯", new List<string> { "C♯", "D", "D♯", "E", "E♯", "F♯", "G", "G♯", "A", "A♯", "B", "C" });
+            output.Add("A♯m", new List<string> { "C♯", "D", "D♯", "E", "E♯", "F♯", "G", "G♯", "A", "A♯", "B", "C" });
             output.Add("D♭", new List<string> { "D♭", "D", "E♭", "E", "F", "G♭", "G", "A♭", "A", "B♭", "B", "C" });
+            output.Add("B♭m", new List<string> { "D♭", "D", "E♭", "E", "F", "G♭", "G", "A♭", "A", "B♭", "B", "C" });
             output.Add("D", new List<string> { "D", "D♯", "E", "F", "F♯", "G", "G♯", "A", "A♯", "B", "C", "C♯" });
+            output.Add("Bm", new List<string> { "D", "D♯", "E", "F", "F♯", "G", "G♯", "A", "A♯", "B", "C", "C♯" });
             output.Add("E♭", new List<string> { "E♭", "E", "F", "G♭", "G", "A♭", "A", "B♭", "B", "C", "D♭", "D" });
+            output.Add("Cm", new List<string> { "E♭", "E", "F", "G♭", "G", "A♭", "A", "B♭", "B", "C", "D♭", "D" });
             output.Add("E", new List<string> { "E", "F", "F♯", "G", "G♯", "A", "A♯", "B", "C", "C♯", "D", "D♯" });
+            output.Add("C♯m", new List<string> { "E", "F", "F♯", "G", "G♯", "A", "A♯", "B", "C", "C♯", "D", "D♯" });
             output.Add("F", new List<string> { "F", "G♭", "G", "A♭", "A", "B♭", "B", "C", "D♭", "D", "E♭", "E" });
+            output.Add("Dm", new List<string> { "F", "G♭", "G", "A♭", "A", "B♭", "B", "C", "D♭", "D", "E♭", "E" });
             output.Add("F♯", new List<string> { "F♯", "G", "G♯", "A", "A♯", "B", "C", "C♯", "D", "D♯", "E", "F" });
+            output.Add("D♯m", new List<string> { "F♯", "G", "G♯", "A", "A♯", "B", "C", "C♯", "D", "D♯", "E", "F" });
             output.Add("G♭", new List<string> { "G♭", "G", "A♭", "A", "B♭", "C♭", "C", "D♭", "D", "E♭", "E", "F" });
+            output.Add("E♭m", new List<string> { "G♭", "G", "A♭", "A", "B♭", "C♭", "C", "D♭", "D", "E♭", "E", "F" });
             output.Add("G", new List<string> { "G", "G♯", "A", "A♯", "B", "C", "C♯", "D", "D♯", "E", "F", "F♯" });
+            output.Add("Em", new List<string> { "G", "G♯", "A", "A♯", "B", "C", "C♯", "D", "D♯", "E", "F", "F♯" });
             output.Add("A♭", new List<string> { "A♭", "A", "B♭", "B", "C", "D♭", "D", "E♭", "E", "F", "G♭", "G" });
+            output.Add("Fm", new List<string> { "A♭", "A", "B♭", "B", "C", "D♭", "D", "E♭", "E", "F", "G♭", "G" });
 
             return output;
         }
@@ -311,7 +337,8 @@ public static class NashvilleNumbering
         List<int> output = new List<int>();
 
         if (_keyType.ToLower() == "minor") {
-            output = new List<int> { 0, 2, 3, 5, 7, 8, 10, 12 };
+            //output = new List<int> { 0, 2, 3, 5, 7, 8, 10, 12 };
+            output = new List<int> { 0, 2, 4, 5, 7, 9, 11, 12 };
         } else {
             output = new List<int> { 0, 2, 4, 5, 7, 9, 11, 12 };
         }
