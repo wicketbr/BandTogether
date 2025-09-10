@@ -144,7 +144,10 @@
             <table style="width:100%;">
                 <tr>
                     <td class="no-wrap" style="width:1%;">
-                        <span class="app-title">@Text.AppName</span> <span class="app-version">v. @Model.Version</span>
+                        <span class="app-title" @onclick="@(() => { Model.User.preferences.showVersionNumber = !Model.User.preferences.showVersionNumber; StateHasChanged(); })">@Text.AppName</span>
+                        @if (Model.User.preferences.showVersionNumber) {
+                            <span class="app-version"> v. @Model.Version</span>
+                        }
                     </td>
 
                     <td class="right tiny theme-and-language no-wrap" style="width:auto;">

@@ -23,6 +23,7 @@ public class userPreferences
     public string settingsTabFormat { get; set; } = "";
     public bool showExport { get; set; } = false;
     public bool showMessaging { get; set; } = false;
+    public bool showVersionNumber { get; set; } = true;
     public int slideshowThumbnailColumns { get; set; } = 4;
     public List<sheetMusicPreference> sheetMusicPreferences { get; set; } = new List<sheetMusicPreference>();
     public List<songPreferences> songPreferences { get; set; } = new List<songPreferences>();

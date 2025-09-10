@@ -64,9 +64,9 @@ public class DataAccess : IDataAccess
 {
     private string _applicationPath = String.Empty;
     private string _basePath = String.Empty;
-    private DateOnly _released = DateOnly.FromDateTime(Convert.ToDateTime("5/26/2025"));
+    private DateOnly _released = DateOnly.FromDateTime(Convert.ToDateTime("9/10/2025"));
     private IServiceProvider? _serviceProvider;
-    private string _version = "1.0.12";
+    private string _version = "1.0.13";
 
     private string _folderAudio = String.Empty;
     private string _folderBackgrounds = String.Empty;

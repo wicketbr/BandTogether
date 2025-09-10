@@ -189,11 +189,11 @@ namespace BandTogether
                 }
             } catch { }
 
-            string computerName = System.Environment.MachineName;
-            if (!String.IsNullOrWhiteSpace(computerName)) {
-                // Use this instead of the ipAddress
-                ipAddress = computerName;
-            }
+            //string computerName = System.Environment.MachineName;
+            //if (!String.IsNullOrWhiteSpace(computerName)) {
+            //    // Use this instead of the ipAddress
+            //    ipAddress = computerName;
+            //}
 
             foreach (var url in urls) {
                 var showUrl = url;
