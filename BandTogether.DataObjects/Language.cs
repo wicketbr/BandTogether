@@ -94,6 +94,7 @@ public class Language
     public string editMode { get; set; } = "";
     public string editSetListItem { get; set; } = "";
     public string editStyle { get; set; } = "";
+    public string editUserPreferences { get; set; } = "";
     public string emptySetList { get; set; } = "";
     public string enabled { get; set; } = "";
     public string enableProjectionMode { get; set; } = "";
@@ -102,6 +103,7 @@ public class Language
     public string error { get; set; } = "";
     public string errors { get; set; } = "";
     public string export { get; set; } = "";
+    public string exportCopiedToClipboard { get; set; } = "";
     public string exportTitle { get; set; } = "";
     public string filterSongbooks { get; set; } = "";
     public string fontColor { get; set; } = "";
@@ -274,6 +276,7 @@ public class Language
     public string unsaved { get; set; } = "";
     public string uploading { get; set; } = "";
     public string url { get; set; } = "";
+    public string user { get; set; } = "";
     public string video { get; set; } = "";
     public string view { get; set; } = "";
     public string viewMode { get; set; } = "";

@@ -64,9 +64,9 @@ public class DataAccess : IDataAccess
 {
     private string _applicationPath = String.Empty;
     private string _basePath = String.Empty;
-    private DateOnly _released = DateOnly.FromDateTime(Convert.ToDateTime("9/10/2025"));
+    private DateOnly _released = DateOnly.FromDateTime(Convert.ToDateTime("9/15/2025"));
     private IServiceProvider? _serviceProvider;
-    private string _version = "1.0.13";
+    private string _version = "1.0.14";
 
     private string _folderAudio = String.Empty;
     private string _folderBackgrounds = String.Empty;
@@ -816,24 +816,18 @@ public class DataAccess : IDataAccess
     {
         var output = new booleanResponse();
 
-        var file = Path.Combine(_folderUsers, userId.ToString() + ".json");
+        var files = Directory.GetFiles(_folderUsers, "*.json");
 
-        if (System.IO.File.Exists(file)) {
-            // Rename the file to .deleted. If a file with that name already exists, delete it.
-            var deletedFile = Path.Combine(_folderUsers, userId.ToString() + ".json.deleted");
-            if (System.IO.File.Exists(deletedFile)) {
-                System.IO.File.Delete(deletedFile);
+        foreach (var file in files) {
+            var user = DeserializeObject<user>(System.IO.File.ReadAllText(file));
+            if (user != null && user.id == userId) {
+                System.IO.File.Delete(file);
+                output.result = true;
+                return output;
             }
-
-            System.IO.File.Move(file, deletedFile);
-
-            output.result = true;
-
-            CacheStore.Clear("user-" + userId.ToString());
-        } else {
-            output.messages.Add("User '" + userId.ToString() + "' Not Found");
         }
 
+        output.messages.Add("User '" + userId.ToString() + "' Not Found");
         return output;
     }
 

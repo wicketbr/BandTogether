@@ -156,7 +156,11 @@ public partial class DataController : ControllerBase
         var output = da.DeleteUser(id);
 
         if (output.result) {
-            await signalR.Clients.All.SendAsync("message", "user-deleted", id.ToString());
+            await SignalRUpdate(new signalRUpdate { 
+                updateType = signalRUpdateType.admin,
+                message = "user-deleted",
+                itemId = id,
+            });
         }
         
         return Ok(output);

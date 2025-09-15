@@ -1,0 +1,131 @@
+﻿@inject BlazorDataModel Model
+@inject Radzen.DialogService DialogService
+@implements IDisposable
+
+<div class="mb-2">
+    <button type="button" class="me-2 btn btn-dark" @onclick="Close">
+        <Icon Name="Close" /> @Text.Close
+    </button>
+
+    @if (ShowDelete) {
+        <FreeBlazor.DeleteConfirmation 
+                CancelText="@Text.Cancel"
+                ConfirmDeleteText="@Text.Confirm"
+                DeleteText="@Text.Delete"
+                CancelIcon="@Helpers.Icon("Cancel")"
+                DeleteIcon="@Helpers.Icon("Delete")"
+                ConfirmDeleteIcon="@Helpers.Icon("Delete")"
+                OnConfirmed="DeleteUser" />
+
+    }
+</div>
+
+<div class="mb-2">
+    <b>@Text.User</b><span>: </span><span>@_user.name</span>
+</div>
+
+<div class="form-check form-switch mb-2">
+    <input type="checkbox" class="form-check-input" role="switch" id="edit-user-enabled" @bind="_user.enabled" @bind:after="Updated" />
+    <label for="edit-user-enabled" class="form-check-label">@Text.Enabled</label>
+</div>
+
+<div class="form-check form-switch mb-2">
+    <input type="checkbox" class="form-check-input" role="switch" id="edit-user-autoFollow" @bind="_user.preferences.autoFollow" @bind:after="Updated" />
+    <label for="edit-user-autoFollow" class="form-check-label">@Text.AutoFollowOn</label>
+</div>
+
+<div class="form-check form-switch mb-2">
+    <input type="checkbox" class="form-check-input" role="switch" id="edit-user-hideChords" @bind="_user.preferences.hideChords" @bind:after="Updated" />
+    <label for="edit-user-hideChords" class="form-check-label">@Text.HideChords</label>
+</div>
+
+<div class="form-check form-switch mb-2">
+    <input type="checkbox" class="form-check-input" role="switch" id="edit-user-showExport" @bind="_user.preferences.showExport" @bind:after="Updated" />
+    <label for="edit-user-showExport" class="form-check-label">@Text.ShowExport</label>
+</div>
+
+@if (_user.preferences.songPreferences.Any(x => !String.IsNullOrWhiteSpace(x.title))) {
+    <h2 class="subtitle">
+        @Text.SongCapoPreferences
+    </h2>
+
+    <table class="table table-sm">
+        <thead>
+            <tr class="table-dark">
+                <td style="width:1%;"></td>
+                <td>@Text.Title</td>
+                <td style="width:200px;" class="center">@Text.Capo</td>
+            </tr>
+        </thead>
+        <tbody>
+            @foreach (var item in _user.preferences.songPreferences.Where(x => !String.IsNullOrWhiteSpace(x.title)).OrderBy(x => x.title)) {
+                <tr>
+                    <td>
+                        <button type="button" class="btn btn-sm btn-danger" @onclick="@(() => _user.preferences.songPreferences.Remove(item))">
+                            @Text.Delete
+                        </button>
+                    </td>
+                    <td>@item.title</td>
+                    <td>
+                        <select class="form-select" @bind="item.capo" @bind:after="Updated">
+                            <option value="0">@Text.NoCapo</option>
+                            @for (int i = 1; i <= 12; i++) {
+                                <option value="@i" selected="@(item.capo == i)">@Helpers.NumberToRomanNumerals(i)</option>
+                            }
+                            <option value="12" selected="@(item.capo == 12)">@Text.NashvilleNumbers</option>
+                        </select>
+                    </td>
+                </tr>
+            }
+        </tbody>
+    </table>
+}
+
+@code {
+    [Parameter] public bool ShowDelete { get; set; }
+
+    [Parameter] public user User { get; set; } = new user();
+
+    protected user _user = new user();
+
+    public void Dispose() { }
+
+    protected override async Task OnInitializedAsync()
+    {
+        _user = User != null ? User : new user();
+
+        await Helpers.DelayedFocus("edit-user-name");
+    }
+
+    protected void Close()
+    {
+        DialogService.Close();
+    }
+
+    protected async Task DeleteUser()
+    {
+        Model.ClearMessages();
+        Model.Message_Processing();
+
+        var result = await Helpers.GetOrPost<booleanResponse>("api/DeleteUser/" + _user.id.ToString());
+
+        Model.ClearMessages();
+
+        if (result != null) {
+            if (result.result) {
+                Close();
+            } else if (result.messages.Any()) {
+                Model.ErrorMessages(result.messages);
+            } else {
+                Model.UnknownError();
+            }
+        } else {
+            Model.UnknownError();
+        }
+    }
+
+    protected async Task Updated()
+    {
+        await Helpers.SaveUserPreferences(_user.id, _user.preferences);
+    }
+}

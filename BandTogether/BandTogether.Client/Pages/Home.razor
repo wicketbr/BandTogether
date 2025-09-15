@@ -931,14 +931,14 @@
                                                         </button>
 
                                                         <FreeBlazor.DeleteConfirmation 
-                                                        ButtonSize="small"
-                                                        CancelText="@Text.Cancel"
-                                                        ConfirmDeleteText="@Text.Confirm"
-                                                        DeleteText="@Text.Delete"
-                                                        CancelIcon="@Helpers.Icon("Cancel")"
-                                                        DeleteIcon="@Helpers.Icon("Delete")"
-                                                        ConfirmDeleteIcon="@Helpers.Icon("Delete")"
-                                                        OnConfirmed="DeleteSong" />
+                                                                ButtonSize="small"
+                                                                CancelText="@Text.Cancel"
+                                                                ConfirmDeleteText="@Text.Confirm"
+                                                                DeleteText="@Text.Delete"
+                                                                CancelIcon="@Helpers.Icon("Cancel")"
+                                                                DeleteIcon="@Helpers.Icon("Delete")"
+                                                                ConfirmDeleteIcon="@Helpers.Icon("Delete")"
+                                                                OnConfirmed="DeleteSong" />
 
                                                         <span class="edit-message">@((MarkupString)_editMessage)</span>
                                                     </div>
@@ -1173,24 +1173,34 @@
                     <input type="text" id="add-new-user" class="form-control" placeholder="@Text.NewUser" @bind="_newUserName" @bind:after="AddNewUser" />
                 </div>
 
-                @foreach (var item in Model.Users.Where(x => x.id != Guid.Empty && (x.enabled == true || _activeUsersOnly == false)).OrderBy(x => x.name)) {
-                    <div class="mb-1">
-                        <button type="button" class="btn btn-sm btn-success user-button" @onclick="@(() => SelectedUser(item))">
-                            @if (item.enabled) {
-                                <span>@item.name</span>
-                            } else {
-                                <em>@item.name</em>
-                            }
-                        </button>
-                    </div>
-                }
+                <table class="user-table">
+                    <tbody>
+                        @foreach (var item in Model.Users.Where(x => x.id != Guid.Empty && (x.enabled == true || _activeUsersOnly == false)).OrderBy(x => x.name)) {
+                            <tr>
+                                <td>
+                                    <button type="button" class="mb-1 btn btn-primary btn-sm no-wrap" @onclick="@(() => EditUser(item))">
+                                        <Icon Name="Edit" />
+                                    </button>
+                                </td>
+                                <td>
+                                    <button type="button" class="ms-1 mb-1 btn btn-sm btn-success user-button" @onclick="@(() => SelectedUser(item))">
+                                        @if (item.enabled) {
+                                            <span>@item.name</span>
+                                        } else {
+                                            <em>@item.name</em>
+                                        }
+                                    </button>
+                                </td>
+                            </tr>
+                        }
+                    </tbody>
+                </table>
             </div>
 
             <div class="col col-12 col-sm-1 col-md-2 col-lg-3 col-xl-4 col-xxl-4"></div>
         </div>
     }
 }
-
 
 @code{
     protected string _activePageSection = "";
@@ -1421,10 +1431,16 @@
     {
         if (!String.IsNullOrWhiteSpace(_newUserName)) {
             // Make sure the name is unique.
-            if (Model.Users.Any(x => x.name == _newUserName)) {
+            var existing = Model.Users.FirstOrDefault(x => x.name.ToLower() == _newUserName.ToLower());
+            if (existing != null) {
+                if (!existing.enabled) {
+                    existing.enabled = true;
+                    var saved = await Helpers.GetOrPost<user>("api/SaveUser", existing);
+                }
+
                 _newUserName = "";
                 StateHasChanged();
-                await Helpers.DelayedFocus("new-username");
+                await Helpers.DelayedFocus("add-new-user");
                 return;
             }
 
@@ -1437,7 +1453,7 @@
             if (result != null && result.id != Guid.Empty) {
                 await Helpers.ReloadUsers();
             } else {
-                await Helpers.DelayedFocus("new-username");
+                await Helpers.DelayedFocus("add-new-user");
             }
 
             _newUserName = "";
@@ -1996,9 +2012,9 @@
         });
     }
 
-    protected void EditUser(user user)
+    protected async Task EditUser(user User)
     {
-        Helpers.NavigateTo("EditUser/" + user.id.ToString());
+        await Helpers.EditUser(User, true);
     }
 
     protected async Task ImportSong(songBook songbook)

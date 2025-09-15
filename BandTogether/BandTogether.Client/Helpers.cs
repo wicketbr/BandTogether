@@ -612,6 +612,23 @@ public static class Helpers
         });
     }
 
+    public async static Task EditUser(user User, bool ShowDelete = false)
+    {
+        Dictionary<string, object> parameters = new Dictionary<string, object>();
+        parameters.Add("User", User);
+        parameters.Add("ShowDelete", ShowDelete);
+
+        await DialogService.OpenAsync<EditUser>(TextValue("EditUserPreferences"), parameters, new Radzen.DialogOptions() {
+            AutoFocusFirstElement = false,
+            Resizable = false,
+            Draggable = false,
+            CloseDialogOnEsc = true,
+            ShowClose = true,
+            Width = "98%",
+            Top = _dialogTop,
+        });
+    }
+
     /// <summary>
     /// Returns the current transposed version of the song using the selected capo position.
     /// </summary>
@@ -619,6 +636,24 @@ public static class Helpers
         get {
             return _currentSongExport;
         }
+    }
+
+    public static async Task ExportSong(string Song, string? Title = null)
+    {
+        Dictionary<string, object> parameters = new Dictionary<string, object>();
+        parameters.Add("Value", Song);
+
+        string title = !String.IsNullOrWhiteSpace(Title) ? Title : TextValue("Export");
+
+        await DialogService.OpenAsync<Export>(title, parameters, new Radzen.DialogOptions() {
+            AutoFocusFirstElement = false,
+            Resizable = false,
+            Draggable = false,
+            CloseDialogOnEsc = true,
+            ShowClose = true,
+            Width = "98%",
+            Height = "98%",
+        });
     }
 
     /// <summary>
@@ -1719,6 +1754,7 @@ public static class Helpers
                 { "fa:fa-solid fa-circle-info",                  new List<string> { "About", "Info" }},
                 { "fa:fa-solid fa-clock",                        new List<string> { "Clock" }},
                 { "fa:fa-solid fa-file-import",                  new List<string> { "Import" }},
+                { "fa:fa-solid fa-file-export",                  new List<string> { "Export" }},
                 { "fa:fa-solid fa-file-lines",                   new List<string> { "SheetMusic" }},
                 { "fa:fa-solid fa-file-medical",                 new List<string> { "AddToSetList" }},
                 { "fa:fa-solid fa-film",                         new List<string> { "Video" }},

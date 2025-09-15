@@ -518,6 +518,16 @@
                         case "reload-users":
                             await Helpers.ReloadUsers();
                             break;
+
+                        case "user-deleted":
+                            if (update.itemId == Model.User.id) {
+                                // The current user was deleted, log them out.
+                                await Helpers.ClearLocalStorageItem("UserId");
+                                Model.User = new user();
+                            }
+
+                            Model.Users = Model.Users.Where(x => x.id != update.itemId).ToList();
+                            break;
                     }
                     break;
 

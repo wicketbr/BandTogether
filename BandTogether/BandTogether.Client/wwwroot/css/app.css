@@ -1540,3 +1540,20 @@ body.dark .pane-item-details .songformat-repeat-end,
 body.dark .pane-item-details .songformat-slash {
     color: deepskyblue;
 }
+
+table.user-table {
+    width:100%;
+}
+
+table.user-table tbody tr td:first-child {
+    width:1%;
+}
+
+table.user-table tbody tr td:last-child {
+    width:100%;
+}
+
+#export-value {
+    height:calc(100vh - 130px);
+    min-height:calc(100vh - 130px);
+}

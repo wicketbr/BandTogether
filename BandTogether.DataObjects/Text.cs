@@ -92,6 +92,7 @@ public static class Text
     public static string EditMode { get; set; } = "Edit Mode";
     public static string EditSetListItem { get; set; } = "Edit Set List Item";
     public static string EditStyle { get; set; } = "Edit Style";
+    public static string EditUserPreferences {  get; set; } = "Edit User Preferences";
     public static string EmptySetList { get; set; } = "Empty Set List";
     public static string Enabled { get; set; } = "Enabled";
     public static string EnableProjectionMode { get; set; } = "Enable Projection Mode";
@@ -100,6 +101,7 @@ public static class Text
     public static string Error { get; set; } = "An error has occurred.";
     public static string Errors { get; set; } = "The following errors have occurred:";
     public static string Export { get; set; } = "Export";
+    public static string ExportCopiedToClipboard { get; set; } = "The current song has been copied to the clipboard.";
     public static string ExportTitle { get; set; } = "Export Transposed Song to Clipboard";
     public static string FilterSongbooks { get; set; } = "Filter Song Books";
     public static string FontColor { get; set; } = "Font Color";
@@ -271,6 +273,7 @@ public static class Text
     public static string Unsaved { get; set; } = "Unsaved";
     public static string Uploading { get; set; } = "Uploading...";
     public static string Url { get; set; } = "URL";
+    public static string User { get; set; } = "User";
     public static string Video { get; set; } = "Video";
     public static string View { get; set; } = "View";
     public static string ViewMode { get; set; } = "View Mode";

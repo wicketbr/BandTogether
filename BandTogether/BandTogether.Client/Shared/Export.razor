@@ -1,0 +1,18 @@
+﻿@implements IDisposable
+@inject BlazorDataModel Model
+@inject Radzen.DialogService DialogService
+
+<div class="mb-2">
+    <textarea class="form-control export-value" id="export-value" @bind="Value"></textarea>
+</div>
+
+@code {
+    [Parameter] public string Value { get; set; } = "";
+
+    public void Dispose() { }
+
+    protected override async Task OnInitializedAsync()
+    {
+        await Helpers.DelayedSelect("export-value");
+    }
+}
