@@ -231,6 +231,7 @@
                                 @if (_song.parts != null && _song.parts.Any()) {
                                     Helpers.UsingDoReMi = Helpers.SongUsesDoReMiSystem(_song);
                                     Helpers.UsingNashvilleNumbering = Helpers.SongUsesNashvilleNumberingSystem(_song);
+                                    Helpers.BeginSongRender();
 
                                     NashvilleNumbering.Init(matrixKey, Minor ? "minor" : "major");
 

@@ -87,6 +87,9 @@ public partial class DataController : ControllerBase
             },
         };
 
+        GlobalSettings.CachedSetList = setlist;
+        CacheStore.SetCacheItem("setlist", setlist);
+
         await signalR.Clients.All.SendAsync("setlist", setlist);
 
         return Ok();
