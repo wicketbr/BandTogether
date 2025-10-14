@@ -624,7 +624,15 @@
         function ScrollToElement(element) {
             var el = document.getElementById(element);
             if (el != undefined && el != null) {
-                el.scrollIntoView(true);
+                //el.scrollIntoView(true);
+                var offset = 130;
+                var elementPosition = el.getBoundingClientRect().top;
+                var offsetPosition = elementPosition + window.scrollY - offset;
+
+                window.scrollTo({
+                    top: offsetPosition,
+                    behavior: "instant"
+                });
             }
         }
 
